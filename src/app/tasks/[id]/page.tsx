@@ -1,0 +1,279 @@
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { formatCurrency, formatDate } from '@/lib/utils'
+import OfferSection from './offer-section'
+import TaskActions from './task-actions'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data } = await supabase.from('tasks').select('title, description').eq('id', id).single()
+  if (!data) return { title: 'Task not found' }
+  return { title: data.title, description: data.description.slice(0, 150) }
+}
+
+export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: task } = await supabase
+    .from('tasks')
+    .select(`*, categories(name, slug), users!customer_id(id, name, avatar_url)`)
+    .eq('id', id)
+    .single()
+
+  if (!task) notFound()
+
+  const { data: images } = await supabase.from('task_images').select('image_url').eq('task_id', id)
+
+  const { data: offers } = await supabase
+    .from('offers')
+    .select(`id, amount, message, status, created_at, users!worker_id(id, name, avatar_url, bio)`)
+    .eq('task_id', id)
+    .order('created_at', { ascending: true })
+
+  let currentUserProfile = null
+  let workerStripeReady = false
+  if (user) {
+    const { data } = await supabase.from('users').select('id, role, name, stripe_onboarded').eq('id', user.id).single()
+    currentUserProfile = data
+    workerStripeReady = !!(data?.stripe_onboarded)
+  }
+
+  const isOwner = user?.id === task.customer_id
+  const isWorker = currentUserProfile?.role === 'worker'
+  const hasOffered = offers?.some(o => o.users && (o.users as any).id === user?.id)
+  const acceptedOffer = offers?.find(o => o.status === 'accepted')
+  const isAcceptedWorker = isWorker && acceptedOffer && (acceptedOffer.users as any)?.id === user?.id
+
+  // Address visibility: owner always, accepted worker only
+  const canSeeAddress = isOwner || isAcceptedWorker
+
+  // Auto-release: if customer didn't act within 5 days, release funds automatically
+  if (
+    task.payment_status === 'held' &&
+    task.funds_release_at &&
+    new Date(task.funds_release_at) < new Date()
+  ) {
+    const { releaseFunds } = await import('./actions')
+    await releaseFunds(id)
+  }
+
+  // Review state
+  let customerHasReviewed = false
+  let workerHasReviewed = false
+  if (task.status === 'completed' && user) {
+    const [{ data: cr }, { data: wr }] = await Promise.all([
+      supabase.from('reviews').select('id').eq('task_id', id).eq('reviewer_id', task.customer_id).maybeSingle(),
+      acceptedOffer
+        ? supabase.from('reviews').select('id').eq('task_id', id).eq('reviewer_id', (acceptedOffer.users as any)?.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ])
+    customerHasReviewed = !!cr
+    workerHasReviewed = !!wr
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-4">
+        <Link href="/tasks" className="text-sm text-stone-500 hover:text-stone-700">← Back to tasks</Link>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        {/* Main content */}
+        <div className="md:col-span-2 space-y-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2 text-sm text-stone-500">
+              <span>{(task.categories as any)?.name}</span>
+              <span>·</span>
+              <span>{task.zip_code}</span>
+              <span>·</span>
+              <span>{formatDate(task.created_at)}</span>
+            </div>
+            <h1 className="text-2xl font-bold text-stone-900">{task.title}</h1>
+            <div className="mt-2">
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                task.status === 'open' ? 'bg-emerald-50 text-emerald-700' :
+                task.status === 'assigned' ? 'bg-blue-50 text-blue-700' :
+                task.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
+                task.status === 'completed' ? 'bg-stone-100 text-stone-600' :
+                'bg-red-50 text-red-600'
+              }`}>
+                {task.status.replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white border border-stone-200 rounded-lg p-5">
+            <h2 className="font-semibold text-stone-900 mb-3">Task description</h2>
+            <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-wrap">{task.description}</p>
+            {task.preferred_time && (
+              <p className="text-sm text-stone-500 mt-3">Preferred time: {new Date(task.preferred_time).toLocaleString()}</p>
+            )}
+          </div>
+
+          {(task.duration_estimate || task.tools_situation || task.access_situation || task.physical_requirements?.length > 0) && (
+            <div className="bg-white border border-stone-200 rounded-lg p-5">
+              <h2 className="font-semibold text-stone-900 mb-4">Job logistics</h2>
+              <dl className="space-y-3 text-sm">
+                {task.duration_estimate && (
+                  <div className="flex gap-3">
+                    <dt className="text-stone-400 w-32 shrink-0">Duration</dt>
+                    <dd className="text-stone-700">{({
+                      under_1hr: 'Less than 1 hour',
+                      '1_2hrs': '1–2 hours',
+                      half_day: 'Half day (3–4 hrs)',
+                      full_day: 'Full day',
+                      multi_day: 'Multiple days',
+                      not_sure: 'Not sure',
+                    } as Record<string,string>)[task.duration_estimate] ?? task.duration_estimate}</dd>
+                  </div>
+                )}
+                {task.tools_situation && (
+                  <div className="flex gap-3">
+                    <dt className="text-stone-400 w-32 shrink-0">Tools & materials</dt>
+                    <dd className="text-stone-700">{({
+                      just_show_up: 'All tools & materials on-site — just show up',
+                      i_have_tools: 'Tools on-site — worker brings skills',
+                      some_materials: 'Some materials on-site — let\'s discuss the rest',
+                      bring_everything: 'Worker should bring tools and materials',
+                    } as Record<string,string>)[task.tools_situation] ?? task.tools_situation}</dd>
+                  </div>
+                )}
+                {task.access_situation && (
+                  <div className="flex gap-3">
+                    <dt className="text-stone-400 w-32 shrink-0">Access</dt>
+                    <dd className="text-stone-700">{({
+                      someone_home: 'Someone will be home',
+                      provide_code: 'Door/gate code provided',
+                      unattended_ok: 'Unattended access is fine',
+                      tbd: 'TBD — will coordinate',
+                    } as Record<string,string>)[task.access_situation] ?? task.access_situation}</dd>
+                  </div>
+                )}
+                {task.physical_requirements?.length > 0 && (
+                  <div className="flex gap-3">
+                    <dt className="text-stone-400 w-32 shrink-0">Physical</dt>
+                    <dd className="flex flex-wrap gap-1">
+                      {(task.physical_requirements as string[]).map(r => (
+                        <span key={r} className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">{({
+                          heavy_lifting: 'Heavy lifting (50+ lbs)',
+                          ladder_access: 'Ladder/roof access',
+                          tight_spaces: 'Tight/confined spaces',
+                        } as Record<string,string>)[r] ?? r}</span>
+                      ))}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          )}
+
+          {/* Address — only visible to owner and accepted worker */}
+          {canSeeAddress && task.address_street && (
+            <div className="bg-white border border-stone-200 rounded-lg p-5">
+              <h2 className="font-semibold text-stone-900 mb-2">Job address</h2>
+              <p className="text-stone-700 text-sm">{task.address_street}</p>
+              <p className="text-stone-500 text-sm">{task.address_city}, {task.address_state} {task.zip_code}</p>
+              {!isOwner && (
+                <p className="text-xs text-stone-400 mt-2">Shared after offer acceptance.</p>
+              )}
+            </div>
+          )}
+
+          {images && images.length > 0 && (
+            <div className="bg-white border border-stone-200 rounded-lg p-5">
+              <h2 className="font-semibold text-stone-900 mb-3">Photos</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {images.map((img, i) => (
+                  <img key={i} src={img.image_url} alt={`Task photo ${i + 1}`} className="rounded-md object-cover aspect-square w-full" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <OfferSection
+            task={task}
+            offers={(offers ?? []) as any}
+            isOwner={isOwner}
+            isWorker={isWorker}
+            hasOffered={hasOffered ?? false}
+            currentUserId={user?.id ?? null}
+            stripeReady={workerStripeReady}
+          />
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-4">
+          <div className="bg-white border border-stone-200 rounded-lg p-5">
+            {task.budget ? (
+              <div>
+                <div className="text-xs text-stone-500 mb-1">Customer budget</div>
+                <div className="text-2xl font-bold text-stone-900">{formatCurrency(task.budget)}</div>
+              </div>
+            ) : (
+              <div className="text-sm text-stone-500">Open to offers</div>
+            )}
+            <div className="mt-4 text-xs text-stone-400">
+              {(offers?.length ?? 0)} offer{offers?.length !== 1 ? 's' : ''} submitted
+            </div>
+          </div>
+
+          <div className="bg-white border border-stone-200 rounded-lg p-5">
+            <div className="text-xs text-stone-500 mb-2">Posted by</div>
+            <div className="flex items-center gap-3">
+              {(task.users as any)?.avatar_url ? (
+                <img src={(task.users as any).avatar_url} className="w-9 h-9 rounded-full object-cover" alt="" />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-stone-200 flex items-center justify-center text-sm font-bold text-stone-600">
+                  {(task.users as any)?.name?.[0]?.toUpperCase()}
+                </div>
+              )}
+              <div className="font-medium text-stone-900 text-sm">{(task.users as any)?.name}</div>
+            </div>
+          </div>
+
+          {isOwner && task.status === 'open' && (
+            <Link
+              href={`/tasks/${task.id}/edit`}
+              className="block w-full text-center border border-stone-300 text-stone-700 py-2.5 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors"
+            >
+              Edit task
+            </Link>
+          )}
+
+          {isOwner && (
+            <TaskActions taskId={task.id} status={task.status} />
+          )}
+
+          {/* Review prompts — shown after completion */}
+          {task.status === 'completed' && isOwner && !customerHasReviewed && (
+            <Link
+              href={`/tasks/${task.id}/review`}
+              className="block w-full text-center bg-emerald-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
+            >
+              Rate the worker
+            </Link>
+          )}
+          {task.status === 'completed' && isOwner && customerHasReviewed && (
+            <div className="text-xs text-center text-stone-400">You've left a review — thanks.</div>
+          )}
+          {task.status === 'completed' && isAcceptedWorker && !workerHasReviewed && (
+            <Link
+              href={`/tasks/${task.id}/review`}
+              className="block w-full text-center bg-emerald-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
+            >
+              Rate the customer
+            </Link>
+          )}
+          {task.status === 'completed' && isAcceptedWorker && workerHasReviewed && (
+            <div className="text-xs text-center text-stone-400">You've left a review — thanks.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
