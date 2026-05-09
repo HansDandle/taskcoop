@@ -9,18 +9,22 @@ import AddressPicker from '@/components/address-picker'
 type Category = { id: string; name: string; slug: string }
 type Address = { id: string; label: string; street: string; city: string; state: string; zip: string }
 
+type TaskAddress = { street: string; city: string; state: string } | null
+
 export default function EditTaskForm({
   task,
   existingImages,
   categories,
   userId,
   savedAddresses,
+  taskAddress,
 }: {
   task: any
   existingImages: string[]
   categories: Category[]
   userId: string
   savedAddresses: Address[]
+  taskAddress: TaskAddress
 }) {
   const [state, action, pending] = useActionState(updateTask, { error: '' })
   const [imageUrls, setImageUrls] = useState<string[]>(existingImages)
@@ -89,8 +93,11 @@ export default function EditTaskForm({
         <label className="block text-sm font-medium text-stone-700 mb-3">Job location <span className="text-red-500">*</span></label>
         <AddressPicker
           saved={savedAddresses}
-          defaultAddressId={task.address_id}
+          defaultAddressId={null}
           defaultZip={task.zip_code}
+          defaultStreet={taskAddress?.street}
+          defaultCity={taskAddress?.city}
+          defaultState={taskAddress?.state}
         />
       </div>
 

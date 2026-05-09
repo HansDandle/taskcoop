@@ -8,9 +8,12 @@ interface Props {
   saved: Address[]
   defaultAddressId?: string | null
   defaultZip?: string
+  defaultStreet?: string
+  defaultCity?: string
+  defaultState?: string
 }
 
-export default function AddressPicker({ saved, defaultAddressId, defaultZip }: Props) {
+export default function AddressPicker({ saved, defaultAddressId, defaultZip, defaultStreet, defaultCity, defaultState }: Props) {
   const [selected, setSelected] = useState<string>(
     defaultAddressId ?? (saved.length > 0 ? saved[0].id : 'new')
   )
@@ -53,7 +56,6 @@ export default function AddressPicker({ saved, defaultAddressId, defaultZip }: P
               {/* Hidden fields populated when this address is selected */}
               {selected === addr.id && (
                 <>
-                  <input type="hidden" name="address_id" value={addr.id} />
                   <input type="hidden" name="address_street" value={addr.street} />
                   <input type="hidden" name="address_city" value={addr.city} />
                   <input type="hidden" name="address_state" value={addr.state} />
@@ -80,16 +82,16 @@ export default function AddressPicker({ saved, defaultAddressId, defaultZip }: P
         <div className="space-y-3 border border-stone-200 rounded-lg p-4 bg-stone-50">
           <div>
             <label className="block text-xs font-medium text-stone-600 mb-1">Street address <span className="text-red-500">*</span></label>
-            <input name="address_street" required placeholder="123 Main St" className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
+            <input name="address_street" required placeholder="123 Main St" defaultValue={defaultStreet ?? ''} className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-1">
               <label className="block text-xs font-medium text-stone-600 mb-1">City</label>
-              <input name="address_city" defaultValue="Austin" className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
+              <input name="address_city" defaultValue={defaultCity ?? 'Austin'} className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
             </div>
             <div>
               <label className="block text-xs font-medium text-stone-600 mb-1">State</label>
-              <input name="address_state" defaultValue="TX" maxLength={2} className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
+              <input name="address_state" defaultValue={defaultState ?? 'TX'} maxLength={2} className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
             </div>
             <div>
               <label className="block text-xs font-medium text-stone-600 mb-1">ZIP <span className="text-red-500">*</span></label>

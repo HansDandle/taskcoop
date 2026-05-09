@@ -109,43 +109,46 @@ export async function releaseFunds(task_id: string) {
     .eq('id', task_id)
     .single()
 
-  if (!task || task.payment_status !== 'held' || !task.payment_intent_id) return
-
-  const { data: offer } = await supabase
-    .from('offers')
-    .select('amount, worker_id')
-    .eq('task_id', task_id)
-    .eq('status', 'accepted')
-    .single()
-
-  if (!offer) return
-
-  const { data: worker } = await supabase
-    .from('users')
-    .select('stripe_account_id')
-    .eq('id', offer.worker_id)
-    .single()
-
-  if (!worker?.stripe_account_id) return
-
-  // Retrieve the charge from the payment intent
-  const pi = await stripe.paymentIntents.retrieve(task.payment_intent_id)
-  const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id
-  if (!chargeId) return
-
-  const workerAmountCents = Math.round(offer.amount * 100 * (1 - PLATFORM_FEE_PERCENT / 100))
-
-  await stripe.transfers.create({
-    amount: workerAmountCents,
-    currency: 'usd',
-    destination: worker.stripe_account_id,
-    source_transaction: chargeId,
-  })
-
+  // Always mark complete regardless of payment state
   await supabase
     .from('tasks')
-    .update({ payment_status: 'released', status: 'completed' })
+    .update({ status: 'completed' })
     .eq('id', task_id)
+
+  // Attempt transfer only if funds are held and worker has Connect account
+  if (task?.payment_status === 'held' && task.payment_intent_id) {
+    const { data: offer } = await supabase
+      .from('offers')
+      .select('amount, worker_id')
+      .eq('task_id', task_id)
+      .eq('status', 'accepted')
+      .single()
+
+    const { data: worker } = offer ? await supabase
+      .from('users')
+      .select('stripe_account_id')
+      .eq('id', offer.worker_id)
+      .single() : { data: null }
+
+    if (worker?.stripe_account_id && offer) {
+      const pi = await stripe.paymentIntents.retrieve(task.payment_intent_id)
+      const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id
+
+      if (chargeId) {
+        const workerAmountCents = Math.round(offer.amount * 100 * (1 - PLATFORM_FEE_PERCENT / 100))
+        await stripe.transfers.create({
+          amount: workerAmountCents,
+          currency: 'usd',
+          destination: worker.stripe_account_id,
+          source_transaction: chargeId,
+        })
+        await supabase
+          .from('tasks')
+          .update({ payment_status: 'released' })
+          .eq('id', task_id)
+      }
+    }
+  }
 
   revalidatePath(`/tasks/${task_id}`)
 }

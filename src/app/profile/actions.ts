@@ -29,3 +29,20 @@ export async function updateProfile(_prev: { error: string; success: boolean }, 
   revalidatePath('/dashboard')
   return { error: '', success: true }
 }
+
+export async function submitIdVerification(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.', success: false }
+
+  const id_document_url = formData.get('id_document_url') as string
+  if (!id_document_url) return { error: 'No document provided.', success: false }
+
+  await supabase
+    .from('users')
+    .update({ id_document_url, id_verification_status: 'pending', id_verified: false })
+    .eq('id', user.id)
+
+  revalidatePath('/profile')
+  return { error: '', success: true }
+}

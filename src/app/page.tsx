@@ -115,7 +115,7 @@ export default async function HomePage() {
           </div>
           <div>
             <div className="text-3xl font-bold text-emerald-400 mb-1">5% fee</div>
-            <div className="text-sm text-stone-400 leading-relaxed">Transparent pricing. Workers keep 95% — so they're motivated to do excellent work</div>
+            <div className="text-sm text-stone-400 leading-relaxed">Transparent pricing. Members keep 95% — so they&apos;re motivated to do excellent work</div>
           </div>
         </div>
       </section>
@@ -126,7 +126,7 @@ export default async function HomePage() {
         <div className="grid md:grid-cols-3 gap-8">
           {[
             { step: '01', title: 'Describe the job', desc: 'Post what you need — as much detail as you have. Photos welcome. Free to post, no commitment.' },
-            { step: '02', title: 'Review local experts', desc: 'Member-workers send offers. Browse their profiles, reviews, and past work. Message them directly.' },
+            { step: '02', title: 'Review local experts', desc: 'Members send offers. Browse their profiles, reviews, and past work. Message them directly.' },
             { step: '03', title: 'Get it done right', desc: 'Accept an offer and pay securely through the platform. Funds release when the job is complete.' },
           ].map((item) => (
             <div key={item.step} className="relative">

@@ -19,8 +19,7 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
   const access_situation = (formData.get('access_situation') as string) || null
   const physicalRaw = formData.get('physical_requirements') as string
 
-  // Address fields
-  const address_id = (formData.get('address_id') as string) || null
+  // Address fields — street stored separately in task_addresses
   const address_street = (formData.get('address_street') as string)?.trim() || null
   const address_city = (formData.get('address_city') as string)?.trim() || 'Austin'
   const address_state = (formData.get('address_state') as string)?.trim() || 'TX'
@@ -30,7 +29,7 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
   if (!title || !description || !category_id || !zip_code || !tools_situation) {
     return { error: 'Please fill in all required fields.' }
   }
-  if (!address_id && !address_street) {
+  if (!address_street) {
     return { error: 'Please provide a job location.' }
   }
 
@@ -39,13 +38,10 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
   try { physical_requirements = physicalRaw ? JSON.parse(physicalRaw) : [] } catch {}
 
   // Optionally save new address to profile
-  let resolvedAddressId = address_id
-  if (!address_id && address_street && save_address) {
-    const { data: saved } = await supabase
+  if (address_street && save_address) {
+    await supabase
       .from('customer_addresses')
       .insert({ user_id: user.id, label: 'Home', street: address_street, city: address_city, state: address_state, zip: zip_code })
-      .select('id').single()
-    resolvedAddressId = saved?.id ?? null
   }
 
   const { data: task, error } = await supabase
@@ -55,13 +51,19 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
       title, description, category_id, zip_code, budget,
       preferred_time: preferred_time || null,
       duration_estimate, tools_situation, access_situation, physical_requirements,
-      address_id: resolvedAddressId,
-      address_street, address_city, address_state,
     })
     .select('id')
     .single()
 
   if (error) return { error: 'Failed to create task. Please try again.' }
+
+  // Store address in task_addresses (RLS-protected)
+  await supabase.from('task_addresses').insert({
+    task_id: task.id,
+    street: address_street,
+    city: address_city,
+    state: address_state,
+  })
 
   let imageUrls: string[] = []
   try { imageUrls = imageUrlsRaw ? JSON.parse(imageUrlsRaw) : [] } catch {}

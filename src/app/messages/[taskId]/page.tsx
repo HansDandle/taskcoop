@@ -34,7 +34,7 @@ export default async function MessagesPage({
   let otherUserId: string | null = null
   if (profile?.role === 'customer' && workerId) {
     otherUserId = workerId
-  } else if (profile?.role === 'worker') {
+  } else if (profile?.role === 'worker') { // member in UI
     otherUserId = task.customer_id
   }
 

@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <div>
             <div className="font-semibold text-stone-900 mb-3">task<span className="text-emerald-600">.coop</span></div>
-            <p className="text-stone-500 leading-relaxed">Worker-owned local services marketplace. Built for Austin, TX.</p>
+            <p className="text-stone-500 leading-relaxed">Member-owned local services marketplace. Built for Austin, TX.</p>
           </div>
           <div>
             <div className="font-medium text-stone-700 mb-3">Platform</div>
@@ -21,7 +21,7 @@ export default function Footer() {
             <div className="font-medium text-stone-700 mb-3">Learn</div>
             <ul className="space-y-2 text-stone-500">
               <li><Link href="/how-it-works" className="hover:text-stone-900">How It Works</Link></li>
-              <li><Link href="/cooperative" className="hover:text-stone-900">Worker Ownership</Link></li>
+              <li><Link href="/cooperative" className="hover:text-stone-900">Member Ownership</Link></li>
               <li><Link href="/faq" className="hover:text-stone-900">FAQ</Link></li>
             </ul>
           </div>

@@ -1,10 +1,11 @@
 'use client'
 
-import { useActionState, useState } from 'react'
-import { updateProfile } from './actions'
+import { useActionState, useState, useTransition } from 'react'
+import { updateProfile, submitIdVerification } from './actions'
 import ImageUpload from '@/components/image-upload'
 import MultiImageUpload from '@/components/multi-image-upload'
 import MarkdownBio from '@/components/markdown-bio'
+import FileUpload from '@/components/file-upload'
 
 const initial = { error: '', success: false }
 
@@ -12,10 +13,14 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
   const [state, action, pending] = useActionState(updateProfile, initial)
   const [avatarUrl, setAvatarUrl] = useState<string>(profile?.avatar_url ?? '')
   const [portfolioUrls, setPortfolioUrls] = useState<string[]>(profile?.portfolio_urls ?? [])
+  const [idUploading, setIdUploading] = useState(false)
+  const [idSubmitted, setIdSubmitted] = useState(false)
+  const [idPending, startIdTransition] = useTransition()
   const [bioPreview, setBioPreview] = useState(false)
   const [bioValue, setBioValue] = useState<string>(profile?.bio ?? '')
 
   return (
+    <>
     <form action={action} className="space-y-6">
       <input type="hidden" name="avatar_url" value={avatarUrl} />
       <input type="hidden" name="portfolio_urls" value={JSON.stringify(portfolioUrls)} />
@@ -98,5 +103,50 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         {pending ? 'Saving…' : 'Save changes'}
       </button>
     </form>
+
+    {/* ID Verification — members only */}
+    {profile?.role === 'worker' && (
+      <div className="mt-8 border border-stone-200 rounded-lg p-5">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-semibold text-stone-900">ID Verification</h3>
+          {profile.id_verified && (
+            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">✓ Verified</span>
+          )}
+          {profile.id_verification_status === 'pending' && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Under review</span>
+          )}
+          {profile.id_verification_status === 'rejected' && (
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rejected — resubmit</span>
+          )}
+        </div>
+        <p className="text-xs text-stone-500 mb-4">
+          Verified members get a badge on their profile. Upload a government-issued ID (driver&apos;s license, passport, or state ID). Only admins can view it — never shown publicly.
+        </p>
+        {!profile.id_verified && profile.id_verification_status !== 'pending' && (
+          idSubmitted ? (
+            <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+              ID submitted — we&apos;ll review it shortly.
+            </div>
+          ) : (
+            <FileUpload
+              bucket="id-documents"
+              folder={profile.id}
+              existingUrl={profile.id_document_url}
+              onUpload={(url) => {
+                startIdTransition(async () => {
+                  const fd = new FormData()
+                  fd.set('id_document_url', url)
+                  await submitIdVerification(fd)
+                  setIdSubmitted(true)
+                })
+              }}
+              accept="image/*,.pdf"
+              label="Upload government ID"
+            />
+          )
+        )}
+      </div>
+    )}
+    </>
   )
 }

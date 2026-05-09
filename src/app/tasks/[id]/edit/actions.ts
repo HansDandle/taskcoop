@@ -20,7 +20,6 @@ export async function updateTask(_prev: { error: string }, formData: FormData) {
   const access_situation = (formData.get('access_situation') as string) || null
   const physicalRaw = formData.get('physical_requirements') as string
 
-  const address_id = (formData.get('address_id') as string) || null
   const address_street = (formData.get('address_street') as string)?.trim() || null
   const address_city = (formData.get('address_city') as string)?.trim() || 'Austin'
   const address_state = (formData.get('address_state') as string)?.trim() || 'TX'
@@ -43,12 +42,31 @@ export async function updateTask(_prev: { error: string }, formData: FormData) {
       title, description, category_id, zip_code, budget,
       preferred_time: preferred_time || null,
       duration_estimate, tools_situation, access_situation, physical_requirements,
-      address_id, address_street, address_city, address_state,
       updated_at: new Date().toISOString(),
     })
     .eq('id', task_id)
 
   if (error) return { error: 'Failed to update task.' }
+
+  // Upsert address in task_addresses
+  if (address_street) {
+    const { data: existing } = await supabase
+      .from('task_addresses')
+      .select('id')
+      .eq('task_id', task_id)
+      .single()
+
+    if (existing) {
+      await supabase
+        .from('task_addresses')
+        .update({ street: address_street, city: address_city, state: address_state })
+        .eq('task_id', task_id)
+    } else {
+      await supabase
+        .from('task_addresses')
+        .insert({ task_id, street: address_street, city: address_city, state: address_state })
+    }
+  }
 
   let imageUrls: string[] = []
   try { imageUrls = imageUrlsRaw ? JSON.parse(imageUrlsRaw) : [] } catch {}

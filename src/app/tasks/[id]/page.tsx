@@ -25,6 +25,13 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
     .eq('id', id)
     .single()
 
+  // Address fetched separately — RLS enforces owner+accepted-worker only
+  const { data: taskAddress } = await supabase
+    .from('task_addresses')
+    .select('street, city, state')
+    .eq('task_id', id)
+    .single()
+
   if (!task) notFound()
 
   const { data: images } = await supabase.from('task_images').select('image_url').eq('task_id', id)
@@ -172,12 +179,12 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </div>
           )}
 
-          {/* Address — only visible to owner and accepted worker */}
-          {canSeeAddress && task.address_street && (
+          {/* Address — RLS enforces owner+accepted-worker only; null for everyone else */}
+          {taskAddress && (
             <div className="bg-white border border-stone-200 rounded-lg p-5">
               <h2 className="font-semibold text-stone-900 mb-2">Job address</h2>
-              <p className="text-stone-700 text-sm">{task.address_street}</p>
-              <p className="text-stone-500 text-sm">{task.address_city}, {task.address_state} {task.zip_code}</p>
+              <p className="text-stone-700 text-sm">{taskAddress.street}</p>
+              <p className="text-stone-500 text-sm">{taskAddress.city}, {taskAddress.state} {task.zip_code}</p>
               {!isOwner && (
                 <p className="text-xs text-stone-400 mt-2">Shared after offer acceptance.</p>
               )}
@@ -255,7 +262,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               href={`/tasks/${task.id}/review`}
               className="block w-full text-center bg-emerald-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
             >
-              Rate the worker
+              Rate the member
             </Link>
           )}
           {task.status === 'completed' && isOwner && customerHasReviewed && (

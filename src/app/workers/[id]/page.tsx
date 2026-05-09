@@ -20,11 +20,11 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
 
   const { data: worker } = await supabase
     .from('users')
-    .select('id, name, bio, avatar_url, role, created_at')
+    .select('id, name, bio, avatar_url, role, created_at, id_verified, suspended')
     .eq('id', id)
     .single()
 
-  if (!worker || worker.role !== 'worker') notFound()
+  if (!worker || worker.role !== 'worker' || (worker as any).suspended) notFound()
 
   const { data: reviews } = await supabase
     .from('reviews')
@@ -59,6 +59,9 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-xl font-bold text-stone-900">{worker.name}</h1>
               <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Member</span>
+              {(worker as any).id_verified && (
+                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">✓ ID Verified</span>
+              )}
             </div>
             {avgRating !== null && (
               <div className="flex items-center gap-2 mb-2">

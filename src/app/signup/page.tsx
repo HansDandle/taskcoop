@@ -14,7 +14,7 @@ export default async function SignupPage({
         <div className="text-center">
           <div className="text-2xl font-semibold mb-1">task<span className="text-emerald-600">.coop</span></div>
           <h2 className="text-xl font-bold tracking-tight text-stone-900">Create an account</h2>
-          <p className="mt-1 text-sm text-stone-500">Join the worker-owned marketplace</p>
+          <p className="mt-1 text-sm text-stone-500">Join the member-owned marketplace</p>
         </div>
 
         <form className="space-y-5" action={signup}>
@@ -42,7 +42,7 @@ export default async function SignupPage({
                   <input type="radio" name="role" value="customer" defaultChecked={role !== 'worker'} className="sr-only" />
                   <span className="text-2xl">📋</span>
                   <span className="text-sm font-medium text-stone-800">Post Tasks</span>
-                  <span className="text-xs text-stone-500 text-center">Find local workers</span>
+                  <span className="text-xs text-stone-500 text-center">Find local members</span>
                 </label>
                 <label className="flex flex-col items-center gap-2 border border-stone-300 rounded-lg p-3 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 transition-colors">
                   <input type="radio" name="role" value="worker" defaultChecked={role === 'worker'} className="sr-only" />

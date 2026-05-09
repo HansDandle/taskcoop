@@ -20,10 +20,11 @@ export default async function EditTaskPage({ params }: { params: Promise<{ id: s
   if (!task) notFound()
   if (task.customer_id !== user.id) redirect(`/tasks/${id}`)
 
-  const [{ data: images }, { data: categories }, { data: addresses }] = await Promise.all([
+  const [{ data: images }, { data: categories }, { data: addresses }, { data: taskAddress }] = await Promise.all([
     supabase.from('task_images').select('image_url').eq('task_id', id),
     supabase.from('categories').select('id, name, slug').order('name'),
     supabase.from('customer_addresses').select('*').eq('user_id', user.id).order('created_at'),
+    supabase.from('task_addresses').select('street, city, state').eq('task_id', id).single(),
   ])
 
   return (
@@ -36,6 +37,7 @@ export default async function EditTaskPage({ params }: { params: Promise<{ id: s
         categories={categories ?? []}
         userId={user.id}
         savedAddresses={addresses ?? []}
+        taskAddress={taskAddress ?? null}
       />
     </div>
   )

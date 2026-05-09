@@ -128,7 +128,7 @@ export default function OfferSection({
       {isWorker && task.status === 'open' && !hasOffered && !stripeReady && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4">
           <p className="text-sm font-medium text-amber-800 mb-1">Connect your bank account to submit offers</p>
-          <p className="text-xs text-amber-700 mb-3">task.coop uses Stripe to pay you securely. It only takes a few minutes.</p>
+          <p className="text-xs text-amber-700 mb-3">task.coop uses Stripe to pay members securely. It only takes a few minutes.</p>
           <Link
             href="/api/stripe/connect"
             className="inline-block text-sm bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors font-medium"
@@ -138,7 +138,7 @@ export default function OfferSection({
         </div>
       )}
 
-      {/* Submit offer form for workers */}
+      {/* Submit offer form for members */}
       {isWorker && task.status === 'open' && !hasOffered && stripeReady && (
         <div className="bg-white border border-stone-200 rounded-lg p-5 mt-4">
           <h3 className="font-semibold text-stone-900 mb-4">Submit an offer</h3>
@@ -177,7 +177,7 @@ export default function OfferSection({
       )}
 
       {isWorker && hasOffered && task.status === 'open' && (
-        <div className="text-sm text-stone-400 py-2">You've submitted an offer on this task.</div>
+        <div className="text-sm text-stone-400 py-2">You&apos;ve submitted an offer on this task.</div>
       )}
 
       {!currentUserId && task.status === 'open' && (

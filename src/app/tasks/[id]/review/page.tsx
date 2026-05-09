@@ -31,7 +31,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       .eq('status', 'accepted')
       .single()
     revieweeId = offer?.worker_id ?? null
-  } else if (profile?.role === 'worker') {
+  } else if (profile?.role === 'worker') { // member in UI, worker in DB
     revieweeId = task.customer_id
   }
 

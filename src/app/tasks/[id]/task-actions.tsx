@@ -39,7 +39,7 @@ export default function TaskActions({ taskId, status }: { taskId: string; status
           disabled={isPending}
           className="w-full text-sm bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-60"
         >
-          Mark Complete & Rate Worker
+          Mark Complete & Rate Member
         </button>
       )}
       {(status === 'open' || status === 'assigned') && (
