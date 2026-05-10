@@ -32,7 +32,7 @@ export default function TaskMap({ tasks }: { tasks: Task[] }) {
     <div className="w-full h-72 rounded-lg overflow-hidden border border-stone-200 mb-6">
       <Map
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''}
-        initialViewState={{ longitude: -97.7431, latitude: 30.2672, zoom: 10.5 }}
+        initialViewState={{ longitude: -97.7800, latitude: 30.3200, zoom: 8.5 }}
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/light-v11"
         onClick={() => setSelected(null)}
