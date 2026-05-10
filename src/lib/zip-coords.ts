@@ -54,7 +54,6 @@ export const ZIP_COORDS: Record<string, [number, number]> = {
   '78664': [-97.6501, 30.5138], // Round Rock
   '78665': [-97.6101, 30.5338], // Round Rock East
   '78681': [-97.7201, 30.5138], // Round Rock West
-  '78701': [-97.7431, 30.2672], // Downtown (duplicate key, last wins)
 }
 
 export function getZipCoords(zip: string): [number, number] | null {
