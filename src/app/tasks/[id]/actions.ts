@@ -112,6 +112,62 @@ export async function acceptOffer(formData: FormData) {
   redirect(session.url!)
 }
 
+export async function workerMarkDone(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authorized.' }
+
+  const task_id = formData.get('task_id') as string
+  const completion_photos = JSON.parse((formData.get('completion_photos') as string) || '[]')
+
+  // Verify caller is the accepted worker
+  const { data: offer } = await supabase
+    .from('offers')
+    .select('worker_id')
+    .eq('task_id', task_id)
+    .eq('status', 'accepted')
+    .single()
+
+  if (!offer || offer.worker_id !== user.id) return { error: 'Not authorized.' }
+
+  await supabase
+    .from('tasks')
+    .update({ worker_marked_done: true, completion_photos, status: 'in_progress' })
+    .eq('id', task_id)
+
+  // Notify customer
+  const { data: task } = await supabase.from('tasks').select('title, customer_id').eq('id', task_id).single()
+  const { data: customer } = task ? await supabase.from('users').select('email').eq('id', task.customer_id).single() : { data: null }
+  const { data: member } = await supabase.from('users').select('name').eq('id', user.id).single()
+  if (customer?.email && task && member) {
+    const { sendNewMessageEmail } = await import('@/lib/email')
+    await sendNewMessageEmail(customer.email, member.name, task.title, task_id, `${member.name} has marked the job as complete and is ready for your review.`)
+  }
+
+  revalidatePath(`/tasks/${task_id}`)
+}
+
+export async function workerUpdateStatus(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authorized.' }
+
+  const task_id = formData.get('task_id') as string
+  const status = formData.get('status') as string
+
+  const { data: offer } = await supabase
+    .from('offers')
+    .select('worker_id')
+    .eq('task_id', task_id)
+    .eq('status', 'accepted')
+    .single()
+
+  if (!offer || offer.worker_id !== user.id) return { error: 'Not authorized.' }
+
+  await supabase.from('tasks').update({ status }).eq('id', task_id)
+  revalidatePath(`/tasks/${task_id}`)
+}
+
 export async function retractOffer(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

@@ -93,8 +93,21 @@ export default async function DashboardPage({
 
     const open = tasks?.filter(t => t.status === 'open') ?? []
     const active = tasks?.filter(t => ['assigned', 'in_progress'].includes(t.status)) ?? []
-    const needsReview = tasks?.filter(t => t.status === 'completed') ?? [] // review check skipped for perf; link to review if not done
+    const needsReview = tasks?.filter(t => t.status === 'completed') ?? []
     const done = tasks?.filter(t => ['completed', 'cancelled'].includes(t.status)) ?? []
+
+    // Fetch pending offer counts for open tasks
+    const openIds = open.map(t => t.id)
+    const { data: pendingOffers } = openIds.length > 0
+      ? await supabase.from('offers').select('task_id').in('task_id', openIds).eq('status', 'pending')
+      : { data: [] }
+
+    const offerCountByTask: Record<string, number> = {}
+    for (const o of pendingOffers ?? []) {
+      offerCountByTask[o.task_id] = (offerCountByTask[o.task_id] ?? 0) + 1
+    }
+    const tasksWithOffers = open.filter(t => offerCountByTask[t.id] > 0)
+    const totalNewOffers = Object.values(offerCountByTask).reduce((s, n) => s + n, 0)
 
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
@@ -108,6 +121,24 @@ export default async function DashboardPage({
           </Link>
         </div>
 
+        {totalNewOffers > 0 && (
+          <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4">
+            <p className="font-semibold text-emerald-900 text-sm mb-2">
+              🎉 You have {totalNewOffers} new offer{totalNewOffers !== 1 ? 's' : ''}
+            </p>
+            <div className="space-y-1">
+              {tasksWithOffers.map(t => (
+                <Link key={t.id} href={`/tasks/${t.id}`} className="flex items-center justify-between text-sm hover:opacity-80">
+                  <span className="text-emerald-800 truncate">{t.title}</span>
+                  <span className="shrink-0 ml-3 bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    {offerCountByTask[t.id]} offer{offerCountByTask[t.id] !== 1 ? 's' : ''} →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
           {active.length > 0 && (
             <Section title={`Active (${active.length})`}>
@@ -120,7 +151,16 @@ export default async function DashboardPage({
             empty={open.length === 0 ? 'No open tasks.' : undefined}
             cta={<Link href="/tasks/new" className="text-xs text-emerald-600 hover:underline">+ Post task</Link>}
           >
-            {open.map(t => <TaskRow key={t.id} task={t} />)}
+            {open.map(t => (
+              <div key={t.id} className="relative">
+                <TaskRow task={t} />
+                {offerCountByTask[t.id] > 0 && (
+                  <span className="absolute right-14 top-1/2 -translate-y-1/2 bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    {offerCountByTask[t.id]} new
+                  </span>
+                )}
+              </div>
+            ))}
           </Section>
 
           {needsReview.length > 0 && (

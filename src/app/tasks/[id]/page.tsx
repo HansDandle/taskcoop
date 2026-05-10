@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import OfferSection from './offer-section'
 import TaskActions from './task-actions'
+import WorkerActions from './worker-actions'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -86,7 +87,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-4">
-        <Link href="/tasks" className="text-sm text-stone-500 hover:text-stone-700">← Back to tasks</Link>
+        <Link href={isWorker ? '/dashboard' : '/tasks'} className="text-sm text-stone-500 hover:text-stone-700">← {isWorker ? 'Dashboard' : 'Back to tasks'}</Link>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
@@ -202,6 +203,17 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </div>
           )}
 
+          {(task.completion_photos as string[])?.length > 0 && (
+            <div className="bg-white border border-emerald-200 rounded-lg p-5">
+              <h2 className="font-semibold text-stone-900 mb-3">Completion photos</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {(task.completion_photos as string[]).map((url, i) => (
+                  <img key={i} src={url} alt={`Completion photo ${i + 1}`} className="rounded-md object-cover aspect-square w-full" />
+                ))}
+              </div>
+            </div>
+          )}
+
           <OfferSection
             task={task}
             offers={(offers ?? []) as any}
@@ -252,8 +264,24 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </Link>
           )}
 
+          {isOwner && task.worker_marked_done && task.status !== 'completed' && (
+            <div className="bg-emerald-50 border border-emerald-300 rounded-lg p-4 text-sm">
+              <p className="font-semibold text-emerald-900 mb-1">🎉 The member says the job is done!</p>
+              <p className="text-emerald-700 text-xs mb-3">Review the completion photos below, then release payment when satisfied.</p>
+            </div>
+          )}
+
           {isOwner && (
             <TaskActions taskId={task.id} status={task.status} />
+          )}
+
+          {isAcceptedWorker && (
+            <WorkerActions
+              taskId={task.id}
+              status={task.status}
+              workerMarkedDone={task.worker_marked_done ?? false}
+              existingPhotos={(task.completion_photos as string[]) ?? []}
+            />
           )}
 
           {/* Review prompts — shown after completion */}
