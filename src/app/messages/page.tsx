@@ -11,14 +11,15 @@ export default async function MessagesInboxPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?next=/messages')
 
-  const { data: profile } = await supabase.from('users').select('id, role').eq('id', user.id).single()
-
-  // Fetch all messages involving this user, grouped by task + other party
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('id, content, created_at, task_id, sender_id, receiver_id, tasks(id, title), users!sender_id(id, name, avatar_url)')
-    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-    .order('created_at', { ascending: false })
+  // Fetch all messages involving this user with both sender and receiver info in one query
+  const [{ data: profile }, { data: messages }] = await Promise.all([
+    supabase.from('users').select('id, role').eq('id', user.id).single(),
+    supabase
+      .from('messages')
+      .select('id, content, created_at, task_id, sender_id, receiver_id, tasks(id, title), sender:users!sender_id(id, name, avatar_url), receiver:users!receiver_id(id, name, avatar_url)')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: false }),
+  ])
 
   // Deduplicate into threads: one per (task_id, other_user_id) pair
   const seen = new Set<string>()
@@ -34,34 +35,20 @@ export default async function MessagesInboxPage() {
 
   for (const msg of messages ?? []) {
     const task = msg.tasks as any
-    const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
+    const isCurrentUserSender = msg.sender_id === user.id
+    const otherUserId = isCurrentUserSender ? msg.receiver_id : msg.sender_id
     const key = `${msg.task_id}:${otherUserId}`
     if (seen.has(key)) continue
     seen.add(key)
 
-    // Fetch other user info if not the sender
-    let otherName = ''
-    let otherAvatar: string | null = null
-    if (msg.sender_id !== user.id) {
-      const sender = msg.users as any
-      otherName = sender?.name ?? ''
-      otherAvatar = sender?.avatar_url ?? null
-    } else {
-      const { data: otherUser } = await supabase
-        .from('users')
-        .select('name, avatar_url')
-        .eq('id', otherUserId)
-        .single()
-      otherName = otherUser?.name ?? ''
-      otherAvatar = otherUser?.avatar_url ?? null
-    }
+    const otherUser = isCurrentUserSender ? (msg as any).receiver : (msg as any).sender
 
     threads.push({
       taskId: msg.task_id,
       taskTitle: task?.title ?? 'Task',
       otherUserId,
-      otherUserName: otherName,
-      otherUserAvatar: otherAvatar,
+      otherUserName: otherUser?.name ?? '',
+      otherUserAvatar: otherUser?.avatar_url ?? null,
       lastMessage: msg.content,
       lastAt: msg.created_at,
     })

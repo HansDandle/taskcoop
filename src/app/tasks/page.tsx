@@ -17,7 +17,13 @@ export default async function TasksPage({
   const { category, q, min, max } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = user ? await supabase.from('users').select('role').eq('id', user.id).single() : { data: null }
+
+  // Fetch profile and category ID in parallel
+  const [{ data: profile }, { data: cat }] = await Promise.all([
+    user ? supabase.from('users').select('role').eq('id', user.id).single() : Promise.resolve({ data: null }),
+    category ? supabase.from('categories').select('id').eq('slug', category).single() : Promise.resolve({ data: null }),
+  ])
+
   const isWorker = profile?.role === 'worker'
 
   let query = supabase
@@ -30,10 +36,7 @@ export default async function TasksPage({
     .eq('status', 'open')
     .order('created_at', { ascending: false })
 
-  if (category) {
-    const { data: cat } = await supabase.from('categories').select('id').eq('slug', category).single()
-    if (cat) query = query.eq('category_id', cat.id)
-  }
+  if (cat) query = query.eq('category_id', (cat as any).id)
   if (q) query = query.ilike('title', `%${q}%`)
   if (min) query = query.gte('budget', Number(min))
   if (max) query = query.lte('budget', Number(max))

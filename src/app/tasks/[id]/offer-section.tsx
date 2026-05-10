@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatRelativeDate } from '@/lib/utils'
-import { submitOffer, acceptOffer } from './actions'
+import { submitOffer, acceptOffer, retractOffer } from './actions'
 
 type Offer = {
   id: string
@@ -176,9 +176,30 @@ export default function OfferSection({
         </div>
       )}
 
-      {isWorker && hasOffered && task.status === 'open' && (
-        <div className="text-sm text-stone-400 py-2">You&apos;ve submitted an offer on this task.</div>
-      )}
+      {isWorker && hasOffered && task.status === 'open' && (() => {
+        const myOffer = offers.find(o => o.users?.id === currentUserId && o.status === 'pending')
+        if (!myOffer) return <div className="text-sm text-stone-400 py-2">You&apos;ve submitted an offer on this task.</div>
+        return (
+          <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 flex items-center justify-between gap-4">
+            <div className="text-sm text-stone-600">
+              Your offer: <span className="font-semibold text-stone-900">{formatCurrency(myOffer.amount)}</span>
+            </div>
+            <button
+              onClick={() => {
+                if (!confirm('Retract your offer?')) return
+                const fd = new FormData()
+                fd.set('offer_id', myOffer.id)
+                fd.set('task_id', task.id)
+                startTransition(async () => { await retractOffer(fd) })
+              }}
+              disabled={isPending}
+              className="text-xs text-red-500 hover:underline disabled:opacity-60"
+            >
+              Retract offer
+            </button>
+          </div>
+        )
+      })()}
 
       {!currentUserId && task.status === 'open' && (
         <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 text-center">

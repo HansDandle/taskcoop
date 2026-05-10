@@ -5,12 +5,14 @@ import { createClient } from '@/lib/supabase/server'
 import { StarRating } from '@/components/star-rating'
 import { formatDate } from '@/lib/utils'
 import MarkdownBio from '@/components/markdown-bio'
+import BadgeList from '@/components/badge-list'
+import { computeBadges } from '@/lib/badges'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
   const supabase = await createClient()
   const { data } = await supabase.from('users').select('name, bio').eq('id', id).single()
-  if (!data) return { title: 'Worker not found' }
+  if (!data) return { title: 'Member not found' }
   return { title: `${data.name} — task.coop`, description: data.bio ?? undefined }
 }
 
@@ -20,27 +22,76 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
 
   const { data: worker } = await supabase
     .from('users')
-    .select('id, name, bio, avatar_url, role, created_at, id_verified, suspended')
+    .select('id, name, bio, avatar_url, role, created_at, id_verified, stripe_onboarded, suspended')
     .eq('id', id)
     .single()
 
   if (!worker || worker.role !== 'worker' || (worker as any).suspended) notFound()
 
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select('id, rating, comment, created_at, users!reviewer_id(name)')
-    .eq('reviewee_id', id)
-    .order('created_at', { ascending: false })
+  const [
+    { data: reviews },
+    { data: acceptedOffers },
+    { data: referredUsers },
+  ] = await Promise.all([
+    supabase
+      .from('reviews')
+      .select('id, rating, comment, created_at, users!reviewer_id(name)')
+      .eq('reviewee_id', id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('offers')
+      .select('task_id, tasks!inner(status, categories(name))')
+      .eq('worker_id', id)
+      .eq('status', 'accepted')
+      .eq('tasks.status', 'completed'),
+    supabase
+      .from('users')
+      .select('id, role')
+      .eq('referred_by', id),
+  ])
 
   const avgRating = reviews?.length
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
     : null
 
-  const { data: completedTasks } = await supabase
-    .from('tasks')
-    .select('id')
-    .eq('status', 'completed')
-    .in('id', (await supabase.from('offers').select('task_id').eq('worker_id', id).eq('status', 'accepted')).data?.map(o => o.task_id).filter(Boolean) ?? [])
+  const completedJobCount = acceptedOffers?.length ?? 0
+
+  const completedJobsByCategory: Record<string, number> = {}
+  for (const offer of acceptedOffers ?? []) {
+    const catName = (offer.tasks as any)?.categories?.name
+    if (catName) completedJobsByCategory[catName] = (completedJobsByCategory[catName] ?? 0) + 1
+  }
+
+  // Compute qualified referrals for badge purposes
+  const referredIds = referredUsers?.map(u => u.id) ?? []
+  let qualifiedReferrals = 0
+  if (referredIds.length > 0) {
+    const customerIds = referredUsers?.filter(u => u.role === 'customer').map(u => u.id) ?? []
+    const memberIds = referredUsers?.filter(u => u.role === 'worker').map(u => u.id) ?? []
+    let qc = 0, qm = 0
+    if (customerIds.length > 0) {
+      const { count } = await supabase.from('tasks').select('customer_id', { count: 'exact', head: true }).in('customer_id', customerIds).eq('payment_status', 'released')
+      qc = count ?? 0
+    }
+    if (memberIds.length > 0) {
+      const { data: qOffers } = await supabase.from('offers').select('worker_id, tasks!inner(status)').in('worker_id', memberIds).eq('status', 'accepted').eq('tasks.status', 'completed')
+      qm = new Set(qOffers?.map(o => o.worker_id)).size
+    }
+    qualifiedReferrals = qc + qm
+  }
+
+  const badges = computeBadges({
+    idVerified: (worker as any).id_verified ?? false,
+    stripeOnboarded: (worker as any).stripe_onboarded ?? false,
+    createdAt: worker.created_at,
+    completedJobCount,
+    avgRating,
+    reviewCount: reviews?.length ?? 0,
+    qualifiedReferrals,
+    completedJobsByCategory,
+  })
+
+  const earnedBadges = badges.filter(b => b.earned)
 
   const { data: { user } } = await supabase.auth.getUser()
   const isOwnProfile = user?.id === worker.id
@@ -62,9 +113,6 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-xl font-bold text-stone-900">{worker.name}</h1>
               <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Member</span>
-              {(worker as any).id_verified && (
-                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">✓ ID Verified</span>
-              )}
             </div>
             {avgRating !== null && (
               <div className="flex items-center gap-2 mb-2">
@@ -73,14 +121,21 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
               </div>
             )}
             <div className="text-xs text-stone-400">Member since {formatDate(worker.created_at)}</div>
-            {completedTasks && completedTasks.length > 0 && (
-              <div className="text-xs text-stone-400">{completedTasks.length} task{completedTasks.length !== 1 ? 's' : ''} completed</div>
+            {completedJobCount > 0 && (
+              <div className="text-xs text-stone-400">{completedJobCount} job{completedJobCount !== 1 ? 's' : ''} completed</div>
             )}
           </div>
         </div>
+
         {worker.bio && (
           <div className="mt-5">
             <MarkdownBio content={worker.bio} className="text-stone-600" />
+          </div>
+        )}
+
+        {earnedBadges.length > 0 && (
+          <div className="mt-5 pt-5 border-t border-stone-100">
+            <BadgeList badges={earnedBadges} />
           </div>
         )}
       </div>

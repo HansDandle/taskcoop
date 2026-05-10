@@ -20,34 +20,32 @@ export default async function MessagesPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('id, title, customer_id, users!customer_id(id, name)')
-    .eq('id', taskId)
-    .single()
+  const [{ data: task }, { data: profile }] = await Promise.all([
+    supabase.from('tasks').select('id, title, customer_id').eq('id', taskId).single(),
+    supabase.from('users').select('id, name, role').eq('id', user.id).single(),
+  ])
 
   if (!task) notFound()
-
-  const { data: profile } = await supabase.from('users').select('id, name, role').eq('id', user.id).single()
 
   // Determine the other party
   let otherUserId: string | null = null
   if (profile?.role === 'customer' && workerId) {
     otherUserId = workerId
-  } else if (profile?.role === 'worker') { // member in UI
+  } else if (profile?.role === 'worker') {
     otherUserId = task.customer_id
   }
 
   if (!otherUserId) redirect('/dashboard')
 
-  const { data: otherUser } = await supabase.from('users').select('id, name, avatar_url').eq('id', otherUserId).single()
-
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('id, content, sender_id, created_at')
-    .eq('task_id', taskId)
-    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-    .order('created_at', { ascending: true })
+  const [{ data: otherUser }, { data: messages }] = await Promise.all([
+    supabase.from('users').select('id, name, avatar_url').eq('id', otherUserId).single(),
+    supabase
+      .from('messages')
+      .select('id, content, sender_id, created_at')
+      .eq('task_id', taskId)
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: true }),
+  ])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col h-full">

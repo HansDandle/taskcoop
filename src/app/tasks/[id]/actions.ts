@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { PLATFORM_FEE_PERCENT } from '@/lib/utils'
+import { sendNewOfferEmail, sendOfferAcceptedEmail, sendOfferRejectedEmail } from '@/lib/email'
+import { releasePayment } from '@/lib/release-funds'
 
 export async function submitOffer(formData: FormData) {
   const supabase = await createClient()
@@ -19,6 +21,14 @@ export async function submitOffer(formData: FormData) {
 
   const { error } = await supabase.from('offers').insert({ task_id, worker_id: user.id, amount, message })
   if (error) return { error: 'Failed to submit offer.' }
+
+  // Notify customer
+  const { data: task } = await supabase.from('tasks').select('title, customer_id').eq('id', task_id).single()
+  const { data: customer } = task ? await supabase.from('users').select('email').eq('id', task.customer_id).single() : { data: null }
+  const { data: member } = await supabase.from('users').select('name').eq('id', user.id).single()
+  if (customer?.email && task && member) {
+    await sendNewOfferEmail(customer.email, task.title, task_id, member.name, amount)
+  }
 
   revalidatePath(`/tasks/${task_id}`)
 }
@@ -49,10 +59,30 @@ export async function acceptOffer(formData: FormData) {
 
   if (!offer) return { error: 'Offer not found.' }
 
+  // Fetch rejected offers before updating so we can email them
+  const { data: otherOffers } = await supabase
+    .from('offers')
+    .select('worker_id, users!worker_id(email)')
+    .eq('task_id', task_id)
+    .neq('id', offer_id)
+    .eq('status', 'pending')
+
   // Mark offer accepted, reject others
   await supabase.from('offers').update({ status: 'accepted' }).eq('id', offer_id)
   await supabase.from('offers').update({ status: 'rejected' }).eq('task_id', task_id).neq('id', offer_id)
   await supabase.from('tasks').update({ status: 'assigned' }).eq('id', task_id)
+
+  // Notify accepted member
+  const { data: acceptedWorker } = await supabase.from('users').select('email').eq('id', offer.worker_id).single()
+  if (acceptedWorker?.email) {
+    await sendOfferAcceptedEmail(acceptedWorker.email, task.title, task_id, offer.amount)
+  }
+
+  // Notify rejected members
+  for (const o of otherOffers ?? []) {
+    const email = (o.users as any)?.email
+    if (email) await sendOfferRejectedEmail(email, task.title)
+  }
 
   // Create Stripe Checkout — funds held on platform (no transfer_data = separate charges model)
   const amountCents = Math.round(offer.amount * 100)
@@ -82,6 +112,27 @@ export async function acceptOffer(formData: FormData) {
   redirect(session.url!)
 }
 
+export async function retractOffer(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authorized.' }
+
+  const offer_id = formData.get('offer_id') as string
+  const task_id = formData.get('task_id') as string
+
+  const { data: offer } = await supabase
+    .from('offers')
+    .select('worker_id, status')
+    .eq('id', offer_id)
+    .single()
+
+  if (!offer || offer.worker_id !== user.id) return { error: 'Not authorized.' }
+  if (offer.status !== 'pending') return { error: 'Only pending offers can be retracted.' }
+
+  await supabase.from('offers').delete().eq('id', offer_id)
+  revalidatePath(`/tasks/${task_id}`)
+}
+
 export async function updateTaskStatus(newStatus: string, formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -102,53 +153,12 @@ export async function cancelTask(formData: FormData) {
 // Release funds to worker — called when customer marks complete or auto-release fires
 export async function releaseFunds(task_id: string) {
   const supabase = await createClient()
-
   const { data: task } = await supabase
     .from('tasks')
-    .select('payment_intent_id, payment_status')
+    .select('id, title, payment_intent_id, payment_status')
     .eq('id', task_id)
     .single()
 
-  // Always mark complete regardless of payment state
-  await supabase
-    .from('tasks')
-    .update({ status: 'completed' })
-    .eq('id', task_id)
-
-  // Attempt transfer only if funds are held and worker has Connect account
-  if (task?.payment_status === 'held' && task.payment_intent_id) {
-    const { data: offer } = await supabase
-      .from('offers')
-      .select('amount, worker_id')
-      .eq('task_id', task_id)
-      .eq('status', 'accepted')
-      .single()
-
-    const { data: worker } = offer ? await supabase
-      .from('users')
-      .select('stripe_account_id')
-      .eq('id', offer.worker_id)
-      .single() : { data: null }
-
-    if (worker?.stripe_account_id && offer) {
-      const pi = await stripe.paymentIntents.retrieve(task.payment_intent_id)
-      const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id
-
-      if (chargeId) {
-        const workerAmountCents = Math.round(offer.amount * 100 * (1 - PLATFORM_FEE_PERCENT / 100))
-        await stripe.transfers.create({
-          amount: workerAmountCents,
-          currency: 'usd',
-          destination: worker.stripe_account_id,
-          source_transaction: chargeId,
-        })
-        await supabase
-          .from('tasks')
-          .update({ payment_status: 'released' })
-          .eq('id', task_id)
-      }
-    }
-  }
-
+  if (task) await releasePayment(task as any)
   revalidatePath(`/tasks/${task_id}`)
 }

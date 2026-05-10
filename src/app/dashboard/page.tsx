@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatRelativeDate } from '@/lib/utils'
 import { stripe } from '@/lib/stripe'
 import ReferralLink from '@/components/referral-link'
+import BadgeList from '@/components/badge-list'
+import { computeBadges } from '@/lib/badges'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -176,25 +178,17 @@ export default async function DashboardPage({
     const customerIds = referredUsers?.filter(u => u.role === 'customer').map(u => u.id) ?? []
     const memberIds = referredUsers?.filter(u => u.role === 'worker').map(u => u.id) ?? []
 
-    if (customerIds.length > 0) {
-      const { count } = await supabase
-        .from('tasks')
-        .select('customer_id', { count: 'exact', head: true })
-        .in('customer_id', customerIds)
-        .eq('payment_status', 'released')
-      qualifiedCustomers = count ?? 0
-    }
+    const [customerResult, memberResult] = await Promise.all([
+      customerIds.length > 0
+        ? supabase.from('tasks').select('customer_id', { count: 'exact', head: true }).in('customer_id', customerIds).eq('payment_status', 'released')
+        : Promise.resolve({ count: 0 }),
+      memberIds.length > 0
+        ? supabase.from('offers').select('worker_id, tasks!inner(status)').in('worker_id', memberIds).eq('status', 'accepted').eq('tasks.status', 'completed')
+        : Promise.resolve({ data: [] }),
+    ])
 
-    if (memberIds.length > 0) {
-      const { data: qualifiedOffers } = await supabase
-        .from('offers')
-        .select('worker_id, tasks!inner(status)')
-        .in('worker_id', memberIds)
-        .eq('status', 'accepted')
-        .eq('tasks.status', 'completed')
-      const uniqueQualifiedMembers = new Set(qualifiedOffers?.map(o => o.worker_id))
-      qualifiedMembers = uniqueQualifiedMembers.size
-    }
+    qualifiedCustomers = (customerResult as any).count ?? 0
+    qualifiedMembers = new Set((memberResult as any).data?.map((o: any) => o.worker_id)).size
   }
 
   const totalQualified = qualifiedCustomers + qualifiedMembers
@@ -204,6 +198,27 @@ export default async function DashboardPage({
   const needsReviewOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
   const pendingOffers = offers?.filter(o => o.status === 'pending') ?? []
   const pastOffers = offers?.filter(o => o.status === 'rejected' || (o.status === 'accepted' && ['completed', 'cancelled'].includes((o.tasks as any)?.status))) ?? []
+
+  // Badges
+  const completedOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
+  const completedJobsByCategory: Record<string, number> = {}
+  for (const o of completedOffers) {
+    const cat = (o.tasks as any)?.categories?.name
+    if (cat) completedJobsByCategory[cat] = (completedJobsByCategory[cat] ?? 0) + 1
+  }
+  const { data: reviewRows } = await supabase.from('reviews').select('rating').eq('reviewee_id', user.id)
+  const memberAvgRating = reviewRows?.length ? reviewRows.reduce((s, r) => s + r.rating, 0) / reviewRows.length : null
+
+  const badges = computeBadges({
+    idVerified: profile.id_verified ?? false,
+    stripeOnboarded: profile.stripe_onboarded ?? false,
+    createdAt: profile.created_at,
+    completedJobCount: completedOffers.length,
+    avgRating: memberAvgRating,
+    reviewCount: reviewRows?.length ?? 0,
+    qualifiedReferrals: totalQualified,
+    completedJobsByCategory,
+  })
 
   function OfferRow({ offer }: { offer: any }) {
     const task = offer.tasks as any
@@ -287,6 +302,16 @@ export default async function DashboardPage({
             {pastOffers.map(o => <OfferRow key={o.id} offer={o} />)}
           </Section>
         )}
+      </div>
+
+      {/* Badges */}
+      <div className="mt-6 bg-white border border-stone-200 rounded-lg overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-stone-200">
+          <h2 className="font-semibold text-stone-900 text-sm">Badges</h2>
+        </div>
+        <div className="px-5 py-4">
+          <BadgeList badges={badges} showUnearned />
+        </div>
       </div>
 
       {/* Referral section */}

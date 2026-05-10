@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { sendNewMessageEmail } from '@/lib/email'
 
 export async function sendMessage(formData: FormData) {
   const supabase = await createClient()
@@ -20,5 +21,16 @@ export async function sendMessage(formData: FormData) {
     .single()
 
   if (error) return { error: 'Failed to send message.' }
+
+  // Notify recipient (fire-and-forget — don't block message delivery)
+  const [{ data: sender }, { data: receiver }, { data: task }] = await Promise.all([
+    supabase.from('users').select('name').eq('id', user.id).single(),
+    supabase.from('users').select('email').eq('id', receiver_id).single(),
+    supabase.from('tasks').select('title').eq('id', task_id).single(),
+  ])
+  if (receiver?.email && sender && task) {
+    sendNewMessageEmail(receiver.email, sender.name, task.title, task_id, content)
+  }
+
   return { message }
 }
