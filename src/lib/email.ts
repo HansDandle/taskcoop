@@ -1,6 +1,5 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = 'task.coop <hello@task.coop>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'
 
@@ -33,6 +32,7 @@ function p(text: string) {
 async function send(to: string, subject: string, html: string) {
   if (!process.env.RESEND_API_KEY) return
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({ from: FROM, to, subject, html })
   } catch (err) {
     console.error('Email send failed:', err)

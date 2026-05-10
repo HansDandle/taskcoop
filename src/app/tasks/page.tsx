@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/server'
 import TaskCard from '@/components/task-card'
 import { CATEGORIES } from '@/lib/utils'
+
+const TaskMap = dynamic(() => import('@/components/task-map'), { ssr: false, loading: () => <div className="w-full h-72 rounded-lg bg-stone-100 animate-pulse mb-6" /> })
 
 export const metadata: Metadata = {
   title: 'Browse Tasks — Austin, TX',
@@ -119,6 +122,9 @@ export default async function TasksPage({
 
         {/* Task list */}
         <div className="flex-1">
+          {tasks && tasks.length > 0 && (
+            <TaskMap tasks={tasks.map(t => ({ id: t.id, title: t.title, budget: t.budget ?? null, zip_code: t.zip_code ?? null, categories: t.categories as any }))} />
+          )}
           {!tasks || tasks.length === 0 ? (
             <div className="text-center py-20 text-stone-400">
               <div className="text-4xl mb-3">📋</div>
