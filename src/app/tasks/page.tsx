@@ -16,6 +16,9 @@ export default async function TasksPage({
 }) {
   const { category, q, min, max } = await searchParams
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = user ? await supabase.from('users').select('role').eq('id', user.id).single() : { data: null }
+  const isWorker = profile?.role === 'worker'
 
   let query = supabase
     .from('tasks')
@@ -44,9 +47,11 @@ export default async function TasksPage({
           <h1 className="text-2xl font-bold text-stone-900">Open Tasks in Austin</h1>
           <p className="text-sm text-stone-500 mt-1">{tasks?.length ?? 0} tasks available</p>
         </div>
-        <Link href="/tasks/new" className="bg-emerald-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors self-start">
-          Post a Task
-        </Link>
+        {!isWorker && (
+          <Link href="/tasks/new" className="bg-emerald-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors self-start">
+            Post a Task
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -115,7 +120,7 @@ export default async function TasksPage({
             <div className="text-center py-20 text-stone-400">
               <div className="text-4xl mb-3">📋</div>
               <div className="font-medium">No tasks found</div>
-              <div className="text-sm mt-1">Try different filters or <Link href="/tasks/new" className="text-emerald-600 hover:underline">post one yourself</Link>.</div>
+              <div className="text-sm mt-1">Try different filters{!isWorker && <> or <Link href="/tasks/new" className="text-emerald-600 hover:underline">post one yourself</Link></>}.</div>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">

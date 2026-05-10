@@ -4,9 +4,9 @@ import Link from 'next/link'
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; role?: string }>
+  searchParams: Promise<{ error?: string; role?: string; ref?: string }>
 }) {
-  const { error, role } = await searchParams
+  const { error, role, ref } = await searchParams
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center p-4">
@@ -14,10 +14,13 @@ export default async function SignupPage({
         <div className="text-center">
           <div className="text-2xl font-semibold mb-1">task<span className="text-emerald-600">.coop</span></div>
           <h2 className="text-xl font-bold tracking-tight text-stone-900">Create an account</h2>
-          <p className="mt-1 text-sm text-stone-500">Join the member-owned marketplace</p>
+          <p className="mt-1 text-sm text-stone-500">
+            {ref ? "You were invited by a task.coop member" : "Join the member-owned marketplace"}
+          </p>
         </div>
 
         <form className="space-y-5" action={signup}>
+          {ref && <input type="hidden" name="ref" value={ref} />}
           <div className="space-y-4">
             <div>
               <label htmlFor="full_name" className="block text-sm font-medium text-stone-700">Full name</label>

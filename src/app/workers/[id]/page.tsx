@@ -42,9 +42,12 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
     .eq('status', 'completed')
     .in('id', (await supabase.from('offers').select('task_id').eq('worker_id', id).eq('status', 'accepted')).data?.map(o => o.task_id).filter(Boolean) ?? [])
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const isOwnProfile = user?.id === worker.id
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-      <Link href="/tasks" className="text-sm text-stone-500 hover:text-stone-700 block mb-6">← Back</Link>
+      <Link href={isOwnProfile ? '/dashboard' : '/tasks'} className="text-sm text-stone-500 hover:text-stone-700 block mb-6">← Back</Link>
 
       <div className="bg-white border border-stone-200 rounded-lg p-6 mb-6">
         <div className="flex items-start gap-5">

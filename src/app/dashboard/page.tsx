@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatRelativeDate } from '@/lib/utils'
 import { stripe } from '@/lib/stripe'
+import ReferralLink from '@/components/referral-link'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -160,6 +161,45 @@ export default async function DashboardPage({
     .order('created_at', { ascending: false })
     .limit(50)
 
+  // Referral counts
+  const { data: referredUsers } = await supabase
+    .from('users')
+    .select('id, role')
+    .eq('referred_by', user.id)
+
+  const referredIds = referredUsers?.map(u => u.id) ?? []
+
+  let qualifiedCustomers = 0
+  let qualifiedMembers = 0
+
+  if (referredIds.length > 0) {
+    const customerIds = referredUsers?.filter(u => u.role === 'customer').map(u => u.id) ?? []
+    const memberIds = referredUsers?.filter(u => u.role === 'worker').map(u => u.id) ?? []
+
+    if (customerIds.length > 0) {
+      const { count } = await supabase
+        .from('tasks')
+        .select('customer_id', { count: 'exact', head: true })
+        .in('customer_id', customerIds)
+        .eq('payment_status', 'released')
+      qualifiedCustomers = count ?? 0
+    }
+
+    if (memberIds.length > 0) {
+      const { data: qualifiedOffers } = await supabase
+        .from('offers')
+        .select('worker_id, tasks!inner(status)')
+        .in('worker_id', memberIds)
+        .eq('status', 'accepted')
+        .eq('tasks.status', 'completed')
+      const uniqueQualifiedMembers = new Set(qualifiedOffers?.map(o => o.worker_id))
+      qualifiedMembers = uniqueQualifiedMembers.size
+    }
+  }
+
+  const totalQualified = qualifiedCustomers + qualifiedMembers
+  const referralUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'}/signup?ref=${user.id}`
+
   const activeOffers = offers?.filter(o => o.status === 'accepted' && ['assigned', 'in_progress'].includes((o.tasks as any)?.status)) ?? []
   const needsReviewOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
   const pendingOffers = offers?.filter(o => o.status === 'pending') ?? []
@@ -249,7 +289,36 @@ export default async function DashboardPage({
         )}
       </div>
 
-      <div className="mt-6 flex gap-4 text-sm">
+      {/* Referral section */}
+      <div className="mt-6 bg-white border border-stone-200 rounded-lg overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-stone-200">
+          <h2 className="font-semibold text-stone-900 text-sm">Grow the cooperative</h2>
+        </div>
+        <div className="px-5 py-4 space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-sm text-stone-700 font-medium">Qualified referrals</span>
+              <span className="text-sm font-semibold text-stone-900">{totalQualified} / 5</span>
+            </div>
+            <div className="w-full bg-stone-100 rounded-full h-2">
+              <div
+                className="bg-emerald-500 h-2 rounded-full transition-all"
+                style={{ width: `${Math.min(100, (totalQualified / 5) * 100)}%` }}
+              />
+            </div>
+            <div className="flex gap-4 mt-2 text-xs text-stone-400">
+              <span>{qualifiedCustomers} customer{qualifiedCustomers !== 1 ? 's' : ''} who paid for a task</span>
+              <span>{qualifiedMembers} member{qualifiedMembers !== 1 ? 's' : ''} who completed a job</span>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-stone-500 mb-2">Share your referral link. A referral counts once they post and pay for a task (customers) or complete their first job (members).</p>
+            <ReferralLink url={referralUrl} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex gap-4 text-sm">
         <Link href="/profile" className="text-stone-500 hover:text-stone-700">Edit profile →</Link>
         <Link href={`/workers/${user.id}`} className="text-stone-500 hover:text-stone-700">View public profile →</Link>
         <Link href="/messages" className="text-stone-500 hover:text-stone-700">Messages →</Link>
