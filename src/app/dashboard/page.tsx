@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatRelativeDate } from '@/lib/utils'
+import { stripe } from '@/lib/stripe'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -55,7 +56,11 @@ function Section({ title, children, empty, cta }: { title: string; children: Rea
   )
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stripe?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?next=/dashboard')
@@ -63,6 +68,16 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single()
 
   if (!profile || profile.role === 'admin') redirect('/admin')
+
+  // If returning from Stripe Connect onboarding, sync the account status
+  const { stripe: stripeParam } = await searchParams
+  if (stripeParam === 'connected' && profile.stripe_account_id && !profile.stripe_onboarded) {
+    const account = await stripe.accounts.retrieve(profile.stripe_account_id)
+    if (account.details_submitted) {
+      await supabase.from('users').update({ stripe_onboarded: true }).eq('id', user.id)
+      profile.stripe_onboarded = true
+    }
+  }
 
   // ── Customer ──────────────────────────────────────────────────────────────
   if (profile.role === 'customer') {

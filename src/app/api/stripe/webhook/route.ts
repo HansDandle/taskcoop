@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'account.updated') {
     const account = event.data.object as any
-    if (account.details_submitted) {
+    if (account.charges_enabled) {
       await supabase
         .from('users')
         .update({ stripe_onboarded: true })
