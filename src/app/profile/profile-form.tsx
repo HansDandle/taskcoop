@@ -78,13 +78,13 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
           />
         )}
         <input type="hidden" name="bio" value={bioValue} />
-        <p className="mt-1 text-xs text-stone-400">Markdown supported — **bold**, _italic_, - lists, [links](url)</p>
+        <p className="mt-1 text-xs text-stone-400">Markdown supported: **bold**, _italic_, - lists, [links](url)</p>
       </div>
 
       {profile?.role === 'worker' && (
         <div>
           <label className="block text-sm font-medium text-stone-700 mb-2">Photos</label>
-          <p className="text-xs text-stone-400 mb-3">Show off your work, yourself, your setup — whatever gives customers a feel for who you are. Up to 8 photos.</p>
+          <p className="text-xs text-stone-400 mb-3">Show off your work, yourself, your setup, whatever gives customers a feel for who you are. Up to 8 photos.</p>
           <MultiImageUpload
             bucket="portfolio"
             folder={profile?.id}
@@ -116,16 +116,16 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
             <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Under review</span>
           )}
           {profile.id_verification_status === 'rejected' && (
-            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rejected — resubmit</span>
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rejected; please resubmit</span>
           )}
         </div>
         <p className="text-xs text-stone-500 mb-4">
-          Verified members get a badge on their profile. Upload a government-issued ID (driver&apos;s license, passport, or state ID). Only admins can view it — never shown publicly.
+          Verified members get a badge on their profile. Upload a government-issued ID (driver&apos;s license, passport, or state ID). Only admins can view it; it is never shown publicly.
         </p>
         {!profile.id_verified && profile.id_verification_status !== 'pending' && (
           idSubmitted ? (
             <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
-              ID submitted — we&apos;ll review it shortly.
+              ID submitted. We&apos;ll review it shortly.
             </div>
           ) : (
             <FileUpload

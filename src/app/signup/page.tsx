@@ -59,6 +59,11 @@ export default async function SignupPage({
 
           {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</div>}
 
+          <label className="flex items-start gap-2 text-sm text-stone-600 cursor-pointer">
+            <input type="checkbox" name="agreed_to_terms" required className="mt-0.5 shrink-0" />
+            <span>I agree to the <a href="/terms" className="underline hover:text-stone-900">Terms of Service</a> and <a href="/privacy" className="underline hover:text-stone-900">Privacy Policy</a></span>
+          </label>
+
           <button type="submit" className="flex w-full justify-center rounded-md bg-emerald-600 py-2.5 px-4 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none transition-colors">
             Create account
           </button>

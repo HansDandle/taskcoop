@@ -29,7 +29,7 @@ export default function AustinPage() {
         <h2 className="font-semibold text-stone-900 mb-2">Why task.coop for Austin?</h2>
         <ul className="text-sm text-stone-600 space-y-2">
           <li>✓ Local workers who know Austin</li>
-          <li>✓ 5% platform fee — workers keep 95%</li>
+          <li>✓ 5% platform fee; workers keep 95%</li>
           <li>✓ Worker-owned cooperative, built to last</li>
           <li>✓ Secure payments with Stripe</li>
         </ul>

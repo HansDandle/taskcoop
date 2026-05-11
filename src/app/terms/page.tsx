@@ -79,8 +79,8 @@ export default function TermsPage() {
 
       <h2>9. Disputes Between Users</h2>
       <p>
-        task.coop encourages all users to document their work thoroughly — including photos, written agreements, and
-        records of communications — before, during, and after each task. In the event of a dispute, task.coop will
+        task.coop encourages all users to document their work thoroughly, including photos, written agreements, and
+        records of communications, before, during, and after each task. In the event of a dispute, task.coop will
         review the matter on a case-by-case basis and may, at its sole discretion, issue a refund, account credit,
         or other remedy to the Customer. task.coop's decision in any dispute is final.
       </p>
@@ -102,8 +102,8 @@ export default function TermsPage() {
 
       <h2>11. Off-Platform Transactions</h2>
       <p>
-        Arranging or completing transactions outside of task.coop — including accepting cash or other payment
-        directly from a Customer you met through the Platform — is a violation of these Terms and may result in
+        Arranging or completing transactions outside of task.coop, including accepting cash or other payment
+        directly from a Customer you met through the Platform, is a violation of these Terms and may result in
         immediate account termination. Off-platform transactions are not covered by any escrow protection or dispute
         process.
       </p>

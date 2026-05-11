@@ -18,9 +18,9 @@ export default function HowItWorksPage() {
           <div className="space-y-6">
             {[
               { n: '1', title: 'Create a free account', body: 'Sign up with your email. No subscription. No upfront cost.' },
-              { n: '2', title: 'Post your task', body: 'Describe what you need — handyman, cleaning, moving help, yard work, furniture assembly, or junk removal. Set a budget, upload photos, and pick your preferred date.' },
+              { n: '2', title: 'Post your task', body: 'Describe what you need: handyman, cleaning, moving help, yard work, furniture assembly, or junk removal. Set a budget, upload photos, and pick your preferred date.' },
               { n: '3', title: 'Receive offers', body: 'Local member-workers submit offers with their price and a note. You can message them directly before deciding.' },
-              { n: '4', title: 'Accept and pay', body: 'Accept the offer you like. Your payment is held securely until the job is complete — you\'re protected.' },
+              { n: '4', title: 'Accept and pay', body: "Accept the offer you like. Your payment is held securely until the job is complete; you're protected." },
               { n: '5', title: 'Job done, funds released', body: 'When you mark the task complete, the worker gets paid (minus the 5% platform fee). Then leave a review.' },
             ].map((s) => (
               <div key={s.n} className="flex gap-4">
@@ -40,7 +40,7 @@ export default function HowItWorksPage() {
             {[
               { n: '1', title: 'Apply to become a member', body: 'Sign up as a worker-member. Set up your profile with your skills, bio, and service area.' },
               { n: '2', title: 'Browse open tasks', body: 'See tasks posted by customers near you. Filter by category, budget, or distance.' },
-              { n: '3', title: 'Submit an offer', body: 'Send the customer your price and a short message. No bidding wars — just honest offers.' },
+              { n: '3', title: 'Submit an offer', body: 'Send the customer your price and a short message. No bidding wars, just honest offers.' },
               { n: '4', title: 'Do the work', body: 'Show up, do great work, and mark the task complete when done.' },
               { n: '5', title: 'Get paid', body: 'Funds are released to your connected Stripe account within 1–2 business days. You keep 95%.' },
             ].map((s) => (
@@ -56,7 +56,7 @@ export default function HowItWorksPage() {
         </section>
 
         <section className="bg-stone-50 border border-stone-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-stone-900 mb-3">Fees — simple and transparent</h2>
+          <h2 className="text-lg font-semibold text-stone-900 mb-3">Simple, transparent fees</h2>
           <div className="text-stone-600 text-sm space-y-2">
             <p>task.coop charges a <strong>5% platform fee</strong> on completed transactions. That's it.</p>
             <p>There are no listing fees, no subscription fees, no surprise charges.</p>

@@ -21,11 +21,12 @@ export default async function TasksPage({
 
   // Fetch profile and category ID in parallel
   const [{ data: profile }, { data: cat }] = await Promise.all([
-    user ? supabase.from('users').select('role').eq('id', user.id).single() : Promise.resolve({ data: null }),
+    user ? supabase.from('users').select('role, id_verified, id_verification_status').eq('id', user.id).single() : Promise.resolve({ data: null }),
     category ? supabase.from('categories').select('id').eq('slug', category).single() : Promise.resolve({ data: null }),
   ])
 
   const isWorker = profile?.role === 'worker'
+  const showIdNudge = isWorker && !profile?.id_verified && profile?.id_verification_status !== 'pending'
 
   let query = supabase
     .from('tasks')
@@ -41,6 +42,8 @@ export default async function TasksPage({
   if (q) query = query.ilike('title', `%${q}%`)
   if (min) query = query.gte('budget', Number(min))
   if (max) query = query.lte('budget', Number(max))
+  // Unverified workers only see tasks that don't require verification
+  if (isWorker && !profile?.id_verified) query = query.eq('require_id_verified', false)
 
   const { data: tasks } = await query.limit(50)
 
@@ -120,6 +123,11 @@ export default async function TasksPage({
 
         {/* Task list */}
         <div className="flex-1">
+          {showIdNudge && (
+            <div className="mb-5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+              <p className="text-sm text-amber-800">Not seeing enough tasks? Many customers require ID-verified members. <Link href="/profile" className="font-medium underline">Upload your ID</Link> to unlock more opportunities.</p>
+            </div>
+          )}
           {tasks && tasks.length > 0 && (
             <TaskMapLoader tasks={tasks.map(t => ({ id: t.id, title: t.title, budget: t.budget ?? null, zip_code: t.zip_code ?? null, categories: t.categories as any }))} />
           )}

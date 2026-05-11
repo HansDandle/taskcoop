@@ -144,9 +144,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                   <div className="flex gap-3">
                     <dt className="text-stone-400 w-32 shrink-0">Tools & materials</dt>
                     <dd className="text-stone-700">{({
-                      just_show_up: 'All tools & materials on-site — just show up',
-                      i_have_tools: 'Tools on-site — worker brings skills',
-                      some_materials: 'Some materials on-site — let\'s discuss the rest',
+                      just_show_up: 'All tools and materials on-site; just show up',
+                      i_have_tools: 'Tools on-site; worker brings skills',
+                      some_materials: "Some materials on-site; let's discuss the rest",
                       bring_everything: 'Worker should bring tools and materials',
                     } as Record<string,string>)[task.tools_situation] ?? task.tools_situation}</dd>
                   </div>
@@ -158,7 +158,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                       someone_home: 'Someone will be home',
                       provide_code: 'Door/gate code provided',
                       unattended_ok: 'Unattended access is fine',
-                      tbd: 'TBD — will coordinate',
+                      tbd: 'TBD, will coordinate',
                     } as Record<string,string>)[task.access_situation] ?? task.access_situation}</dd>
                   </div>
                 )}
@@ -294,7 +294,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </Link>
           )}
           {task.status === 'completed' && isOwner && customerHasReviewed && (
-            <div className="text-xs text-center text-stone-400">You've left a review — thanks.</div>
+            <div className="text-xs text-center text-stone-400">You've left a review. Thanks.</div>
           )}
           {task.status === 'completed' && isAcceptedWorker && !workerHasReviewed && (
             <Link
@@ -305,7 +305,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </Link>
           )}
           {task.status === 'completed' && isAcceptedWorker && workerHasReviewed && (
-            <div className="text-xs text-center text-stone-400">You've left a review — thanks.</div>
+            <div className="text-xs text-center text-stone-400">You've left a review. Thanks.</div>
           )}
         </div>
       </div>

@@ -31,7 +31,6 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
   const [
     { data: reviews },
     { data: acceptedOffers },
-    { data: referredUsers },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -44,10 +43,6 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
       .eq('worker_id', id)
       .eq('status', 'accepted')
       .eq('tasks.status', 'completed'),
-    supabase
-      .from('users')
-      .select('id, role')
-      .eq('referred_by', id),
   ])
 
   const avgRating = reviews?.length
@@ -62,23 +57,11 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
     if (catName) completedJobsByCategory[catName] = (completedJobsByCategory[catName] ?? 0) + 1
   }
 
-  // Compute qualified referrals for badge purposes
-  const referredIds = referredUsers?.map(u => u.id) ?? []
-  let qualifiedReferrals = 0
-  if (referredIds.length > 0) {
-    const customerIds = referredUsers?.filter(u => u.role === 'customer').map(u => u.id) ?? []
-    const memberIds = referredUsers?.filter(u => u.role === 'worker').map(u => u.id) ?? []
-    let qc = 0, qm = 0
-    if (customerIds.length > 0) {
-      const { count } = await supabase.from('tasks').select('customer_id', { count: 'exact', head: true }).in('customer_id', customerIds).eq('payment_status', 'released')
-      qc = count ?? 0
-    }
-    if (memberIds.length > 0) {
-      const { data: qOffers } = await supabase.from('offers').select('worker_id, tasks!inner(status)').in('worker_id', memberIds).eq('status', 'accepted').eq('tasks.status', 'completed')
-      qm = new Set(qOffers?.map(o => o.worker_id)).size
-    }
-    qualifiedReferrals = qc + qm
-  }
+  // Fetch referral slots for badge computation
+  const { data: referralSlots } = await supabase
+    .from('referral_slots')
+    .select('category, referred_user_id')
+    .eq('referrer_id', worker.id)
 
   const badges = computeBadges({
     idVerified: (worker as any).id_verified ?? false,
@@ -87,7 +70,7 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
     completedJobCount,
     avgRating,
     reviewCount: reviews?.length ?? 0,
-    qualifiedReferrals,
+    referralSlots: referralSlots ?? [],
     completedJobsByCategory,
   })
 

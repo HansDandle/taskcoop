@@ -58,7 +58,7 @@ export default function TaskForm({
           name="description"
           required
           rows={5}
-          placeholder="Describe what needs to be done and what a successful result looks like. The more detail the better — workers use this to send accurate offers."
+          placeholder="Describe what needs to be done and what a successful result looks like. The more detail the better; workers use this to send accurate offers."
           className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
         />
         <p className="mt-1.5 text-xs text-stone-400 leading-relaxed">
@@ -107,6 +107,16 @@ export default function TaskForm({
       </div>
 
       <TaskExpectations />
+
+      <div className="border border-stone-200 rounded-lg p-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" name="require_id_verified" defaultChecked className="mt-0.5 shrink-0" />
+          <div>
+            <div className="text-sm font-medium text-stone-700">Require ID-verified members only</div>
+            <div className="text-xs text-stone-400 mt-0.5">Only members who have had their government ID verified can submit offers. Recommended.</div>
+          </div>
+        </label>
+      </div>
 
       {state?.error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md px-4 py-3">{state.error}</div>

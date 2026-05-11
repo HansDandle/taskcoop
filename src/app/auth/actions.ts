@@ -39,10 +39,16 @@ export async function signup(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { data: signUpData, error } = await supabase.auth.signUp(data)
 
   if (error) {
     redirect(`/signup?error=${encodeURIComponent(error.message)}`)
+  }
+
+  // Mark referral slot as used
+  if (ref && signUpData?.user?.id) {
+    const { markSlotUsed } = await import('@/lib/referral-slots')
+    await markSlotUsed(ref, signUpData.user.id).catch(() => {})
   }
 
   redirect('/signup/confirmed')

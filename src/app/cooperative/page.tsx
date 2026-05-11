@@ -14,7 +14,7 @@ export default function CooperativePage() {
       </div>
       <h1 className="text-3xl font-bold text-stone-900 mb-4">Members own this platform.</h1>
       <p className="text-lg text-stone-500 mb-12 leading-relaxed">
-        Most gig platforms extract value from the people doing the work. task.coop is built to do the opposite — distribute it.
+        Most gig platforms extract value from the people doing the work. task.coop is built to do the opposite: distribute it.
       </p>
 
       <div className="space-y-12">
@@ -22,7 +22,7 @@ export default function CooperativePage() {
           <h2 className="text-xl font-semibold text-stone-900 mb-4">Why a cooperative?</h2>
           <div className="text-stone-600 space-y-4 leading-relaxed">
             <p>Platforms like TaskRabbit and Thumbtack take 15–30% of every job. They set the rules, raise fees whenever they want, and the people doing the work have no say.</p>
-            <p>task.coop is structured as a member-owned cooperative. That means the members — the people doing the actual work — have a stake in the platform and, eventually, a vote in how it's run.</p>
+            <p>task.coop is structured as a member-owned cooperative. That means the members, the people doing the actual work, have a stake in the platform and, eventually, a vote in how it's run.</p>
             <p>We charge 5% because we don't need to extract profit for outside investors. We need enough to run the platform and grow it sustainably.</p>
           </div>
         </section>
@@ -32,7 +32,7 @@ export default function CooperativePage() {
           <div className="grid sm:grid-cols-2 gap-4">
             {[
               { title: 'Low fees', body: '5% platform fee. Members keep 95% of every job.' },
-              { title: 'Direct messaging', body: 'Talk to customers directly — no algorithmic gatekeeping.' },
+              { title: 'Direct messaging', body: 'Talk to customers directly, without algorithmic gatekeeping.' },
               { title: 'Transparent policies', body: 'All platform rules are published. No surprise deactivations.' },
               { title: 'Human dispute resolution', body: 'Real human review for disputes, not automated bans.' },
             ].map((item) => (
@@ -47,7 +47,7 @@ export default function CooperativePage() {
         <section>
           <h2 className="text-xl font-semibold text-stone-900 mb-4">The roadmap to full ownership</h2>
           <p className="text-stone-500 text-sm mb-6 leading-relaxed">
-            We&apos;re building this in phases. The cooperative governance tools don&apos;t exist yet — but they&apos;re on the roadmap, not vaporware.
+            We&apos;re building this in phases. The cooperative governance tools don&apos;t exist yet, but they&apos;re on the roadmap, not vaporware.
           </p>
           <div className="space-y-4">
             {[

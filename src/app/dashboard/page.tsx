@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatRelativeDate } from '@/lib/utils'
 import { stripe } from '@/lib/stripe'
-import ReferralLink from '@/components/referral-link'
+import ReferralGrid from '@/components/referral-grid'
 import BadgeList from '@/components/badge-list'
 import { computeBadges } from '@/lib/badges'
 
@@ -164,7 +164,7 @@ export default async function DashboardPage({
           </Section>
 
           {needsReview.length > 0 && (
-            <Section title={`Completed — rate your member (${needsReview.length})`}>
+            <Section title={`Completed: rate your member (${needsReview.length})`}>
               {needsReview.map(t => (
                 <Link key={t.id} href={`/tasks/${t.id}/review`}
                   className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
@@ -203,36 +203,27 @@ export default async function DashboardPage({
     .order('created_at', { ascending: false })
     .limit(50)
 
-  // Referral counts
-  const { data: referredUsers } = await supabase
-    .from('users')
-    .select('id, role')
-    .eq('referred_by', user.id)
+  // Referral slots — generate lazily if none exist
+  let { data: referralSlots } = await supabase
+    .from('referral_slots')
+    .select('category, slot_number, code, referred_user_id')
+    .eq('referrer_id', user.id)
+    .order('category').order('slot_number')
 
-  const referredIds = referredUsers?.map(u => u.id) ?? []
-
-  let qualifiedCustomers = 0
-  let qualifiedMembers = 0
-
-  if (referredIds.length > 0) {
-    const customerIds = referredUsers?.filter(u => u.role === 'customer').map(u => u.id) ?? []
-    const memberIds = referredUsers?.filter(u => u.role === 'worker').map(u => u.id) ?? []
-
-    const [customerResult, memberResult] = await Promise.all([
-      customerIds.length > 0
-        ? supabase.from('tasks').select('customer_id', { count: 'exact', head: true }).in('customer_id', customerIds).eq('payment_status', 'released')
-        : Promise.resolve({ count: 0 }),
-      memberIds.length > 0
-        ? supabase.from('offers').select('worker_id, tasks!inner(status)').in('worker_id', memberIds).eq('status', 'accepted').eq('tasks.status', 'completed')
-        : Promise.resolve({ data: [] }),
-    ])
-
-    qualifiedCustomers = (customerResult as any).count ?? 0
-    qualifiedMembers = new Set((memberResult as any).data?.map((o: any) => o.worker_id)).size
+  if (!referralSlots || referralSlots.length === 0) {
+    const { generateSlotsForUser } = await import('@/lib/referral-slots')
+    await generateSlotsForUser(user.id)
+    const { data: fresh } = await supabase
+      .from('referral_slots')
+      .select('category, slot_number, code, referred_user_id')
+      .eq('referrer_id', user.id)
+      .order('category').order('slot_number')
+    referralSlots = fresh ?? []
   }
 
-  const totalQualified = qualifiedCustomers + qualifiedMembers
-  const referralUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'}/signup?ref=${user.id}`
+  const usedSlots = referralSlots.filter(s => s.referred_user_id)
+  const totalQualified = usedSlots.length
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'
 
   const activeOffers = offers?.filter(o => o.status === 'accepted' && ['assigned', 'in_progress'].includes((o.tasks as any)?.status)) ?? []
   const needsReviewOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
@@ -256,7 +247,7 @@ export default async function DashboardPage({
     completedJobCount: completedOffers.length,
     avgRating: memberAvgRating,
     reviewCount: reviewRows?.length ?? 0,
-    qualifiedReferrals: totalQualified,
+    referralSlots: referralSlots ?? [],
     completedJobsByCategory,
   })
 
@@ -309,7 +300,7 @@ export default async function DashboardPage({
         )}
 
         {needsReviewOffers.length > 0 && (
-          <Section title={`Completed — rate the customer (${needsReviewOffers.length})`}>
+          <Section title={`Completed: rate the customer (${needsReviewOffers.length})`}>
             {needsReviewOffers.map(o => {
               const task = o.tasks as any
               return (
@@ -358,28 +349,10 @@ export default async function DashboardPage({
       <div className="mt-6 bg-white border border-stone-200 rounded-lg overflow-hidden">
         <div className="px-5 py-3.5 border-b border-stone-200">
           <h2 className="font-semibold text-stone-900 text-sm">Grow the cooperative</h2>
+          <p className="text-xs text-stone-400 mt-0.5">You have 25 unique invite links, 5 per category. Fill a row to earn Team Builder. Fill all 25 for Full Roster.</p>
         </div>
-        <div className="px-5 py-4 space-y-4">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-sm text-stone-700 font-medium">Qualified referrals</span>
-              <span className="text-sm font-semibold text-stone-900">{totalQualified} / 5</span>
-            </div>
-            <div className="w-full bg-stone-100 rounded-full h-2">
-              <div
-                className="bg-emerald-500 h-2 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (totalQualified / 5) * 100)}%` }}
-              />
-            </div>
-            <div className="flex gap-4 mt-2 text-xs text-stone-400">
-              <span>{qualifiedCustomers} customer{qualifiedCustomers !== 1 ? 's' : ''} who paid for a task</span>
-              <span>{qualifiedMembers} member{qualifiedMembers !== 1 ? 's' : ''} who completed a job</span>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 mb-2">Share your referral link. A referral counts once they post and pay for a task (customers) or complete their first job (members).</p>
-            <ReferralLink url={referralUrl} />
-          </div>
+        <div className="px-5 py-4">
+          <ReferralGrid slots={referralSlots ?? []} baseUrl={baseUrl} />
         </div>
       </div>
 

@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: 'What areas does task.coop serve?',
-    a: "We're launching in Austin, TX. If you're outside Austin and interested, sign up — we're planning to expand to other cities.",
+    a: "We're launching in Austin, TX. If you're outside Austin and interested, sign up; we're planning to expand to other cities.",
   },
   {
     q: 'What kinds of tasks can I post?',
@@ -37,15 +37,15 @@ const faqs = [
   },
   {
     q: "What if a member doesn't show up or the work is unsatisfactory?",
-    a: "Contact us through the dispute process on your task page. We review each case individually — members are encouraged to document their work with photos and notes. We'll work with you to make it right, whether that's a refund or a credit.",
+    a: "Contact us through the dispute process on your task page. We review each case individually; members are encouraged to document their work with photos and notes. We'll work with you to make it right, whether that's a refund or a credit.",
   },
   {
     q: 'Are members employees of task.coop?',
-    a: 'No. Members are independent contractors who use the platform to find work. See our Member Classification page for details. The cooperative structure means members have a stake in the platform — but that is distinct from employment.',
+    a: 'No. Members are independent contractors who use the platform to find work. See our Member Classification page for details. The cooperative structure means members have a stake in the platform, but that is distinct from employment.',
   },
   {
     q: 'How does member ownership work?',
-    a: "task.coop is structured as a member-owned cooperative. We're in early stages — full governance tools are on the roadmap for 2027. Right now, membership means low fees, transparent policies, and early access to shape how the platform evolves. See the Co-op page for details.",
+    a: "task.coop is structured as a member-owned cooperative. We're in early stages; full governance tools are on the roadmap for 2027. Right now, membership means low fees, transparent policies, and early access to shape how the platform evolves. See the Co-op page for details.",
   },
 ]
 

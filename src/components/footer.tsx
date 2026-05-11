@@ -36,7 +36,7 @@ export default function Footer() {
         </div>
         <div className="mt-8 pt-6 border-t border-stone-200 flex flex-col sm:flex-row justify-between text-xs text-stone-400">
           <span>© {new Date().getFullYear()} task.coop. All rights reserved.</span>
-          <span className="mt-1 sm:mt-0">Platform fee: 5% — transparent, always.</span>
+          <span className="mt-1 sm:mt-0">Platform fee: 5%. Transparent, always.</span>
         </div>
       </div>
     </footer>

@@ -63,7 +63,7 @@ export default function PrivacyPage() {
 
       <h3>With other users</h3>
       <p>
-        Your public profile — including your name, profile photo, bio, and reviews — is visible to all users of the
+        Your public profile, including your name, profile photo, bio, and reviews, is visible to all users of the
         Platform. When you post a task or submit an offer, the relevant details are visible to the other party in
         that transaction. Service addresses are shared only with Members whose offers have been accepted.
       </p>
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
 
       <h2>4. Cookies and Local Storage</h2>
       <p>
-        We use cookies and browser local storage solely for authentication — to keep you logged in across sessions.
+        We use cookies and browser local storage solely for authentication, to keep you logged in across sessions.
         These are first-party cookies set by Supabase. We do not use third-party advertising or tracking cookies,
         and we do not share session data with advertisers.
       </p>

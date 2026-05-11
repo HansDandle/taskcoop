@@ -18,6 +18,7 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
   const tools_situation = formData.get('tools_situation') as string
   const access_situation = (formData.get('access_situation') as string) || null
   const physicalRaw = formData.get('physical_requirements') as string
+  const require_id_verified = formData.get('require_id_verified') === 'on'
 
   // Address fields — street stored separately in task_addresses
   const address_street = (formData.get('address_street') as string)?.trim() || null
@@ -50,7 +51,7 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
       customer_id: user.id,
       title, description, category_id, zip_code, budget,
       preferred_time: preferred_time || null,
-      duration_estimate, tools_situation, access_situation, physical_requirements,
+      duration_estimate, tools_situation, access_situation, physical_requirements, require_id_verified,
     })
     .select('id')
     .single()

@@ -22,7 +22,7 @@ const ACCESS_OPTIONS = [
   { value: 'someone_home', label: 'Someone will be home' },
   { value: 'provide_code', label: 'I\'ll provide a door/gate code' },
   { value: 'unattended_ok', label: 'Unattended access is fine' },
-  { value: 'tbd', label: 'TBD — we\'ll coordinate' },
+  { value: 'tbd', label: "TBD, we'll coordinate" },
 ]
 
 const PHYSICAL_OPTIONS = [
@@ -52,7 +52,7 @@ export default function TaskLogisticsFields({ defaults }: Props) {
       <div className="border-t border-stone-100 pt-6">
         <h3 className="text-sm font-semibold text-stone-700 mb-4">Job logistics</h3>
         <p className="text-xs text-stone-400 mb-5 leading-relaxed">
-          These details help workers prepare properly and send you accurate offers — no back-and-forth required.
+          These details help workers prepare properly and send you accurate offers, with no back-and-forth required.
         </p>
 
         {/* Duration */}

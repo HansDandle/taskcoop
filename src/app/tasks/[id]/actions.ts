@@ -19,6 +19,14 @@ export async function submitOffer(formData: FormData) {
 
   if (!task_id || !amount || amount < 5) return { error: 'Invalid offer data.' }
 
+  const [{ data: profile }, { data: targetTask }] = await Promise.all([
+    supabase.from('users').select('id_verified, role').eq('id', user.id).single(),
+    supabase.from('tasks').select('require_id_verified').eq('id', task_id).single(),
+  ])
+  if (profile?.role === 'worker' && targetTask?.require_id_verified && !profile?.id_verified) {
+    return { error: 'This task requires a verified ID. Upload yours on your profile page.' }
+  }
+
   const { error } = await supabase.from('offers').insert({ task_id, worker_id: user.id, amount, message })
   if (error) return { error: 'Failed to submit offer.' }
 

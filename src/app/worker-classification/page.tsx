@@ -45,7 +45,7 @@ export default function WorkerClassificationPage() {
       <h2>The Cooperative Model and Employment</h2>
       <p>
         task.coop is working toward a cooperative structure where active members become stakeholders in the
-        platform. Member-ownership — including any future equity, profit-sharing, or governance rights — does
+        platform. Member-ownership, including any future equity, profit-sharing, or governance rights, does
         not create or imply an employment relationship. These are two distinct legal concepts.
       </p>
 

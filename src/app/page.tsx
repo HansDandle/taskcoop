@@ -47,7 +47,7 @@ export default async function HomePage() {
             Trusted local help for home,<br />tech, and everyday tasks.
           </h1>
           <p className="text-lg text-stone-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            From furniture assembly and yard work to Wi-Fi troubleshooting and smart home setup —
+            From furniture assembly and yard work to Wi-Fi troubleshooting and smart home setup,
             task.coop connects you with reliable, skilled local experts who take pride in their work.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -115,7 +115,7 @@ export default async function HomePage() {
           </div>
           <div>
             <div className="text-3xl font-bold text-emerald-400 mb-1">5% fee</div>
-            <div className="text-sm text-stone-400 leading-relaxed">Transparent pricing. Members keep 95% — so they&apos;re motivated to do excellent work</div>
+            <div className="text-sm text-stone-400 leading-relaxed">Transparent pricing. Members keep 95%, so they&apos;re motivated to do excellent work</div>
           </div>
         </div>
       </section>
@@ -125,7 +125,7 @@ export default async function HomePage() {
         <h2 className="text-2xl font-bold text-stone-900 mb-10 text-center">How it works</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { step: '01', title: 'Describe the job', desc: 'Post what you need — as much detail as you have. Photos welcome. Free to post, no commitment.' },
+            { step: '01', title: 'Describe the job', desc: 'Post what you need, with as much detail as you have. Photos welcome. Free to post, no commitment.' },
             { step: '02', title: 'Review local experts', desc: 'Members send offers. Browse their profiles, reviews, and past work. Message them directly.' },
             { step: '03', title: 'Get it done right', desc: 'Accept an offer and pay securely through the platform. Funds release when the job is complete.' },
           ].map((item) => (

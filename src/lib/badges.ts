@@ -1,4 +1,5 @@
 import { CATEGORIES } from './utils'
+import { REFERRAL_CATEGORIES } from './referral-slots'
 
 export interface BadgeData {
   idVerified: boolean
@@ -7,7 +8,7 @@ export interface BadgeData {
   completedJobCount: number
   avgRating: number | null
   reviewCount: number
-  qualifiedReferrals: number
+  referralSlots: { category: string; referred_user_id: string | null }[]
   completedJobsByCategory: Record<string, number>
 }
 
@@ -22,6 +23,15 @@ export interface Badge {
 const EARLY_MEMBER_CUTOFF = new Date('2027-05-01')
 
 export function computeBadges(data: BadgeData): Badge[] {
+  const usedByCategory = Object.fromEntries(
+    REFERRAL_CATEGORIES.map(cat => [
+      cat.id,
+      data.referralSlots.filter(s => s.category === cat.id && s.referred_user_id).length,
+    ])
+  )
+  const hasAnyInEach = REFERRAL_CATEGORIES.every(cat => (usedByCategory[cat.id] ?? 0) >= 1)
+  const allFull = REFERRAL_CATEGORIES.every(cat => (usedByCategory[cat.id] ?? 0) >= 5)
+
   const badges: Badge[] = [
     {
       id: 'id_verified',
@@ -66,11 +76,18 @@ export function computeBadges(data: BadgeData): Badge[] {
       earned: data.reviewCount >= 3 && data.avgRating === 5.0,
     },
     {
-      id: 'coop_builder',
-      name: 'Cooperative Builder',
-      description: 'Referred 5 members or customers who transacted',
+      id: 'team_builder',
+      name: 'Team Builder',
+      description: 'Recruited at least one person in every category',
       icon: '🤝',
-      earned: data.qualifiedReferrals >= 5,
+      earned: hasAnyInEach,
+    },
+    {
+      id: 'full_roster',
+      name: 'Full Roster',
+      description: 'Filled all 25 referral slots',
+      icon: '🌐',
+      earned: allFull,
     },
     {
       id: 'early_member',
