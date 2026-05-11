@@ -53,7 +53,7 @@ export default function FAQPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-14">
       <h1 className="text-3xl font-bold text-stone-900 mb-3">Frequently asked questions</h1>
-      <p className="text-stone-500 mb-12">Can&apos;t find what you&apos;re looking for? <Link href="mailto:hello@task.coop" className="text-emerald-600 hover:underline">Email us</Link>.</p>
+      <p className="text-stone-500 mb-12">Can&apos;t find what you&apos;re looking for? <Link href="/contact" className="text-emerald-600 hover:underline">Email us</Link>.</p>
 
       <div className="divide-y divide-stone-200">
         {faqs.map((faq) => (

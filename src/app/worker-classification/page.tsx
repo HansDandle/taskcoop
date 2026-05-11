@@ -50,7 +50,7 @@ export default function WorkerClassificationPage() {
       </p>
 
       <h2>Questions</h2>
-      <p>Questions about member classification? Email <a href="mailto:hello@task.coop">hello@task.coop</a>.</p>
+      <p>Questions about member classification? Email <a href="mailto:hello@taskcoop.org">hello@taskcoop.org</a>.</p>
     </div>
   )
 }

@@ -126,7 +126,7 @@ export default function PrivacyPage() {
       </ul>
       <p>
         To exercise any of these rights, email us at{' '}
-        <a href="mailto:privacy@task.coop">privacy@task.coop</a>. We will respond within 30 days.
+        <a href="mailto:privacy@taskcoop.org">privacy@taskcoop.org</a>. We will respond within 30 days.
       </p>
 
       <h2>8. Children's Privacy</h2>
@@ -145,7 +145,7 @@ export default function PrivacyPage() {
 
       <h2>Contact</h2>
       <p>
-        Privacy questions or requests: <a href="mailto:privacy@task.coop">privacy@task.coop</a>
+        Privacy questions or requests: <a href="mailto:privacy@taskcoop.org">privacy@taskcoop.org</a>
       </p>
     </div>
   )

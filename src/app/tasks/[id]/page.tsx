@@ -234,7 +234,20 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         {/* Sidebar */}
         <div className="space-y-4">
           <div className="bg-white border border-stone-200 rounded-lg p-5">
-            {task.budget ? (
+            {acceptedOffer ? (
+              <div className="space-y-2">
+                {task.budget && (
+                  <div>
+                    <div className="text-xs text-stone-400 mb-0.5">Your budget</div>
+                    <div className="text-lg font-semibold text-stone-400 line-through">{formatCurrency(task.budget)}</div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-xs text-stone-500 mb-0.5">Member agreed to</div>
+                  <div className="text-2xl font-bold text-stone-900">{formatCurrency(acceptedOffer.amount)}</div>
+                </div>
+              </div>
+            ) : task.budget ? (
               <div>
                 <div className="text-xs text-stone-500 mb-1">Customer budget</div>
                 <div className="text-2xl font-bold text-stone-900">{formatCurrency(task.budget)}</div>
@@ -242,9 +255,11 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             ) : (
               <div className="text-sm text-stone-500">Open to offers</div>
             )}
-            <div className="mt-4 text-xs text-stone-400">
-              {(offers?.length ?? 0)} offer{offers?.length !== 1 ? 's' : ''} submitted
-            </div>
+            {!acceptedOffer && (
+              <div className="mt-4 text-xs text-stone-400">
+                {(offers?.length ?? 0)} offer{offers?.length !== 1 ? 's' : ''} submitted
+              </div>
+            )}
           </div>
 
           <div className="bg-white border border-stone-200 rounded-lg p-5">

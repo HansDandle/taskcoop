@@ -90,6 +90,15 @@ export async function sendWorkerMarkedDoneEmail(to: string, memberName: string, 
   `))
 }
 
+export async function sendContactEmail(from: string, subject: string, category: string, message: string) {
+  await send('support@taskcoop.org', `[${category}] ${subject}`, baseTemplate(`
+    ${p(`<strong>From:</strong> ${from}`)}
+    ${p(`<strong>Category:</strong> ${category}`)}
+    ${p(`<strong>Subject:</strong> ${subject}`)}
+    <div style="margin:12px 0;padding:12px 16px;background:#fafaf9;border-left:3px solid #e7e5e4;border-radius:4px;font-size:14px;color:#57534e;white-space:pre-wrap">${message}</div>
+  `))
+}
+
 export async function sendPaymentReleasedEmail(to: string, taskTitle: string, amount: number) {
   await send(to, `Payment released: "${taskTitle}"`, baseTemplate(`
     ${p('Your payment is on the way.')}

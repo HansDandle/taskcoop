@@ -27,6 +27,7 @@ export default function Nav({ user }: { user: User }) {
           <Link href="/tasks" className={pathname === '/tasks' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Browse Tasks</Link>
           <Link href="/how-it-works" className={pathname === '/how-it-works' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>How It Works</Link>
           <Link href="/cooperative" className={pathname === '/cooperative' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Co-op</Link>
+          <Link href="/contact" className={pathname === '/contact' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Contact</Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
@@ -64,6 +65,7 @@ export default function Nav({ user }: { user: User }) {
           <Link href="/tasks" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Browse Tasks</Link>
           <Link href="/how-it-works" className="block text-stone-700" onClick={() => setMenuOpen(false)}>How It Works</Link>
           <Link href="/cooperative" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Co-op</Link>
+          <Link href="/contact" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Contact</Link>
           {user ? (
             <>
               <Link href="/dashboard" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Dashboard</Link>
