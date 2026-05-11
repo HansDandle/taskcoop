@@ -10,11 +10,12 @@ type Slot = {
   referred_user_id: string | null
 }
 
-export default function ReferralGrid({ slots, baseUrl }: { slots: Slot[]; baseUrl: string }) {
+export default function ReferralGrid({ slots, baseUrl, firstName }: { slots: Slot[]; baseUrl: string; firstName: string }) {
   const [copied, setCopied] = useState<string | null>(null)
 
   const copy = async (code: string) => {
-    await navigator.clipboard.writeText(`${baseUrl}/signup?ref=${code}`)
+    const url = `${baseUrl}/signup?ref=${code}`
+    await navigator.clipboard.writeText(`${firstName} is inviting you to join the launch of task.coop - ${url}`)
     setCopied(code)
     setTimeout(() => setCopied(null), 2000)
   }

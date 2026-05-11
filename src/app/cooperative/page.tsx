@@ -53,8 +53,8 @@ export default function CooperativePage() {
             {[
               { phase: 'Now', label: 'MVP launch', desc: 'Platform launches, first transactions, cooperative narrative established. 5% fee locked in.' },
               { phase: 'Q3 2026', label: 'Member equity', desc: 'Active members earn equity units based on platform activity. Equity tracked transparently.' },
-              { phase: 'Q1 2027', label: 'Profit sharing', desc: 'Platform surplus distributed to members proportional to their contribution.' },
-              { phase: '2027+', label: 'Democratic governance', desc: 'Members vote on platform policies, fee structure, and major decisions through an in-platform governance system.' },
+              { phase: 'Q1 2027', label: 'Democratic governance', desc: 'Members vote on platform policies, fee structure, and major decisions through an in-platform governance system.' },
+              { phase: '2027+', label: 'Profit sharing', desc: 'Platform surplus distributed to members proportional to their contribution.' },
             ].map((item) => (
               <div key={item.phase} className="flex gap-4">
                 <div className="text-xs font-mono text-emerald-600 w-20 shrink-0 pt-0.5">{item.phase}</div>

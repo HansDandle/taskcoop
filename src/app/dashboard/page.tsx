@@ -352,7 +352,7 @@ export default async function DashboardPage({
           <p className="text-xs text-stone-400 mt-0.5">You have 25 unique invite links, 5 per category. Fill a row to earn Team Builder. Fill all 25 for Full Roster.</p>
         </div>
         <div className="px-5 py-4">
-          <ReferralGrid slots={referralSlots ?? []} baseUrl={baseUrl} />
+          <ReferralGrid slots={referralSlots ?? []} baseUrl={baseUrl} firstName={profile.name?.split(' ')[0] ?? 'A member'} />
         </div>
       </div>
 
