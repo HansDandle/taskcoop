@@ -84,7 +84,7 @@ export default function AddressPicker({ saved, defaultAddressId, defaultZip, def
             <label className="block text-xs font-medium text-stone-600 mb-1">Street address <span className="text-red-500">*</span></label>
             <input name="address_street" required placeholder="123 Main St" defaultValue={defaultStreet ?? ''} className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="col-span-1">
               <label className="block text-xs font-medium text-stone-600 mb-1">City</label>
               <input name="address_city" defaultValue={defaultCity ?? 'Austin'} className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white" />

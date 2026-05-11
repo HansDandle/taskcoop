@@ -53,7 +53,7 @@ export default function ReferralGrid({ slots, baseUrl, firstName }: { slots: Slo
                 <span className="text-xs font-medium text-stone-600">{cat.label}</span>
                 {usedInCat >= 5 && <span className="text-xs text-emerald-600 font-semibold ml-auto">Complete ✓</span>}
               </div>
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
                 {catSlots.map((slot, i) => {
                   if (!slot) return <div key={i} className="h-9 rounded bg-stone-100" />
                   if (slot.referred_user_id) {

@@ -25,7 +25,7 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
       <input type="hidden" name="avatar_url" value={avatarUrl} />
       <input type="hidden" name="portfolio_urls" value={JSON.stringify(portfolioUrls)} />
 
-      <div className="flex items-start gap-5">
+      <div className="flex flex-col sm:flex-row items-start gap-5">
         <div className="w-24 shrink-0">
           <ImageUpload
             bucket="avatars"

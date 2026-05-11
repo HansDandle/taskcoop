@@ -53,7 +53,7 @@ export default function Nav({ user }: { user: User }) {
           )}
         </div>
 
-        <button className="md:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
+        <button className="md:hidden p-3" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="w-5 h-0.5 bg-stone-700 mb-1" />
           <div className="w-5 h-0.5 bg-stone-700 mb-1" />
           <div className="w-5 h-0.5 bg-stone-700" />

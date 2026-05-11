@@ -72,7 +72,7 @@ export default function MessageThread({
         <div ref={bottomRef} />
       </div>
       {error && <div className="px-5 text-xs text-red-600">{error}</div>}
-      <div className="px-5 py-4 border-t border-stone-200 flex gap-3">
+      <div className="px-5 py-4 border-t border-stone-200 flex flex-col sm:flex-row gap-3">
         <input
           value={content}
           onChange={(e) => setContent(e.target.value)}
