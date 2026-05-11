@@ -28,25 +28,36 @@ export default function AdminUserActions({
     run(deleteUser, {})
   }
 
+  const confirmRole = (role: string, label: string) => {
+    if (!confirm(`Change this user's role to ${label}?`)) return
+    run(changeUserRole, { role })
+  }
+
+  const confirmSuspend = () => {
+    const msg = suspended ? 'Unsuspend this user?' : 'Suspend this user? They will lose access immediately.'
+    if (!confirm(msg)) return
+    run(suspendUser, { suspended: suspended ? 'false' : 'true' })
+  }
+
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1 items-center">
       {currentRole !== 'worker' && (
-        <button onClick={() => run(changeUserRole, { role: 'worker' })} disabled={isPending}
+        <button onClick={() => confirmRole('worker', 'member')} disabled={isPending}
           className="text-xs text-blue-600 hover:underline disabled:opacity-60">Make member</button>
       )}
       {currentRole !== 'customer' && (
-        <button onClick={() => run(changeUserRole, { role: 'customer' })} disabled={isPending}
+        <button onClick={() => confirmRole('customer', 'customer')} disabled={isPending}
           className="text-xs text-stone-600 hover:underline disabled:opacity-60">Make customer</button>
       )}
       {currentRole !== 'admin' && (
-        <button onClick={() => run(changeUserRole, { role: 'admin' })} disabled={isPending}
+        <button onClick={() => confirmRole('admin', 'admin')} disabled={isPending}
           className="text-xs text-purple-600 hover:underline disabled:opacity-60">Make admin</button>
       )}
 
       <span className="text-stone-200">|</span>
 
       <button
-        onClick={() => run(suspendUser, { suspended: suspended ? 'false' : 'true' })}
+        onClick={confirmSuspend}
         disabled={isPending}
         className={`text-xs hover:underline disabled:opacity-60 ${suspended ? 'text-emerald-600' : 'text-amber-600'}`}
       >

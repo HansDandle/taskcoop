@@ -40,7 +40,7 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="bg-white border-b border-stone-200">
         <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-          <div className="inline-block bg-stone-100 text-stone-600 text-xs font-semibold px-3 py-1 rounded-full mb-6 tracking-wide uppercase">
+          <div className="inline-block bg-stone-100 text-stone-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 tracking-wide uppercase">
             Austin's local services cooperative
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-stone-900 leading-tight mb-6">
@@ -130,7 +130,7 @@ export default async function HomePage() {
             { step: '03', title: 'Get it done right', desc: 'Accept an offer and pay securely through the platform. Funds release when the job is complete.' },
           ].map((item) => (
             <div key={item.step} className="relative">
-              <div className="text-4xl font-bold text-stone-100 mb-3">{item.step}</div>
+              <div className="text-4xl font-bold text-stone-300 mb-3">{item.step}</div>
               <h3 className="font-semibold text-stone-900 mb-2">{item.title}</h3>
               <p className="text-sm text-stone-500 leading-relaxed">{item.desc}</p>
             </div>
