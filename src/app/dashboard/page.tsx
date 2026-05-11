@@ -86,13 +86,14 @@ export default async function DashboardPage({
   if (profile.role === 'customer') {
     const { data: tasks } = await supabase
       .from('tasks')
-      .select('id, title, status, budget, created_at, categories(name)')
+      .select('id, title, status, budget, created_at, categories(name), worker_marked_done')
       .eq('customer_id', user.id)
       .order('created_at', { ascending: false })
       .limit(50)
 
     const open = tasks?.filter(t => t.status === 'open') ?? []
-    const active = tasks?.filter(t => ['assigned', 'in_progress'].includes(t.status)) ?? []
+    const pendingReview = tasks?.filter(t => (t as any).worker_marked_done && t.status !== 'completed') ?? []
+    const active = tasks?.filter(t => ['assigned', 'in_progress'].includes(t.status) && !(t as any).worker_marked_done) ?? []
     const needsReview = tasks?.filter(t => t.status === 'completed') ?? []
     const done = tasks?.filter(t => ['completed', 'cancelled'].includes(t.status)) ?? []
 
@@ -132,6 +133,24 @@ export default async function DashboardPage({
                   <span className="text-emerald-800 truncate">{t.title}</span>
                   <span className="shrink-0 ml-3 bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                     {offerCountByTask[t.id]} offer{offerCountByTask[t.id] !== 1 ? 's' : ''} →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {pendingReview.length > 0 && (
+          <div className="mb-6 bg-purple-50 border border-purple-200 rounded-lg px-5 py-4">
+            <p className="font-semibold text-purple-900 text-sm mb-2">
+              Your member has marked {pendingReview.length === 1 ? 'a job' : 'jobs'} as done
+            </p>
+            <div className="space-y-1">
+              {pendingReview.map(t => (
+                <Link key={t.id} href={`/tasks/${t.id}`} className="flex items-center justify-between text-sm hover:opacity-80">
+                  <span className="text-purple-800 truncate">{t.title}</span>
+                  <span className="shrink-0 ml-3 bg-purple-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    Review and release payment →
                   </span>
                 </Link>
               ))}

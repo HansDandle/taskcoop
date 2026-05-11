@@ -87,7 +87,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-4">
-        <Link href={isWorker ? '/dashboard' : '/tasks'} className="text-sm text-stone-500 hover:text-stone-700">← {isWorker ? 'Dashboard' : 'Back to tasks'}</Link>
+        <Link href="/dashboard" className="text-sm text-stone-500 hover:text-stone-700">← Back to dashboard</Link>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
@@ -103,15 +103,21 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </div>
             <h1 className="text-2xl font-bold text-stone-900">{task.title}</h1>
             <div className="mt-2">
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                task.status === 'open' ? 'bg-emerald-50 text-emerald-700' :
-                task.status === 'assigned' ? 'bg-blue-50 text-blue-700' :
-                task.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
-                task.status === 'completed' ? 'bg-stone-100 text-stone-600' :
-                'bg-red-50 text-red-600'
-              }`}>
-                {task.status.replace('_', ' ')}
-              </span>
+              {task.worker_marked_done && task.status !== 'completed' ? (
+                <span className="text-xs px-2 py-1 rounded-full font-medium bg-purple-50 text-purple-700">
+                  pending review
+                </span>
+              ) : (
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  task.status === 'open' ? 'bg-emerald-50 text-emerald-700' :
+                  task.status === 'assigned' ? 'bg-blue-50 text-blue-700' :
+                  task.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
+                  task.status === 'completed' ? 'bg-stone-100 text-stone-600' :
+                  'bg-red-50 text-red-600'
+                }`}>
+                  {task.status.replace('_', ' ')}
+                </span>
+              )}
             </div>
           </div>
 
@@ -266,8 +272,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
           {isOwner && task.worker_marked_done && task.status !== 'completed' && (
             <div className="bg-emerald-50 border border-emerald-300 rounded-lg p-4 text-sm">
-              <p className="font-semibold text-emerald-900 mb-1">🎉 The member says the job is done!</p>
-              <p className="text-emerald-700 text-xs mb-3">Review the completion photos below, then release payment when satisfied.</p>
+              <p className="font-semibold text-emerald-900 mb-1">The member has marked this job done</p>
+              <p className="text-emerald-700 text-xs mb-3">Review any completion photos below, then click the button to release payment and rate the member.</p>
             </div>
           )}
 

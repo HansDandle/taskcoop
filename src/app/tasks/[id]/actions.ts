@@ -148,8 +148,8 @@ export async function workerMarkDone(formData: FormData) {
   const { data: customer } = task ? await supabase.from('users').select('email').eq('id', task.customer_id).single() : { data: null }
   const { data: member } = await supabase.from('users').select('name').eq('id', user.id).single()
   if (customer?.email && task && member) {
-    const { sendNewMessageEmail } = await import('@/lib/email')
-    await sendNewMessageEmail(customer.email, member.name, task.title, task_id, `${member.name} has marked the job as complete and is ready for your review.`)
+    const { sendWorkerMarkedDoneEmail } = await import('@/lib/email')
+    await sendWorkerMarkedDoneEmail(customer.email, member.name, task.title, task_id)
   }
 
   revalidatePath(`/tasks/${task_id}`)

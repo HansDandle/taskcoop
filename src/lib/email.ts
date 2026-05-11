@@ -82,6 +82,14 @@ export async function sendNewMessageEmail(to: string, senderName: string, taskTi
   `))
 }
 
+export async function sendWorkerMarkedDoneEmail(to: string, memberName: string, taskTitle: string, taskId: string) {
+  await send(to, `${memberName} says the job is done`, baseTemplate(`
+    ${p(`<strong>${memberName}</strong> has marked your task <em>${taskTitle}</em> as complete.`)}
+    ${p('Review any completion photos, then release payment when you\'re satisfied. You\'ll also be prompted to leave a rating.')}
+    ${btn('Review and release payment', `${APP_URL}/tasks/${taskId}`)}
+  `))
+}
+
 export async function sendPaymentReleasedEmail(to: string, taskTitle: string, amount: number) {
   await send(to, `Payment released: "${taskTitle}"`, baseTemplate(`
     ${p('Your payment is on the way.')}
