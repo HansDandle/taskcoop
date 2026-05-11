@@ -1,7 +1,6 @@
-import { Resend } from 'resend'
-
-const FROM = 'task.coop <hello@task.coop>'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'
+const FROM_NAME = 'task.coop'
+const FROM_EMAIL = 'hello@taskcoop.org'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://taskcoop.org'
 
 function baseTemplate(body: string) {
   return `<!DOCTYPE html>
@@ -30,10 +29,21 @@ function p(text: string) {
 }
 
 async function send(to: string, subject: string, html: string) {
-  if (!process.env.RESEND_API_KEY) return
+  if (!process.env.BREVO_API_KEY) return
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({ from: FROM, to, subject, html })
+    await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: FROM_NAME, email: FROM_EMAIL },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
+    })
   } catch (err) {
     console.error('Email send failed:', err)
   }
@@ -43,24 +53,24 @@ export async function sendNewOfferEmail(to: string, taskTitle: string, taskId: s
   await send(to, `New offer on "${taskTitle}"`, baseTemplate(`
     ${p(`<strong>${memberName}</strong> submitted a <strong>$${amount}</strong> offer on your task.`)}
     ${p(`Task: <em>${taskTitle}</em>`)}
-    ${btn('Review offer →', `${APP_URL}/tasks/${taskId}`)}
+    ${btn('Review offer', `${APP_URL}/tasks/${taskId}`)}
   `))
 }
 
 export async function sendOfferAcceptedEmail(to: string, taskTitle: string, taskId: string, amount: number) {
-  await send(to, `Your offer was accepted — "${taskTitle}"`, baseTemplate(`
-    ${p('Great news — your offer was accepted!')}
+  await send(to, `Your offer was accepted: "${taskTitle}"`, baseTemplate(`
+    ${p('Great news. Your offer was accepted.')}
     ${p(`Task: <em>${taskTitle}</em><br>Amount: <strong>$${amount}</strong>`)}
     ${p('Payment will be released once the customer marks the task complete.')}
-    ${btn('View task →', `${APP_URL}/tasks/${taskId}`)}
+    ${btn('View task', `${APP_URL}/tasks/${taskId}`)}
   `))
 }
 
 export async function sendOfferRejectedEmail(to: string, taskTitle: string) {
   await send(to, `Another offer was selected for "${taskTitle}"`, baseTemplate(`
     ${p(`The customer selected another member's offer for <em>${taskTitle}</em>.`)}
-    ${p('Thanks for submitting — keep browsing for other tasks that fit your skills.')}
-    ${btn('Browse tasks →', `${APP_URL}/tasks`)}
+    ${p('Thanks for submitting. Keep browsing for other tasks that fit your skills.')}
+    ${btn('Browse tasks', `${APP_URL}/tasks`)}
   `))
 }
 
@@ -68,16 +78,16 @@ export async function sendNewMessageEmail(to: string, senderName: string, taskTi
   await send(to, `New message from ${senderName}`, baseTemplate(`
     ${p(`<strong>${senderName}</strong> sent you a message about <em>${taskTitle}</em>.`)}
     <div style="margin:12px 0;padding:12px 16px;background:#fafaf9;border-left:3px solid #e7e5e4;border-radius:4px;font-size:14px;color:#57534e;font-style:italic">"${preview.slice(0, 200)}${preview.length > 200 ? '…' : ''}"</div>
-    ${btn('Reply →', `${APP_URL}/messages/${taskId}`)}
+    ${btn('Reply', `${APP_URL}/messages/${taskId}`)}
   `))
 }
 
 export async function sendPaymentReleasedEmail(to: string, taskTitle: string, amount: number) {
-  await send(to, `Payment released — "${taskTitle}"`, baseTemplate(`
-    ${p('Your payment is on the way!')}
+  await send(to, `Payment released: "${taskTitle}"`, baseTemplate(`
+    ${p('Your payment is on the way.')}
     ${p(`Task: <em>${taskTitle}</em><br>Amount: <strong>$${(amount * 0.95).toFixed(2)}</strong> (after 5% platform fee)`)}
     ${p('Funds typically arrive in your bank account within 2–7 business days depending on your Stripe payout schedule.')}
-    ${btn('View dashboard →', `${APP_URL}/dashboard`)}
+    ${btn('View dashboard', `${APP_URL}/dashboard`)}
   `))
 }
 
@@ -86,6 +96,6 @@ export async function sendReviewReceivedEmail(to: string, reviewerName: string, 
   await send(to, `You received a ${rating}-star review`, baseTemplate(`
     ${p(`<strong>${reviewerName}</strong> left you a review for <em>${taskTitle}</em>.`)}
     <div style="margin:12px 0;font-size:20px;color:#16a34a">${stars}</div>
-    ${btn('See your profile →', `${APP_URL}/workers/me`)}
+    ${btn('See your profile', `${APP_URL}/workers/me`)}
   `))
 }
