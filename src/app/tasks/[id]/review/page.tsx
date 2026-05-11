@@ -47,13 +47,32 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
   if (existing) redirect(`/tasks/${id}`)
 
-  const { data: reviewee } = await supabase.from('users').select('name').eq('id', revieweeId).single()
+  const { data: reviewee } = await supabase.from('users').select('name, stripe_account_id').eq('id', revieweeId).single()
+  const isCustomer = profile?.role === 'customer'
+
+  let jobAmount: number | null = null
+  if (isCustomer) {
+    const { data: offer } = await supabase
+      .from('offers')
+      .select('amount')
+      .eq('task_id', id)
+      .eq('status', 'accepted')
+      .single()
+    jobAmount = offer?.amount ?? null
+  }
 
   return (
     <div className="max-w-lg mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold text-stone-900 mb-2">Leave a review</h1>
       <p className="text-stone-500 text-sm mb-8">Rate your experience with {reviewee?.name} on "{task.title}"</p>
-      <ReviewForm taskId={id} revieweeId={revieweeId} revieweeName={reviewee?.name ?? ''} />
+      <ReviewForm
+        taskId={id}
+        revieweeId={revieweeId}
+        revieweeName={reviewee?.name ?? ''}
+        isCustomer={isCustomer}
+        workerStripeReady={!!reviewee?.stripe_account_id}
+        jobAmount={jobAmount}
+      />
     </div>
   )
 }
