@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { formatDate, formatCurrency } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'Admin — Payments' }
@@ -19,6 +20,10 @@ export default async function AdminPaymentsPage({
   if (roleData !== 'admin') redirect('/')
 
   const { status } = await searchParams
+  const adminSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
 
   let query = supabase
     .from('tasks')
@@ -33,16 +38,22 @@ export default async function AdminPaymentsPage({
   // Pull accepted offer amounts for each task
   const taskIds = tasks?.map(t => t.id) ?? []
   const { data: offers } = taskIds.length > 0
-    ? await supabase
+    ? await adminSupabase
         .from('offers')
-        .select('task_id, amount, worker_id, users!worker_id(id, name)')
+        .select('task_id, amount, worker_id')
         .in('task_id', taskIds)
         .eq('status', 'accepted')
     : { data: [] }
 
-  const offerMap = Object.fromEntries((offers ?? []).map(o => [o.task_id, o]))
+  const workerIds = [...new Set((offers ?? []).map(o => o.worker_id).filter(Boolean))]
+  const { data: workers } = workerIds.length > 0
+    ? await adminSupabase.from('users').select('id, name').in('id', workerIds)
+    : { data: [] }
+  const workerMap = Object.fromEntries((workers ?? []).map(w => [w.id, w]))
 
-  const held = tasks?.filter(t => t.payment_status === 'held') ?? []
+  const offerMap = Object.fromEntries((offers ?? []).map(o => [o.task_id, { ...o, workerName: workerMap[o.worker_id]?.name }]))
+
+const held = tasks?.filter(t => t.payment_status === 'held') ?? []
   const released = tasks?.filter(t => t.payment_status === 'released') ?? []
   const heldTotal = held.reduce((sum, t) => sum + (offerMap[t.id]?.amount ?? 0), 0)
   const releasedTotal = released.reduce((sum, t) => sum + (offerMap[t.id]?.amount ?? 0), 0)
@@ -134,8 +145,8 @@ export default async function AdminPaymentsPage({
                   </td>
                   <td className="px-4 py-3">
                     {offer ? (
-                      <Link href={`/admin/users/${(offer.users as any)?.id}`} className="text-xs text-stone-600 hover:underline">
-                        {(offer.users as any)?.name}
+                      <Link href={`/admin/users/${offer.worker_id}`} className="text-xs text-stone-600 hover:underline">
+                        {offer.workerName ?? offer.worker_id}
                       </Link>
                     ) : <span className="text-xs text-stone-400">—</span>}
                   </td>
