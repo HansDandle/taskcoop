@@ -85,26 +85,34 @@ export default function TaskForm({
         <AddressPicker saved={savedAddresses} />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">Budget ($)</label>
-        <input
-          name="budget"
-          type="number"
-          min="5"
-          step="5"
-          placeholder="Leave blank to receive offers"
-          className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-      </div>
+      <details className="border border-stone-200 rounded-lg group">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-stone-700 select-none flex items-center justify-between">
+          <span>Budget & timing (optional)</span>
+          <span className="text-stone-400 group-open:rotate-180 transition-transform">▾</span>
+        </summary>
+        <div className="px-4 pb-4 space-y-4 border-t border-stone-200 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">Budget ($)</label>
+            <input
+              name="budget"
+              type="number"
+              min="5"
+              step="5"
+              placeholder="Leave blank to receive offers"
+              className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">Preferred date / time</label>
-        <input
-          name="preferred_time"
-          type="datetime-local"
-          className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">Preferred date / time</label>
+            <input
+              name="preferred_time"
+              type="datetime-local"
+              className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+        </div>
+      </details>
 
       <TaskExpectations />
 

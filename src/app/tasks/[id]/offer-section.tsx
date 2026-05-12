@@ -76,22 +76,22 @@ export default function OfferSection({
             className={`bg-white border rounded-lg p-4 ${isAccepted ? 'border-emerald-400 bg-emerald-50' : 'border-stone-200'}`}
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 {worker?.avatar_url ? (
-                  <img src={worker.avatar_url} className="w-9 h-9 rounded-full object-cover" alt="" />
+                  <img src={worker.avatar_url} className="w-9 h-9 rounded-full object-cover shrink-0" alt="" />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-stone-200 flex items-center justify-center text-sm font-bold text-stone-600">
+                  <div className="w-9 h-9 rounded-full bg-stone-200 flex items-center justify-center text-sm font-bold text-stone-600 shrink-0">
                     {worker?.name?.[0]?.toUpperCase()}
                   </div>
                 )}
-                <div>
-                  <Link href={`/workers/${worker?.id}`} className="font-medium text-stone-900 hover:underline text-sm">
+                <div className="min-w-0">
+                  <Link href={`/workers/${worker?.id}`} className="font-medium text-stone-900 hover:underline text-sm block truncate">
                     {worker?.name}
                   </Link>
                   <div className="text-xs text-stone-400">{formatRelativeDate(offer.created_at)}</div>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="font-bold text-stone-900">{formatCurrency(offer.amount)}</div>
                 {isAccepted && <div className="text-xs text-emerald-600 font-medium">Accepted</div>}
               </div>
@@ -99,11 +99,11 @@ export default function OfferSection({
             {offer.message && (
               <p className="mt-3 text-sm text-stone-600 leading-relaxed">{offer.message}</p>
             )}
-            <div className="mt-3 flex gap-3">
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               {currentUserId && (
                 <Link
                   href={`/messages/${task.id}?worker=${worker?.id}`}
-                  className="text-xs text-stone-500 hover:text-stone-700 underline"
+                  className="text-sm text-stone-500 hover:text-stone-700 underline py-1"
                 >
                   Message
                 </Link>
@@ -112,7 +112,7 @@ export default function OfferSection({
                 <button
                   onClick={() => handleAccept(offer.id)}
                   disabled={isPending}
-                  className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-60"
+                  className="ml-auto text-sm bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-60 font-medium"
                 >
                   Accept offer
                 </button>

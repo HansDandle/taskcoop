@@ -112,7 +112,7 @@ export default async function TaskDetailPage({
         {/* Main content */}
         <div className="md:col-span-2 space-y-6">
           <div>
-            <div className="flex items-center gap-2 mb-2 text-sm text-stone-500">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2 text-sm text-stone-500">
               <span>{(task.categories as any)?.name}</span>
               <span>·</span>
               <span>{task.zip_code}</span>
@@ -152,8 +152,8 @@ export default async function TaskDetailPage({
               <h2 className="font-semibold text-stone-900 mb-4">Job logistics</h2>
               <dl className="space-y-3 text-sm">
                 {task.duration_estimate && (
-                  <div className="flex gap-3">
-                    <dt className="text-stone-400 w-32 shrink-0">Duration</dt>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Duration</dt>
                     <dd className="text-stone-700">{({
                       under_1hr: 'Less than 1 hour',
                       '1_2hrs': '1–2 hours',
@@ -165,8 +165,8 @@ export default async function TaskDetailPage({
                   </div>
                 )}
                 {task.tools_situation && (
-                  <div className="flex gap-3">
-                    <dt className="text-stone-400 w-32 shrink-0">Tools & materials</dt>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Tools & materials</dt>
                     <dd className="text-stone-700">{({
                       just_show_up: 'All tools and materials on-site; just show up',
                       i_have_tools: 'Tools on-site; worker brings skills',
@@ -176,8 +176,8 @@ export default async function TaskDetailPage({
                   </div>
                 )}
                 {task.access_situation && (
-                  <div className="flex gap-3">
-                    <dt className="text-stone-400 w-32 shrink-0">Access</dt>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Access</dt>
                     <dd className="text-stone-700">{({
                       someone_home: 'Someone will be home',
                       provide_code: 'Door/gate code provided',
@@ -187,8 +187,8 @@ export default async function TaskDetailPage({
                   </div>
                 )}
                 {task.physical_requirements?.length > 0 && (
-                  <div className="flex gap-3">
-                    <dt className="text-stone-400 w-32 shrink-0">Physical</dt>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Physical</dt>
                     <dd className="flex flex-wrap gap-1">
                       {(task.physical_requirements as string[]).map(r => (
                         <span key={r} className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">{({
@@ -219,7 +219,7 @@ export default async function TaskDetailPage({
           {images && images.length > 0 && (
             <div className="bg-white border border-stone-200 rounded-lg p-5">
               <h2 className="font-semibold text-stone-900 mb-3">Photos</h2>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {images.map((img, i) => (
                   <img key={i} src={img.image_url} alt={`Task photo ${i + 1}`} className="rounded-md object-cover aspect-square w-full" />
                 ))}
@@ -230,7 +230,7 @@ export default async function TaskDetailPage({
           {(task.completion_photos as string[])?.length > 0 && (
             <div className="bg-white border border-emerald-200 rounded-lg p-5">
               <h2 className="font-semibold text-stone-900 mb-3">Completion photos</h2>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {(task.completion_photos as string[]).map((url, i) => (
                   <img key={i} src={url} alt={`Completion photo ${i + 1}`} className="rounded-md object-cover aspect-square w-full" />
                 ))}

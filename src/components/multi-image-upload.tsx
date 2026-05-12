@@ -60,7 +60,8 @@ export default function MultiImageUpload({ bucket, folder, existingUrls = [], on
             <button
               type="button"
               onClick={() => remove(url)}
-              className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Remove photo"
+              className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-7 h-7 sm:w-5 sm:h-5 text-sm flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
             >
               ×
             </button>
