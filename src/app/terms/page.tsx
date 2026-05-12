@@ -14,8 +14,11 @@ export default function TermsPage() {
       <h2>1. Acceptance of Terms</h2>
       <p>
         By creating an account or using task.coop (the "Platform"), you agree to be bound by these Terms of Service
-        ("Terms"). If you do not agree, you may not use the Platform. We may update these Terms from time to time;
-        continued use after changes are posted constitutes acceptance of the revised Terms.
+        ("Terms"). If you do not agree, you may not use the Platform. We may update these Terms from time to time.
+        For material changes, we will provide notice by email to the address registered on your account or by
+        posting a prominent notice on the Platform at least 30 days before the changes take effect. Non-material
+        changes (such as typos, clarifications, or updates to contact information) take effect upon posting.
+        Continued use after the effective date constitutes acceptance of the revised Terms.
       </p>
 
       <h2>2. Eligibility</h2>
@@ -100,7 +103,18 @@ export default function TermsPage() {
         <li>Create multiple accounts to circumvent a suspension</li>
       </ul>
 
-      <h2>11. Off-Platform Transactions</h2>
+      <h2>11. Anti-Discrimination</h2>
+      <p>
+        task.coop is committed to a community free from discrimination. You may not refuse to provide or receive
+        services, or otherwise treat any user differently, on the basis of race, color, national origin, ancestry,
+        immigration status, religion, sex, gender identity, sexual orientation, marital or family status, age,
+        disability, medical condition, military or veteran status, or any other characteristic protected under
+        applicable federal, state, or local law. Violation of this policy is grounds for immediate account
+        termination. task.coop reserves sole discretion to determine whether conduct constitutes discrimination
+        under this Section.
+      </p>
+
+      <h2>12. Off-Platform Transactions</h2>
       <p>
         Arranging or completing transactions outside of task.coop, including accepting cash or other payment
         directly from a Customer you met through the Platform, is a violation of these Terms and may result in
@@ -108,7 +122,17 @@ export default function TermsPage() {
         process.
       </p>
 
-      <h2>12. Content</h2>
+      <h2>13. Intoxication and Safety</h2>
+      <p>
+        You must not use the Platform or perform services while under the influence of alcohol, illegal drugs, or
+        any substance that impairs your judgment or ability to safely perform or receive services. Members are
+        responsible for providing a safe environment for themselves while performing services and for declining any
+        job they believe poses an unreasonable risk. Customers are responsible for providing a reasonably safe
+        environment within their home or property. If task.coop has reason to believe you have violated this
+        Section, we may suspend or terminate your account at our sole discretion.
+      </p>
+
+      <h2>14. Content</h2>
       <p>
         You are solely responsible for any content you post on the Platform (task descriptions, messages, profile
         information, photos, etc.). By posting content, you grant task.coop a non-exclusive, royalty-free license
@@ -117,7 +141,20 @@ export default function TermsPage() {
         violates these Terms or that we deem inappropriate.
       </p>
 
-      <h2>13. Disclaimer of Warranties</h2>
+      <h2>15. Assumption of Risk</h2>
+      <p>
+        task.coop is a marketplace that connects Customers and Members. Services are performed in person, often
+        inside private homes or on private property. You acknowledge and agree that:
+      </p>
+      <ul>
+        <li>task.coop does not perform background checks beyond optional ID verification, does not verify professional qualifications, and does not supervise the services performed through the Platform;</li>
+        <li>In-person service involves inherent risks, including bodily injury, property damage, theft, and exposure to illness;</li>
+        <li>You assume all risks associated with meeting, hosting, or working with other users of the Platform, whether online or offline;</li>
+        <li>You are responsible for taking reasonable precautions, including verifying identity, supervising work performed on your property, and securing valuables;</li>
+        <li>Members are responsible for maintaining appropriate liability, automobile, and other insurance for the services they offer.</li>
+      </ul>
+
+      <h2>16. Disclaimer of Warranties</h2>
       <p>
         THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND. task.coop EXPRESSLY
         DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -125,7 +162,7 @@ export default function TermsPage() {
         ERROR-FREE, OR FREE OF HARMFUL COMPONENTS.
       </p>
 
-      <h2>14. Limitation of Liability</h2>
+      <h2>17. Limitation of Liability</h2>
       <p>
         TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, task.coop AND ITS OFFICERS, DIRECTORS, AND AGENTS WILL
         NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF
@@ -135,21 +172,45 @@ export default function TermsPage() {
         THREE MONTHS PRECEDING THE CLAIM.
       </p>
 
-      <h2>15. Indemnification</h2>
+      <h2>18. Indemnification</h2>
       <p>
         You agree to indemnify and hold harmless task.coop and its officers, directors, and agents from any claims,
         damages, losses, or expenses (including reasonable attorneys' fees) arising out of your use of the Platform,
         your violation of these Terms, or your violation of any third-party rights.
       </p>
 
-      <h2>16. Governing Law and Disputes</h2>
+      <h2>19. Electronic Communications</h2>
+      <p>
+        By creating an account, you consent to receive communications from task.coop in electronic form, including
+        account notices, transaction confirmations, dispute correspondence, legal disclosures, and updates to these
+        Terms. We may communicate by email to the address on your account, SMS to the phone number on your account,
+        or in-app notification. You agree that electronic communications satisfy any legal requirement that such
+        communications be in writing. You may withdraw consent for marketing communications at any time, but consent
+        to transactional communications is required to use the Platform.
+      </p>
+
+      <h2>20. Governing Law and Disputes</h2>
       <p>
         These Terms are governed by the laws of the State of Texas, without regard to its conflict of law principles.
         Any dispute arising from these Terms or your use of the Platform will be resolved exclusively in the state
         or federal courts located in Travis County, Texas, and you consent to personal jurisdiction in those courts.
       </p>
 
-      <h2>17. Entire Agreement</h2>
+      <h2>21. Assignment</h2>
+      <p>
+        You may not assign or transfer these Terms or any of your rights or obligations under them without our prior
+        written consent. We may assign these Terms, in whole or in part, to any successor, affiliate, or acquirer of
+        our business or assets without notice or consent. Any assignment in violation of this Section is void.
+      </p>
+
+      <h2>22. Severability</h2>
+      <p>
+        If any provision of these Terms is held invalid or unenforceable by a court of competent jurisdiction, that
+        provision will be enforced to the maximum extent permissible and the remaining provisions will remain in
+        full force and effect.
+      </p>
+
+      <h2>23. Entire Agreement</h2>
       <p>
         These Terms, together with our Privacy Policy, constitute the entire agreement between you and task.coop
         regarding your use of the Platform and supersede any prior agreements.
