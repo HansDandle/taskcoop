@@ -27,12 +27,10 @@ export async function signup(formData: FormData) {
   const supabase = await createClient()
 
   const ref = formData.get('ref') as string | null
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://taskcoop.org'
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
     options: {
-      emailRedirectTo: `${appUrl}/auth/callback?next=/dashboard`,
       data: {
         full_name: formData.get('full_name') as string,
         role: formData.get('role') as string,
