@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import ProfileForm from './profile-form'
 import AddressManager from './address-manager'
 
@@ -30,6 +31,17 @@ export default async function ProfilePage() {
           <AddressManager addresses={addresses ?? []} />
         </div>
       )}
+
+      <div className="border-t border-stone-200 pt-10">
+        <h2 className="text-lg font-semibold text-stone-900 mb-1">Notifications</h2>
+        <p className="text-stone-500 text-sm mb-4">Control which emails and push notifications you receive.</p>
+        <Link
+          href="/profile/notifications"
+          className="inline-block text-sm border border-stone-300 text-stone-700 px-4 py-2 rounded-md font-medium hover:border-stone-500 transition-colors"
+        >
+          Manage notification preferences →
+        </Link>
+      </div>
     </div>
   )
 }

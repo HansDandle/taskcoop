@@ -36,7 +36,7 @@ export async function submitOffer(formData: FormData) {
   const { data: customer } = task ? await supabase.from('users').select('email').eq('id', task.customer_id).single() : { data: null }
   const { data: member } = await supabase.from('users').select('name').eq('id', user.id).single()
   if (customer?.email && task && member) {
-    await sendNewOfferEmail(customer.email, task.title, task_id, member.name, amount)
+    await sendNewOfferEmail(task.customer_id, customer.email, task.title, task_id, member.name, amount)
   }
   if (task) {
     await sendPushToUser(task.customer_id, {
@@ -44,6 +44,7 @@ export async function submitOffer(formData: FormData) {
       body: `${member?.name ?? 'A member'} sent an offer on "${task.title}"`,
       url: `/tasks/${task_id}`,
       tag: `offer-${task_id}`,
+      type: 'new_offer',
     })
   }
 
@@ -79,7 +80,7 @@ export async function acceptOffer(formData: FormData) {
   // Fetch rejected offers before updating so we can email them
   const { data: otherOffers } = await supabase
     .from('offers')
-    .select('worker_id, users!worker_id(email)')
+    .select('worker_id, users!worker_id(id, email)')
     .eq('task_id', task_id)
     .neq('id', offer_id)
     .eq('status', 'pending')
@@ -92,24 +93,26 @@ export async function acceptOffer(formData: FormData) {
   // Notify accepted member
   const { data: acceptedWorker } = await supabase.from('users').select('email').eq('id', offer.worker_id).single()
   if (acceptedWorker?.email) {
-    await sendOfferAcceptedEmail(acceptedWorker.email, task.title, task_id, offer.amount)
+    await sendOfferAcceptedEmail(offer.worker_id, acceptedWorker.email, task.title, task_id, offer.amount)
   }
   await sendPushToUser(offer.worker_id, {
     title: 'Your offer was accepted',
     body: `"${task.title}" — $${offer.amount}`,
     url: `/tasks/${task_id}`,
     tag: `accepted-${task_id}`,
+    type: 'offer_accepted',
   })
 
   // Notify rejected members
   for (const o of otherOffers ?? []) {
     const email = (o.users as any)?.email
-    if (email) await sendOfferRejectedEmail(email, task.title)
+    if (email) await sendOfferRejectedEmail(o.worker_id, email, task.title)
     await sendPushToUser(o.worker_id, {
       title: 'Another offer was selected',
       body: `The customer chose another member for "${task.title}"`,
       url: '/tasks',
       tag: `rejected-${task_id}-${o.worker_id}`,
+      type: 'offer_rejected',
     })
   }
 
@@ -170,7 +173,7 @@ export async function workerMarkDone(formData: FormData) {
   const { data: member } = await supabase.from('users').select('name').eq('id', user.id).single()
   if (customer?.email && task && member) {
     const { sendWorkerMarkedDoneEmail } = await import('@/lib/email')
-    await sendWorkerMarkedDoneEmail(customer.email, member.name, task.title, task_id)
+    await sendWorkerMarkedDoneEmail(task.customer_id, customer.email, member.name, task.title, task_id)
   }
   if (task) {
     await sendPushToUser(task.customer_id, {
@@ -178,6 +181,7 @@ export async function workerMarkDone(formData: FormData) {
       body: `${member?.name ?? 'Your member'} marked "${task.title}" as done. Review and release payment.`,
       url: `/tasks/${task_id}`,
       tag: `done-${task_id}`,
+      type: 'job_marked_done',
     })
   }
 

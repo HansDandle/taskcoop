@@ -1,5 +1,6 @@
 import webpush from 'web-push'
 import { createClient } from '@supabase/supabase-js'
+import { shouldNotify, type NotificationType } from './notification-prefs'
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY
@@ -14,6 +15,7 @@ type Payload = {
   body: string
   url?: string
   tag?: string
+  type: NotificationType
 }
 
 function adminClient() {
@@ -25,6 +27,7 @@ function adminClient() {
 
 export async function sendPushToUser(userId: string, payload: Payload) {
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) return
+  if (!(await shouldNotify(userId, 'push', payload.type))) return
 
   const supabase = adminClient()
   const { data: subs } = await supabase

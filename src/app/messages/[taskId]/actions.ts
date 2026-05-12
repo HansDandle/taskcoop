@@ -30,7 +30,7 @@ export async function sendMessage(formData: FormData) {
     supabase.from('tasks').select('title').eq('id', task_id).single(),
   ])
   if (receiver?.email && sender && task) {
-    sendNewMessageEmail(receiver.email, sender.name, task.title, task_id, content)
+    sendNewMessageEmail(receiver_id, receiver.email, sender.name, task.title, task_id, content)
   }
   if (sender && task) {
     await sendPushToUser(receiver_id, {
@@ -38,6 +38,7 @@ export async function sendMessage(formData: FormData) {
       body: content.slice(0, 140),
       url: `/messages/${task_id}`,
       tag: `msg-${task_id}`,
+      type: 'new_message',
     })
   }
 

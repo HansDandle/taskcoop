@@ -44,12 +44,13 @@ export async function releasePayment(task: {
   await supabase.from('tasks').update({ payment_status: 'released' }).eq('id', task.id)
 
   if (worker.email) {
-    await sendPaymentReleasedEmail(worker.email, task.title, offer.amount)
+    await sendPaymentReleasedEmail(offer.worker_id, worker.email, task.title, offer.amount)
   }
   await sendPushToUser(offer.worker_id, {
     title: 'Payment released 💰',
     body: `$${(offer.amount * 0.95).toFixed(2)} on its way for "${task.title}"`,
     url: '/dashboard',
     tag: `paid-${task.id}`,
+    type: 'payment_released',
   })
 }
