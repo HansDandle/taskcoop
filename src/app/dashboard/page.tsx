@@ -7,6 +7,8 @@ import { stripe } from '@/lib/stripe'
 import ReferralGrid from '@/components/referral-grid'
 import BadgeList from '@/components/badge-list'
 import { computeBadges } from '@/lib/badges'
+import InstallTile from '@/components/install-tile'
+import PushToggle from '@/components/push-toggle'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -215,6 +217,11 @@ export default async function DashboardPage({
           )}
         </div>
 
+        <div className="mt-6 space-y-3">
+          <InstallTile />
+          <PushToggle />
+        </div>
+
         <div className="mt-6 flex gap-4 text-sm">
           <Link href="/profile" className="text-stone-500 hover:text-stone-700">Edit profile →</Link>
           <Link href="/messages" className="text-stone-500 hover:text-stone-700">Messages →</Link>
@@ -404,7 +411,12 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      <div className="mt-4 flex gap-4 text-sm">
+      <div className="mt-6 space-y-3">
+        <InstallTile />
+        <PushToggle />
+      </div>
+
+      <div className="mt-6 flex gap-4 text-sm">
         <Link href="/profile" className="text-stone-500 hover:text-stone-700">Edit profile →</Link>
         <Link href={`/workers/${user.id}`} className="text-stone-500 hover:text-stone-700">View public profile →</Link>
         <Link href="/messages" className="text-stone-500 hover:text-stone-700">Messages →</Link>

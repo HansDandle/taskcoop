@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { sendNewMessageEmail } from '@/lib/email'
+import { sendPushToUser } from '@/lib/push'
 
 export async function sendMessage(formData: FormData) {
   const supabase = await createClient()
@@ -30,6 +31,14 @@ export async function sendMessage(formData: FormData) {
   ])
   if (receiver?.email && sender && task) {
     sendNewMessageEmail(receiver.email, sender.name, task.title, task_id, content)
+  }
+  if (sender && task) {
+    await sendPushToUser(receiver_id, {
+      title: `${sender.name}: ${task.title}`,
+      body: content.slice(0, 140),
+      url: `/messages/${task_id}`,
+      tag: `msg-${task_id}`,
+    })
   }
 
   return { message }

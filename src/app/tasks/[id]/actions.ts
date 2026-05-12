@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { PLATFORM_FEE_PERCENT } from '@/lib/utils'
 import { sendNewOfferEmail, sendOfferAcceptedEmail, sendOfferRejectedEmail } from '@/lib/email'
+import { sendPushToUser } from '@/lib/push'
 import { releasePayment } from '@/lib/release-funds'
 
 export async function submitOffer(formData: FormData) {
@@ -36,6 +37,14 @@ export async function submitOffer(formData: FormData) {
   const { data: member } = await supabase.from('users').select('name').eq('id', user.id).single()
   if (customer?.email && task && member) {
     await sendNewOfferEmail(customer.email, task.title, task_id, member.name, amount)
+  }
+  if (task) {
+    await sendPushToUser(task.customer_id, {
+      title: `New offer: $${amount}`,
+      body: `${member?.name ?? 'A member'} sent an offer on "${task.title}"`,
+      url: `/tasks/${task_id}`,
+      tag: `offer-${task_id}`,
+    })
   }
 
   revalidatePath(`/tasks/${task_id}`)
@@ -85,11 +94,23 @@ export async function acceptOffer(formData: FormData) {
   if (acceptedWorker?.email) {
     await sendOfferAcceptedEmail(acceptedWorker.email, task.title, task_id, offer.amount)
   }
+  await sendPushToUser(offer.worker_id, {
+    title: 'Your offer was accepted',
+    body: `"${task.title}" — $${offer.amount}`,
+    url: `/tasks/${task_id}`,
+    tag: `accepted-${task_id}`,
+  })
 
   // Notify rejected members
   for (const o of otherOffers ?? []) {
     const email = (o.users as any)?.email
     if (email) await sendOfferRejectedEmail(email, task.title)
+    await sendPushToUser(o.worker_id, {
+      title: 'Another offer was selected',
+      body: `The customer chose another member for "${task.title}"`,
+      url: '/tasks',
+      tag: `rejected-${task_id}-${o.worker_id}`,
+    })
   }
 
   // Create Stripe Checkout — funds held on platform (no transfer_data = separate charges model)
@@ -150,6 +171,14 @@ export async function workerMarkDone(formData: FormData) {
   if (customer?.email && task && member) {
     const { sendWorkerMarkedDoneEmail } = await import('@/lib/email')
     await sendWorkerMarkedDoneEmail(customer.email, member.name, task.title, task_id)
+  }
+  if (task) {
+    await sendPushToUser(task.customer_id, {
+      title: 'Job marked complete',
+      body: `${member?.name ?? 'Your member'} marked "${task.title}" as done. Review and release payment.`,
+      url: `/tasks/${task_id}`,
+      tag: `done-${task_id}`,
+    })
   }
 
   revalidatePath(`/tasks/${task_id}`)
