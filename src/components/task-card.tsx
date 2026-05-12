@@ -25,15 +25,16 @@ export default function TaskCard({ task }: { task: Task }) {
           <div className="flex items-center gap-2 mb-2">
             {cat && <span className="text-base">{cat.icon}</span>}
             <span className="text-xs text-stone-500 font-medium">{task.categories?.name}</span>
-            <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${
-              task.status === 'open' ? 'bg-emerald-50 text-emerald-700' :
-              task.status === 'assigned' ? 'bg-blue-50 text-blue-700' :
-              task.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
-              task.status === 'completed' ? 'bg-stone-100 text-stone-600' :
-              'bg-red-50 text-red-600'
-            }`}>
-              {task.status.replace('_', ' ')}
-            </span>
+            {task.status !== 'open' && (
+              <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${
+                task.status === 'assigned' ? 'bg-blue-50 text-blue-700' :
+                task.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
+                task.status === 'completed' ? 'bg-stone-100 text-stone-600' :
+                'bg-red-50 text-red-600'
+              }`}>
+                {task.status.replace('_', ' ')}
+              </span>
+            )}
           </div>
           <h3 className="font-semibold text-stone-900 leading-snug truncate">{task.title}</h3>
           <p className="text-sm text-stone-500 mt-1 line-clamp-2">{task.description}</p>

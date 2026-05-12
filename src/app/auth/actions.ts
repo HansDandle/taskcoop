@@ -55,7 +55,8 @@ export async function signup(formData: FormData) {
   // If email confirmations are disabled, user is immediately signed in
   if (signUpData?.session) {
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    const role = data.options?.data?.role
+    redirect(role === 'customer' ? '/tasks/new?welcome=1' : '/dashboard?welcome=1')
   }
 
   redirect('/signup/confirmed')

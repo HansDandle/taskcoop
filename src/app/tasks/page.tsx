@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import TaskCard from '@/components/task-card'
-import { CATEGORIES } from '@/lib/utils'
 import TaskMapLoader from '@/components/task-map-loader'
+import FilterSidebar from './filter-sidebar'
 
 export const metadata: Metadata = {
   title: 'Browse Tasks — Austin, TX',
@@ -64,61 +64,7 @@ export default async function TasksPage({
       <div className="flex flex-col md:flex-row gap-8">
         {/* Filters sidebar */}
         <aside className="md:w-56 shrink-0">
-          <form className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Search</label>
-              <input
-                name="q"
-                defaultValue={q}
-                placeholder="e.g. fence repair"
-                className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Category</label>
-              <select
-                name="category"
-                defaultValue={category ?? ''}
-                className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="">All categories</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c.slug} value={c.slug}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Budget</label>
-              <div className="flex gap-2">
-                <input name="min" defaultValue={min} placeholder="Min $" type="number" min="0" className="w-full border border-stone-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                <input name="max" defaultValue={max} placeholder="Max $" type="number" min="0" className="w-full border border-stone-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              </div>
-            </div>
-            <button type="submit" className="w-full bg-stone-900 text-white py-2 rounded-md text-sm font-medium hover:bg-stone-800 transition-colors">
-              Apply filters
-            </button>
-            {(category || q || min || max) && (
-              <Link href="/tasks" className="block text-center text-sm text-stone-500 hover:text-stone-700">
-                Clear filters
-              </Link>
-            )}
-          </form>
-
-          {/* Category quick-links */}
-          <div className="mt-8">
-            <div className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-3">Categories</div>
-            <div className="space-y-1">
-              {CATEGORIES.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/tasks?category=${c.slug}`}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors ${category === c.slug ? 'bg-emerald-50 text-emerald-700 font-medium' : 'text-stone-600 hover:bg-stone-100'}`}
-                >
-                  <span>{c.icon}</span> {c.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+          <FilterSidebar category={category} q={q} min={min} max={max} />
         </aside>
 
         {/* Task list */}

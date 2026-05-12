@@ -72,5 +72,5 @@ export async function createTask(_prev: { error: string }, formData: FormData) {
     await supabase.from('task_images').insert(imageUrls.map((url) => ({ task_id: task.id, image_url: url })))
   }
 
-  redirect(`/tasks/${task.id}`)
+  redirect(`/tasks/${task.id}?posted=1`)
 }

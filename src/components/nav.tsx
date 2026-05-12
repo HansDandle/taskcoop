@@ -12,7 +12,7 @@ type User = {
   role?: string
 } | null
 
-export default function Nav({ user }: { user: User }) {
+export default function Nav({ user, dashboardAlert }: { user: User; dashboardAlert?: boolean }) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -26,14 +26,17 @@ export default function Nav({ user }: { user: User }) {
         <nav className="hidden md:flex items-center gap-6 text-sm text-stone-600">
           <Link href="/tasks" className={pathname === '/tasks' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Browse Tasks</Link>
           <Link href="/how-it-works" className={pathname === '/how-it-works' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>How It Works</Link>
-          <Link href="/cooperative" className={pathname === '/cooperative' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Co-op</Link>
+          <Link href="/cooperative" className={pathname === '/cooperative' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>About</Link>
           <Link href="/contact" className={pathname === '/contact' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Contact</Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
-              <Link href="/dashboard" className="text-sm text-stone-600 hover:text-stone-900">Dashboard</Link>
+              <Link href="/dashboard" className="relative text-sm text-stone-600 hover:text-stone-900">
+                Dashboard
+                {dashboardAlert && <span className="absolute -top-1 -right-2 w-2 h-2 bg-red-500 rounded-full" aria-label="New activity" />}
+              </Link>
               {user.role === 'customer' && (
                 <Link href="/tasks/new" className="text-sm bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors">
                   Post a Task
@@ -64,11 +67,14 @@ export default function Nav({ user }: { user: User }) {
         <div className="md:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 text-sm">
           <Link href="/tasks" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Browse Tasks</Link>
           <Link href="/how-it-works" className="block text-stone-700" onClick={() => setMenuOpen(false)}>How It Works</Link>
-          <Link href="/cooperative" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Co-op</Link>
+          <Link href="/cooperative" className="block text-stone-700" onClick={() => setMenuOpen(false)}>About</Link>
           <Link href="/contact" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Contact</Link>
           {user ? (
             <>
-              <Link href="/dashboard" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+              <Link href="/dashboard" className="flex items-center gap-2 text-stone-700" onClick={() => setMenuOpen(false)}>
+                Dashboard
+                {dashboardAlert && <span className="w-2 h-2 bg-red-500 rounded-full" aria-label="New activity" />}
+              </Link>
               {user.role === 'customer' && (
                 <Link href="/tasks/new" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Post a Task</Link>
               )}

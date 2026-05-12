@@ -6,6 +6,8 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import OfferSection from './offer-section'
 import TaskActions from './task-actions'
 import WorkerActions from './worker-actions'
+import TaskDescription from './task-description'
+import SmartBack from '@/components/smart-back'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -15,8 +17,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: data.title, description: data.description.slice(0, 150) }
 }
 
-export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TaskDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ posted?: string }>
+}) {
   const { id } = await params
+  const { posted } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -87,8 +96,17 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-4">
-        <Link href="/dashboard" className="text-sm text-stone-500 hover:text-stone-700">← Back to dashboard</Link>
+        <SmartBack />
       </div>
+
+      {posted && isOwner && (
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4">
+          <p className="font-semibold text-emerald-900 text-sm">✅ Your task is live!</p>
+          <p className="text-emerald-700 text-xs mt-1">
+            Members in Austin can now see it and send you offers. You&apos;ll get an email as soon as the first offer comes in.
+          </p>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-3 gap-8">
         {/* Main content */}
@@ -123,7 +141,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
           <div className="bg-white border border-stone-200 rounded-lg p-5">
             <h2 className="font-semibold text-stone-900 mb-3">Task description</h2>
-            <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-wrap">{task.description}</p>
+            <TaskDescription text={task.description} />
             {task.preferred_time && (
               <p className="text-sm text-stone-500 mt-3">Preferred time: {new Date(task.preferred_time).toLocaleString()}</p>
             )}
@@ -257,7 +275,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             )}
             {!acceptedOffer && (
               <div className="mt-4 text-xs text-stone-400">
-                {(offers?.length ?? 0)} offer{offers?.length !== 1 ? 's' : ''} submitted
+                {(offers?.length ?? 0) === 0
+                  ? (isWorker ? 'Be the first to offer' : 'Members are reviewing this task')
+                  : `${offers?.length} offer${offers?.length !== 1 ? 's' : ''} submitted`}
               </div>
             )}
           </div>
@@ -272,7 +292,14 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                   {(task.users as any)?.name?.[0]?.toUpperCase()}
                 </div>
               )}
-              <div className="font-medium text-stone-900 text-sm">{(task.users as any)?.name}</div>
+              <div className="font-medium text-stone-900 text-sm">
+                {(() => {
+                  const fullName = (task.users as any)?.name ?? ''
+                  if (isOwner || isAcceptedWorker) return fullName
+                  const parts = fullName.split(' ')
+                  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : fullName
+                })()}
+              </div>
             </div>
           </div>
 

@@ -23,15 +23,45 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { data: { user: authUser } } = await supabase.auth.getUser()
 
   let profile = null
+  let dashboardAlert = false
   if (authUser) {
     const { data } = await supabase.from('users').select('id, name, role').eq('id', authUser.id).single()
     profile = data ? { ...data, email: authUser.email } : null
+
+    if (profile?.role === 'customer') {
+      // Pending offers on own open tasks, or jobs marked done awaiting review
+      const { data: ownTasks } = await supabase
+        .from('tasks')
+        .select('id, status, worker_marked_done')
+        .eq('customer_id', authUser.id)
+      const openIds = (ownTasks ?? []).filter(t => t.status === 'open').map(t => t.id)
+      const hasPendingReview = (ownTasks ?? []).some(t => t.worker_marked_done && t.status !== 'completed')
+      const hasNeedsReview = (ownTasks ?? []).some(t => t.status === 'completed')
+      let hasPendingOffer = false
+      if (openIds.length > 0) {
+        const { count } = await supabase
+          .from('offers')
+          .select('id', { count: 'exact', head: true })
+          .in('task_id', openIds)
+          .eq('status', 'pending')
+        hasPendingOffer = (count ?? 0) > 0
+      }
+      dashboardAlert = hasPendingOffer || hasPendingReview || hasNeedsReview
+    } else if (profile?.role === 'worker') {
+      // Accepted offers or completed jobs awaiting review
+      const { data: workerOffers } = await supabase
+        .from('offers')
+        .select('status, tasks(status)')
+        .eq('worker_id', authUser.id)
+        .eq('status', 'accepted')
+      dashboardAlert = (workerOffers ?? []).some(o => (o.tasks as any)?.status === 'completed')
+    }
   }
 
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">
-        <Nav user={profile} />
+        <Nav user={profile} dashboardAlert={dashboardAlert} />
         <main className="flex-1 flex flex-col">
           {children}
         </main>

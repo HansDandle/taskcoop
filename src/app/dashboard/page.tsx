@@ -62,7 +62,7 @@ function Section({ title, children, empty, cta }: { title: string; children: Rea
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stripe?: string }>
+  searchParams: Promise<{ stripe?: string; welcome?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -73,7 +73,7 @@ export default async function DashboardPage({
   if (!profile || profile.role === 'admin') redirect('/admin')
 
   // If returning from Stripe Connect onboarding, sync the account status
-  const { stripe: stripeParam } = await searchParams
+  const { stripe: stripeParam, welcome } = await searchParams
   if (stripeParam === 'connected' && profile.stripe_account_id && !profile.stripe_onboarded) {
     const account = await stripe.accounts.retrieve(profile.stripe_account_id)
     if (account.details_submitted) {
@@ -121,6 +121,17 @@ export default async function DashboardPage({
             Post a Task
           </Link>
         </div>
+
+        {tasks?.length === 0 && (
+          <div className="mb-6 bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
+            <div className="text-3xl mb-3">📋</div>
+            <h2 className="font-semibold text-stone-900 mb-1">Post your first task</h2>
+            <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Describe what you need and local members will send you offers, usually within a few hours. Free to post.</p>
+            <Link href="/tasks/new" className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
+              Post a Task
+            </Link>
+          </div>
+        )}
 
         {totalNewOffers > 0 && (
           <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4">
@@ -298,16 +309,23 @@ export default async function DashboardPage({
         </Link>
       </div>
 
+      {welcome && stripeOnboarded && (
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4">
+          <p className="font-semibold text-emerald-900 text-sm">Welcome{profile.name ? `, ${profile.name.split(' ')[0]}` : ''}! Your account is ready.</p>
+          <p className="text-emerald-700 text-xs mt-1">Browse open tasks below and send offers on ones that fit your skills.</p>
+        </div>
+      )}
+
       {!stripeOnboarded && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="font-semibold text-amber-900 text-sm">Connect your bank account to get paid</p>
-            <p className="text-xs text-amber-700 mt-1">You can browse tasks, but you&apos;ll need to set up payouts before submitting offers.</p>
-          </div>
+        <div className="mb-6 bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
+          <div className="text-3xl mb-3">💳</div>
+          <h2 className="font-semibold text-stone-900 mb-1">Set up payouts to start earning</h2>
+          <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Connect your bank account through Stripe so you can receive payment when jobs are complete. Takes about 2 minutes.</p>
           <Link href="/api/stripe/connect"
-            className="shrink-0 text-sm bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors font-medium">
+            className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
             Set up payouts →
           </Link>
+          <p className="text-xs text-stone-400 mt-4">You can browse tasks in the meantime, but you&apos;ll need this before submitting offers.</p>
         </div>
       )}
 
@@ -337,6 +355,17 @@ export default async function DashboardPage({
               )
             })}
           </Section>
+        )}
+
+        {stripeOnboarded && activeOffers.length === 0 && pendingOffers.length === 0 && pastOffers.length === 0 && (
+          <div className="bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
+            <div className="text-3xl mb-3">🔍</div>
+            <h2 className="font-semibold text-stone-900 mb-1">Find your first job</h2>
+            <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Browse open tasks posted by customers in Austin and send an offer on anything that fits your skills.</p>
+            <Link href="/tasks" className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
+              Browse open tasks
+            </Link>
+          </div>
         )}
 
         <Section

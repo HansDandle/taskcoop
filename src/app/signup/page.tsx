@@ -1,5 +1,5 @@
-import { signup } from '@/app/auth/actions'
 import Link from 'next/link'
+import SignupForm from './signup-form'
 
 export default async function SignupPage({
   searchParams,
@@ -19,55 +19,9 @@ export default async function SignupPage({
           </p>
         </div>
 
-        <form className="space-y-5" action={signup}>
-          {ref && <input type="hidden" name="ref" value={ref} />}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="full_name" className="block text-sm font-medium text-stone-700">Full name</label>
-              <input id="full_name" name="full_name" type="text" required autoComplete="name"
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500" />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-stone-700">Email</label>
-              <input id="email" name="email" type="email" required autoComplete="email"
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500" />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-stone-700">Password</label>
-              <input id="password" name="password" type="password" required autoComplete="new-password" minLength={8}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500" />
-            </div>
+        {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</div>}
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">I want to…</label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col items-center gap-2 border border-stone-300 rounded-lg p-3 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 transition-colors">
-                  <input type="radio" name="role" value="customer" defaultChecked={role !== 'worker'} className="sr-only" />
-                  <span className="text-2xl">📋</span>
-                  <span className="text-sm font-medium text-stone-800">Post Tasks</span>
-                  <span className="text-xs text-stone-500 text-center">Find local members</span>
-                </label>
-                <label className="flex flex-col items-center gap-2 border border-stone-300 rounded-lg p-3 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 transition-colors">
-                  <input type="radio" name="role" value="worker" defaultChecked={role === 'worker'} className="sr-only" />
-                  <span className="text-2xl">🔨</span>
-                  <span className="text-sm font-medium text-stone-800">Work & Earn</span>
-                  <span className="text-xs text-stone-500 text-center">Keep 95% of every job</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</div>}
-
-          <label className="flex items-start gap-2 text-sm text-stone-600 cursor-pointer">
-            <input type="checkbox" name="agreed_to_terms" required className="mt-0.5 shrink-0" />
-            <span>I agree to the <a href="/terms" className="underline hover:text-stone-900">Terms of Service</a> and <a href="/privacy" className="underline hover:text-stone-900">Privacy Policy</a></span>
-          </label>
-
-          <button type="submit" className="flex w-full justify-center rounded-md bg-emerald-600 py-2.5 px-4 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none transition-colors">
-            Create account
-          </button>
-        </form>
+        <SignupForm role={role} ref={ref} />
 
         <p className="text-center text-sm text-stone-500">
           Already have an account?{' '}

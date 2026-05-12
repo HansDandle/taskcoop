@@ -28,12 +28,16 @@ const SERVICE_GROUPS = [
 
 export default async function HomePage() {
   const supabase = await createClient()
-  const { data: recentTasks } = await supabase
-    .from('tasks')
-    .select('id, title, budget, zip_code, created_at, categories(name, slug)')
-    .eq('status', 'open')
-    .order('created_at', { ascending: false })
-    .limit(4)
+  const [{ data: recentTasks }, { data: { user } }] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('id, title, budget, zip_code, created_at, categories(name, slug)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(4),
+    supabase.auth.getUser(),
+  ])
+  const isSignedIn = !!user
 
   return (
     <div>
@@ -51,13 +55,17 @@ export default async function HomePage() {
             task.coop connects you with reliable, skilled local experts who take pride in their work.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/tasks/new" className="bg-emerald-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-emerald-700 transition-colors">
-              Post a Task
+            <Link href={isSignedIn ? '/tasks/new' : '/signup'} className="bg-emerald-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-emerald-700 transition-colors">
+              {isSignedIn ? 'Post a Task' : 'Sign up to post a task'}
             </Link>
             <Link href="/tasks" className="bg-white text-stone-700 border border-stone-300 px-8 py-3 rounded-md font-semibold hover:border-stone-500 transition-colors">
               Browse open tasks
             </Link>
           </div>
+          <p className="mt-6 text-sm text-stone-400">
+            Members keep 95% of every job. No hidden fees.
+            {!isSignedIn && <> · Free to sign up · <Link href="/login" className="text-emerald-600 hover:underline">Sign in</Link></>}
+          </p>
         </div>
       </section>
 
@@ -179,7 +187,7 @@ export default async function HomePage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/signup?role=worker" className="bg-stone-900 text-white px-8 py-3 rounded-md font-semibold hover:bg-stone-800 transition-colors">
-            Apply to join as a member
+            Join as a member
           </Link>
           <Link href="/cooperative" className="text-stone-700 border border-stone-300 px-8 py-3 rounded-md font-semibold hover:border-stone-500 transition-colors">
             How the co-op works
