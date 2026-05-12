@@ -39,5 +39,3 @@ export const CATEGORIES = [
   { name: 'Moving Help', slug: 'moving-help', icon: '📦', group: 'Moving' },
   { name: 'Junk Removal', slug: 'junk-removal', icon: '🚛', group: 'Moving' },
 ]
-
-export const PLATFORM_FEE_PERCENT = 5

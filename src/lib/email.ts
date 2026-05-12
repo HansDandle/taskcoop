@@ -1,8 +1,9 @@
 import { shouldNotify, signUnsubscribeToken, type NotificationType } from './notification-prefs'
+import { PLATFORM_FEE_PERCENT, WORKER_PAYOUT_RATIO } from './stripe'
+import { APP_URL } from './urls'
 
 const FROM_NAME = 'task.coop'
 const FROM_EMAIL = 'hello@taskcoop.org'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://taskcoop.org'
 
 function footer(userId: string | null, type: NotificationType | null) {
   if (!userId || !type) {
@@ -135,7 +136,7 @@ export async function sendContactEmail(from: string, subject: string, category: 
 export async function sendPaymentReleasedEmail(userId: string, to: string, taskTitle: string, amount: number) {
   await sendTransactional(userId, to, 'payment_released', `Payment released: "${taskTitle}"`, baseTemplate(`
     ${p('Your payment is on the way.')}
-    ${p(`Task: <em>${taskTitle}</em><br>Amount: <strong>$${(amount * 0.95).toFixed(2)}</strong> (after 5% platform fee)`)}
+    ${p(`Task: <em>${taskTitle}</em><br>Amount: <strong>$${(amount * WORKER_PAYOUT_RATIO).toFixed(2)}</strong> (after ${PLATFORM_FEE_PERCENT}% platform fee)`)}
     ${p('Funds typically arrive in your bank account within 2–7 business days depending on your Stripe payout schedule.')}
     ${btn('View dashboard', `${APP_URL}/dashboard`)}
   `, userId, 'payment_released'))

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatRelativeDate } from '@/lib/utils'
 import { stripe } from '@/lib/stripe'
+import { APP_URL } from '@/lib/urls'
 import ReferralGrid from '@/components/referral-grid'
 import BadgeList from '@/components/badge-list'
 import { computeBadges } from '@/lib/badges'
@@ -74,11 +75,13 @@ export default async function DashboardPage({
 
   if (!profile || profile.role === 'admin') redirect('/admin')
 
-  // If returning from Stripe Connect onboarding, sync the account status
+  // If returning from Stripe Connect onboarding, sync the account status.
+  // charges_enabled is the canonical signal that the connected account can receive payments,
+  // matching what the account.updated webhook keys off of.
   const { stripe: stripeParam, welcome } = await searchParams
   if (stripeParam === 'connected' && profile.stripe_account_id && !profile.stripe_onboarded) {
     const account = await stripe.accounts.retrieve(profile.stripe_account_id)
-    if (account.details_submitted) {
+    if (account.charges_enabled) {
       await supabase.from('users').update({ stripe_onboarded: true }).eq('id', user.id)
       profile.stripe_onboarded = true
     }
@@ -258,10 +261,6 @@ export default async function DashboardPage({
     referralSlots = fresh ?? []
   }
 
-  const usedSlots = referralSlots.filter(s => s.referred_user_id)
-  const totalQualified = usedSlots.length
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'
-
   const activeOffers = offers?.filter(o => o.status === 'accepted' && ['assigned', 'in_progress'].includes((o.tasks as any)?.status)) ?? []
   const needsReviewOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
   const pendingOffers = offers?.filter(o => o.status === 'pending') ?? []
@@ -407,7 +406,7 @@ export default async function DashboardPage({
           <p className="text-xs text-stone-400 mt-0.5">You have 25 unique invite links, 5 per category. Fill a row to earn Team Builder. Fill all 25 for Full Roster.</p>
         </div>
         <div className="px-5 py-4">
-          <ReferralGrid slots={referralSlots ?? []} baseUrl={baseUrl} firstName={profile.name?.split(' ')[0] ?? 'A member'} />
+          <ReferralGrid slots={referralSlots ?? []} baseUrl={APP_URL} firstName={profile.name?.split(' ')[0] ?? 'A member'} />
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
+import { APP_URL } from '@/lib/urls'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -35,7 +36,6 @@ export async function POST(req: NextRequest) {
   }
 
   const amountCents = Math.round(amount * 100)
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
       transfer_data: { destination: worker.stripe_account_id },
     },
     mode: 'payment',
-    success_url: `${origin}/tasks/${taskId}?tip=sent`,
-    cancel_url: `${origin}/tasks/${taskId}`,
+    success_url: `${APP_URL}/tasks/${taskId}?tip=sent`,
+    cancel_url: `${APP_URL}/tasks/${taskId}`,
   })
 
   return Response.json({ url: session.url })

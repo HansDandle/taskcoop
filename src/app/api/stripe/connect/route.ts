@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
+import { APP_URL } from '@/lib/urls'
 
 export async function GET(_req: NextRequest) {
   const supabase = await createClient()
@@ -16,11 +17,10 @@ export async function GET(_req: NextRequest) {
     await supabase.from('users').update({ stripe_account_id: accountId }).eq('id', user.id)
   }
 
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   const link = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: `${origin}/api/stripe/connect`,
-    return_url: `${origin}/dashboard?stripe=connected`,
+    refresh_url: `${APP_URL}/api/stripe/connect`,
+    return_url: `${APP_URL}/dashboard?stripe=connected`,
     type: 'account_onboarding',
   })
 

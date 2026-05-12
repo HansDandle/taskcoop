@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
-import { PLATFORM_FEE_PERCENT } from '@/lib/utils'
+import { APP_URL } from '@/lib/urls'
 import { sendNewOfferEmail, sendOfferAcceptedEmail, sendOfferRejectedEmail } from '@/lib/email'
 import { sendPushToUser } from '@/lib/push'
 import { releasePayment } from '@/lib/release-funds'
@@ -118,7 +118,6 @@ export async function acceptOffer(formData: FormData) {
 
   // Create Stripe Checkout — funds held on platform (no transfer_data = separate charges model)
   const amountCents = Math.round(offer.amount * 100)
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -131,8 +130,8 @@ export async function acceptOffer(formData: FormData) {
       quantity: 1,
     }],
     mode: 'payment',
-    success_url: `${origin}/tasks/${task_id}?payment=success`,
-    cancel_url: `${origin}/tasks/${task_id}`,
+    success_url: `${APP_URL}/tasks/${task_id}?payment=success`,
+    cancel_url: `${APP_URL}/tasks/${task_id}`,
     metadata: {
       task_id,
       offer_id,

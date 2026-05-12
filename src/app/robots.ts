@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next'
+import { APP_URL } from '@/lib/urls'
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://task.coop'
   return {
     rules: { userAgent: '*', allow: '/', disallow: ['/admin/', '/api/', '/dashboard', '/profile', '/messages/'] },
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: `${APP_URL}/sitemap.xml`,
   }
 }

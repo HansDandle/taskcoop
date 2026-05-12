@@ -61,8 +61,9 @@ Core marketplace
 Offer/bidding
 
 Workers submit offers inline on the task detail page
-Customer accepts → task goes assigned
-PayButton → Stripe Checkout for escrowed payment
+Customer accepts → server action creates a Stripe Checkout Session and redirects the customer
+After successful payment, the `checkout.session.completed` webhook flips the task to `assigned` with `payment_status='held'` and `funds_release_at = now + 5 days`
+Funds are transferred to the worker (minus 5% platform fee) when the customer marks the job complete, or automatically after 5 days via `/api/cron/release-funds`
 Messaging
 
 /messages/[taskId] — Real-time-style thread between customer and worker
@@ -73,9 +74,11 @@ User pages
 /workers/[id] — Public worker profile with reviews and star ratings
 Payments
 
-/api/stripe/checkout — Creates Checkout Session with platform fee (5%) + destination charge
-/api/stripe/connect — Stripe Connect onboarding for workers
+Server action `acceptOffer` in `src/app/tasks/[id]/actions.ts` — creates Checkout Session (separate-charges model; funds held on platform)
+/api/stripe/tip — One-off tips, 100% to worker via destination charge
+/api/stripe/connect — Stripe Connect Express onboarding for workers
 /api/stripe/webhook — Updates task status on payment completion (uses service role key to bypass RLS)
+/api/cron/release-funds — Authenticated by `CRON_SECRET`; transfers held funds to workers when the hold expires
 Admin
 
 /admin — Stats dashboard + recent users/tasks

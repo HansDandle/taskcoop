@@ -58,7 +58,12 @@ export async function shouldNotify(userId: string, channel: Channel, type: Notif
 // ──────────────────────────────────────────────────────────────
 
 function secret() {
-  return process.env.NOTIFICATION_TOKEN_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? 'dev-only-secret'
+  const s = process.env.NOTIFICATION_TOKEN_SECRET
+  if (s) return s
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('NOTIFICATION_TOKEN_SECRET is required in production')
+  }
+  return 'dev-only-secret'
 }
 
 export function signUnsubscribeToken(userId: string, type: NotificationType | 'all'): string {

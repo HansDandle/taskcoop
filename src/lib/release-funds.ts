@@ -1,6 +1,5 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
-import { stripe } from './stripe'
-import { PLATFORM_FEE_PERCENT } from './utils'
+import { stripe, PLATFORM_FEE_PERCENT, WORKER_PAYOUT_RATIO } from './stripe'
 import { sendPaymentReleasedEmail } from './email'
 import { sendPushToUser } from './push'
 
@@ -48,7 +47,7 @@ export async function releasePayment(task: {
   }
   await sendPushToUser(offer.worker_id, {
     title: 'Payment released 💰',
-    body: `$${(offer.amount * 0.95).toFixed(2)} on its way for "${task.title}"`,
+    body: `$${(offer.amount * WORKER_PAYOUT_RATIO).toFixed(2)} on its way for "${task.title}"`,
     url: '/dashboard',
     tag: `paid-${task.id}`,
     type: 'payment_released',
