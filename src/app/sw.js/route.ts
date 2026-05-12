@@ -1,5 +1,14 @@
-// task.coop service worker — offline fallback + web push
-const CACHE_VERSION = 'taskcoop-v2'
+import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-static'
+
+const CACHE_VERSION =
+  process.env.VERCEL_GIT_COMMIT_SHA ??
+  process.env.NEXT_PUBLIC_BUILD_ID ??
+  `dev-${Date.now()}`
+
+const SW_BODY = `// task.coop service worker — offline fallback + web push
+const CACHE_VERSION = 'taskcoop-${CACHE_VERSION}'
 const OFFLINE_URL = '/offline'
 const STATIC_ASSETS = [
   '/offline',
@@ -42,10 +51,6 @@ self.addEventListener('fetch', (event) => {
   }
 })
 
-// ──────────────────────────────────────────────────────────────
-// Web Push
-// ──────────────────────────────────────────────────────────────
-
 self.addEventListener('push', (event) => {
   let data = { title: 'task.coop', body: 'You have a new notification', url: '/dashboard' }
   try {
@@ -69,17 +74,26 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      // Focus an existing window if one is open
       for (const client of clients) {
         if ('focus' in client) {
           client.navigate(target)
           return client.focus()
         }
       }
-      // Otherwise open a new window
       if (self.clients.openWindow) {
         return self.clients.openWindow(target)
       }
     }),
   )
 })
+`
+
+export function GET() {
+  return new NextResponse(SW_BODY, {
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8',
+      'Service-Worker-Allowed': '/',
+      'Cache-Control': 'public, max-age=0, must-revalidate',
+    },
+  })
+}

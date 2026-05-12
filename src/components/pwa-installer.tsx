@@ -14,9 +14,18 @@ export default function PWAInstaller() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // Register service worker
+    // Register service worker and check for updates
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {})
+      navigator.serviceWorker.register('/sw.js').then((reg) => {
+        reg.update().catch(() => {})
+        // Reload once when a new SW takes control
+        let refreshing = false
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return
+          refreshing = true
+          window.location.reload()
+        })
+      }).catch(() => {})
     }
 
     // Don't show again if previously dismissed within 30 days
