@@ -65,7 +65,7 @@ export default function CooperativePage() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-stone-400 mt-6 italic">
+          <p className="text-sm text-stone-500 mt-6 italic">
             Roadmap dates are targets, not guarantees. Governance structure subject to legal review and member input.
           </p>
         </section>

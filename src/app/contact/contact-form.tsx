@@ -43,8 +43,9 @@ export default function ContactForm({ defaultEmail }: { defaultEmail?: string })
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Your email</label>
+        <label htmlFor="contact-email" className="block text-sm font-medium text-stone-700 mb-1.5">Your email</label>
         <input
+          id="contact-email"
           name="email"
           type="email"
           required
@@ -55,8 +56,9 @@ export default function ContactForm({ defaultEmail }: { defaultEmail?: string })
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Category</label>
+        <label htmlFor="contact-category" className="block text-sm font-medium text-stone-700 mb-1.5">Category</label>
         <select
+          id="contact-category"
           name="category"
           required
           className="w-full border border-stone-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
@@ -67,8 +69,9 @@ export default function ContactForm({ defaultEmail }: { defaultEmail?: string })
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Subject</label>
+        <label htmlFor="contact-subject" className="block text-sm font-medium text-stone-700 mb-1.5">Subject</label>
         <input
+          id="contact-subject"
           name="subject"
           type="text"
           required
@@ -79,8 +82,9 @@ export default function ContactForm({ defaultEmail }: { defaultEmail?: string })
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Message</label>
+        <label htmlFor="contact-message" className="block text-sm font-medium text-stone-700 mb-1.5">Message</label>
         <textarea
+          id="contact-message"
           name="message"
           required
           rows={6}

@@ -63,7 +63,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex items-center gap-3 mb-8">
         <Link href="/admin/users" className="text-sm text-stone-500 hover:text-stone-700">← Users</Link>
-        <span className="text-stone-300">/</span>
+        <span className="text-stone-300" aria-hidden="true">/</span>
         <h1 className="text-xl font-bold text-stone-900">{profile.name}</h1>
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
           profile.role === 'worker' ? 'bg-blue-50 text-blue-700' :
@@ -88,7 +88,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               )}
               <div>
                 <div className="font-semibold text-stone-900">{profile.name}</div>
-                <div className="text-xs text-stone-400">Joined {formatDate(profile.created_at)}</div>
+                <div className="text-xs text-stone-500">Joined {formatDate(profile.created_at)}</div>
               </div>
             </div>
             <dl className="space-y-2 text-sm">
@@ -173,13 +173,13 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 <h2 className="font-semibold text-stone-900">Tasks ({tasks?.length ?? 0})</h2>
               </div>
               <div className="divide-y divide-stone-100">
-                {!tasks?.length && <div className="px-5 py-4 text-sm text-stone-400">No tasks yet.</div>}
+                {!tasks?.length && <div className="px-5 py-4 text-sm text-stone-500">No tasks yet.</div>}
                 {tasks?.map(t => (
                   <Link key={t.id} href={`/tasks/${t.id}`} target="_blank"
                     className="flex items-center justify-between px-5 py-3 hover:bg-stone-50 transition-colors">
                     <div>
                       <div className="text-sm font-medium text-stone-900">{t.title}</div>
-                      <div className="text-xs text-stone-400">{formatRelativeDate(t.created_at)}</div>
+                      <div className="text-xs text-stone-500">{formatRelativeDate(t.created_at)}</div>
                     </div>
                     <div className="flex items-center gap-2">
                       {t.budget && <span className="text-xs text-stone-500">{formatCurrency(t.budget)}</span>}
@@ -203,7 +203,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 <h2 className="font-semibold text-stone-900">Offers ({offers?.length ?? 0})</h2>
               </div>
               <div className="divide-y divide-stone-100">
-                {!offers?.length && <div className="px-5 py-4 text-sm text-stone-400">No offers yet.</div>}
+                {!offers?.length && <div className="px-5 py-4 text-sm text-stone-500">No offers yet.</div>}
                 {offers?.map(o => (
                   <Link key={o.id} href={`/tasks/${(o.tasks as any)?.id}`} target="_blank"
                     className="flex items-center justify-between px-5 py-3 hover:bg-stone-50 transition-colors">
@@ -236,7 +236,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                   <div key={r.id} className="px-5 py-3">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-amber-500 text-sm">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
-                      <span className="text-xs text-stone-400">by {(r.users as any)?.name} · {formatRelativeDate(r.created_at)}</span>
+                      <span className="text-xs text-stone-500">by {(r.users as any)?.name} · {formatRelativeDate(r.created_at)}</span>
                     </div>
                     {r.comment && <p className="text-sm text-stone-600">{r.comment}</p>}
                   </div>

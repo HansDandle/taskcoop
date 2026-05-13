@@ -64,13 +64,13 @@ export default function SignupForm({ role, ref: refCode }: { role?: string; ref?
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col items-center gap-2 border border-stone-300 rounded-lg p-3 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 transition-colors">
               <input type="radio" name="role" value="customer" defaultChecked={role !== 'worker'} className="sr-only" />
-              <span className="text-2xl">📋</span>
+              <span className="text-2xl" aria-hidden="true">📋</span>
               <span className="text-sm font-medium text-stone-800">Post Tasks</span>
               <span className="text-xs text-stone-500 text-center">Find local members</span>
             </label>
             <label className="flex flex-col items-center gap-2 border border-stone-300 rounded-lg p-3 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 transition-colors">
               <input type="radio" name="role" value="worker" defaultChecked={role === 'worker'} className="sr-only" />
-              <span className="text-2xl">🔨</span>
+              <span className="text-2xl" aria-hidden="true">🔨</span>
               <span className="text-sm font-medium text-stone-800">Work & Earn</span>
               <span className="text-xs text-stone-500 text-center">Keep 95% of every job</span>
             </label>

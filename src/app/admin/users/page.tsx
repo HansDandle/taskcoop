@@ -75,7 +75,7 @@ export default async function AdminUsersPage({
             }`}
           >
             {tab.label}
-            <span className="ml-1.5 text-xs text-stone-400">
+            <span className="ml-1.5 text-xs text-stone-500">
               {tab.value === '' ? counts.all :
                tab.value === 'customer' ? counts.customer :
                tab.value === 'worker' ? counts.worker :
@@ -107,7 +107,7 @@ export default async function AdminUsersPage({
           </thead>
           <tbody className="divide-y divide-stone-100">
             {!users?.length && (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-stone-400">No users found.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-8 text-center text-stone-500">No users found.</td></tr>
             )}
             {users?.map((u) => (
               <tr key={u.id} className={`hover:bg-stone-50 ${u.suspended ? 'opacity-60' : ''}`}>
@@ -117,9 +117,9 @@ export default async function AdminUsersPage({
                       <span className="font-medium text-stone-900 hover:underline">{u.name}</span>
                       {u.id_verified && <span className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">✓ ID</span>}
                       {u.id_verification_status === 'pending' && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">ID pending</span>}
-                      {u.admin_notes && <span className="text-xs text-stone-400" title={u.admin_notes}>📝</span>}
+                      {u.admin_notes && <span className="text-xs text-stone-400" title={u.admin_notes} aria-label="Has admin notes">📝</span>}
                     </div>
-                    {u.bio && <div className="text-xs text-stone-400 truncate max-w-xs mt-0.5">{u.bio}</div>}
+                    {u.bio && <div className="text-xs text-stone-500 truncate max-w-xs mt-0.5">{u.bio}</div>}
                   </Link>
                 </td>
                 <td className="px-4 py-3">
@@ -132,7 +132,7 @@ export default async function AdminUsersPage({
                 <td className="px-4 py-3">
                   {u.suspended
                     ? <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-medium">Suspended</span>
-                    : <span className="text-xs text-stone-400">Active</span>}
+                    : <span className="text-xs text-stone-500">Active</span>}
                 </td>
                 <td className="px-4 py-3 text-stone-500 text-xs">{formatDate(u.created_at)}</td>
                 <td className="px-4 py-3">

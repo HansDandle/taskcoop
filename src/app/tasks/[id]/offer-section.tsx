@@ -64,7 +64,7 @@ export default function OfferSection({
       <h2 className="font-semibold text-stone-900">Offers ({offers.length})</h2>
 
       {offers.length === 0 && (
-        <div className="text-sm text-stone-400 py-4">No offers yet.</div>
+        <div className="text-sm text-stone-500 py-4">No offers yet.</div>
       )}
 
       {offers.map((offer) => {
@@ -88,7 +88,7 @@ export default function OfferSection({
                   <Link href={`/workers/${worker?.id}`} className="font-medium text-stone-900 hover:underline text-sm block truncate">
                     {worker?.name}
                   </Link>
-                  <div className="text-xs text-stone-400">{formatRelativeDate(offer.created_at)}</div>
+                  <div className="text-xs text-stone-500">{formatRelativeDate(offer.created_at)}</div>
                 </div>
               </div>
               <div className="text-right shrink-0">
@@ -144,8 +144,9 @@ export default function OfferSection({
           <h3 className="font-semibold text-stone-900 mb-4">Submit an offer</h3>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-stone-600 mb-1">Your price ($)</label>
+              <label htmlFor="offer-amount" className="block text-sm font-medium text-stone-600 mb-1">Your price ($)</label>
               <input
+                id="offer-amount"
                 type="number"
                 min="5"
                 step="5"
@@ -156,8 +157,9 @@ export default function OfferSection({
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-600 mb-1">Message (optional)</label>
+              <label htmlFor="offer-message" className="block text-sm font-medium text-stone-600 mb-1">Message (optional)</label>
               <textarea
+                id="offer-message"
                 rows={3}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -178,7 +180,7 @@ export default function OfferSection({
 
       {isWorker && hasOffered && task.status === 'open' && (() => {
         const myOffer = offers.find(o => o.users?.id === currentUserId && o.status === 'pending')
-        if (!myOffer) return <div className="text-sm text-stone-400 py-2">You&apos;ve submitted an offer on this task.</div>
+        if (!myOffer) return <div className="text-sm text-stone-500 py-2">You&apos;ve submitted an offer on this task.</div>
         return (
           <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 flex items-center justify-between gap-4">
             <div className="text-sm text-stone-600">

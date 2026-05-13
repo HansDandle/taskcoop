@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
+import ServiceCarousel from '@/components/service-carousel'
 
 const SERVICE_GROUPS = [
   {
@@ -24,6 +25,16 @@ const SERVICE_GROUPS = [
     icon: '📦',
     services: ['Local moving help', 'Junk removal', 'Donation runs', 'Loading & unloading'],
   },
+  {
+    label: 'Pets',
+    icon: '🐾',
+    services: ['Dog walking', 'Pet sitting', 'Boarding', 'Grooming', 'Drop-in visits'],
+  },
+  {
+    label: 'Notary & Process Server',
+    icon: '⚖️',
+    services: ['Mobile notary', 'Loan signings', 'Process serving', 'Apostille assistance'],
+  },
 ]
 
 export default async function HomePage() {
@@ -38,6 +49,10 @@ export default async function HomePage() {
     supabase.auth.getUser(),
   ])
   const isSignedIn = !!user
+  const { data: profile } = user
+    ? await supabase.from('users').select('role').eq('id', user.id).single()
+    : { data: null }
+  const isWorker = profile?.role === 'worker'
 
   return (
     <div>
@@ -55,9 +70,11 @@ export default async function HomePage() {
             task.coop connects you with reliable, skilled local experts who take pride in their work.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href={isSignedIn ? '/tasks/new' : '/signup'} className="bg-emerald-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-emerald-700 transition-colors">
-              {isSignedIn ? 'Post a Task' : 'Sign up to post a task'}
-            </Link>
+            {!isWorker && (
+              <Link href={isSignedIn ? '/tasks/new' : '/signup'} className="bg-emerald-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-emerald-700 transition-colors">
+                {isSignedIn ? 'Post a Task' : 'Sign up to post a task'}
+              </Link>
+            )}
             <Link href="/tasks" className="bg-white text-stone-700 border border-stone-300 px-8 py-3 rounded-md font-semibold hover:border-stone-500 transition-colors">
               Browse open tasks
             </Link>
@@ -73,30 +90,7 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-4 py-16">
         <h2 className="text-2xl font-bold text-stone-900 mb-2">What we help with</h2>
         <p className="text-stone-600 text-base mb-10">Skilled members available across a wide range of household and technical services.</p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {SERVICE_GROUPS.map((group) => (
-            <div
-              key={group.label}
-              className={`rounded-lg border p-5 ${group.highlight ? 'border-emerald-200 bg-emerald-50/50' : 'border-stone-200 bg-white'}`}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">{group.icon}</span>
-                <h3 className={`font-semibold text-sm ${group.highlight ? 'text-emerald-800' : 'text-stone-800'}`}>{group.label}</h3>
-                {group.highlight && (
-                  <span className="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Popular</span>
-                )}
-              </div>
-              <ul className="space-y-1.5">
-                {group.services.map((s) => (
-                  <li key={s} className="text-sm text-stone-600 flex items-start gap-1.5">
-                    <span className="text-stone-400 mt-0.5" aria-hidden="true">–</span>
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        <ServiceCarousel groups={SERVICE_GROUPS} />
         <div className="mt-8 flex flex-wrap gap-2">
           {CATEGORIES.map((cat) => (
             <Link

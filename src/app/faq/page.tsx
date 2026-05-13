@@ -60,7 +60,7 @@ export default function FAQPage() {
           <details key={faq.q} className="group py-5">
             <summary className="flex cursor-pointer items-start justify-between font-semibold text-stone-900 gap-4 list-none">
               <span>{faq.q}</span>
-              <span className="text-stone-400 group-open:rotate-180 transition-transform mt-0.5">▼</span>
+              <span className="text-stone-400 group-open:rotate-180 transition-transform mt-0.5" aria-hidden="true">▼</span>
             </summary>
             <p className="mt-4 text-stone-500 leading-relaxed text-sm">{faq.a}</p>
           </details>

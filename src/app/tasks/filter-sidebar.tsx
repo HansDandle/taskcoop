@@ -48,8 +48,9 @@ export default function FilterSidebar({
     <div className={isPending ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
       <div className="space-y-5">
         <div>
-          <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Search</label>
+          <label htmlFor="filter-search" className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Search</label>
           <input
+            id="filter-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="e.g. fence repair"
@@ -57,22 +58,26 @@ export default function FilterSidebar({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Budget</label>
-          <div className="flex gap-2">
+          <div className="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2" id="budget-label">Budget</div>
+          <div className="flex gap-2" role="group" aria-labelledby="budget-label">
             <input
+              id="budget-min"
               defaultValue={min}
               onBlur={(e) => update('min', e.target.value)}
               placeholder="Min $"
               type="number"
               min="0"
+              aria-label="Minimum budget"
               className="w-full border border-stone-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <input
+              id="budget-max"
               defaultValue={max}
               onBlur={(e) => update('max', e.target.value)}
               placeholder="Max $"
               type="number"
               min="0"
+              aria-label="Maximum budget"
               className="w-full border border-stone-300 rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>

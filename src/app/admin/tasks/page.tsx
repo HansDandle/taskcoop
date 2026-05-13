@@ -58,7 +58,7 @@ export default async function AdminTasksPage({
             }`}
           >
             {s || 'All'}
-            <span className="ml-1.5 text-xs text-stone-400">{counts[s || 'all']}</span>
+            <span className="ml-1.5 text-xs text-stone-500">{counts[s || 'all']}</span>
           </Link>
         ))}
       </div>
@@ -87,13 +87,13 @@ export default async function AdminTasksPage({
           </thead>
           <tbody className="divide-y divide-stone-100">
             {!tasks?.length && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-stone-400">No tasks found.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-stone-500">No tasks found.</td></tr>
             )}
             {tasks?.map((t) => (
               <tr key={t.id} className="hover:bg-stone-50">
                 <td className="px-4 py-3">
                   <Link href={`/tasks/${t.id}`} target="_blank" className="font-medium text-stone-900 hover:underline">{t.title}</Link>
-                  <div className="text-xs text-stone-400">{(t.categories as any)?.name} · {t.zip_code}</div>
+                  <div className="text-xs text-stone-500">{(t.categories as any)?.name} · {t.zip_code}</div>
                 </td>
                 <td className="px-4 py-3">
                   <Link href={`/admin/users/${(t.users as any)?.id}`} className="text-stone-600 hover:underline text-xs">

@@ -91,7 +91,7 @@ export default function TaskForm({
       <details className="border border-stone-200 rounded-lg group">
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-stone-700 select-none flex items-center justify-between">
           <span>Budget & timing (optional)</span>
-          <span className="text-stone-400 group-open:rotate-180 transition-transform">▾</span>
+          <span className="text-stone-400 group-open:rotate-180 transition-transform" aria-hidden="true">▾</span>
         </summary>
         <div className="px-4 pb-4 space-y-4 border-t border-stone-200 pt-4">
           <div>

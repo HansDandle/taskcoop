@@ -103,9 +103,9 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
                 <span className="text-sm text-stone-500">{avgRating.toFixed(1)} ({reviews?.length} reviews)</span>
               </div>
             )}
-            <div className="text-xs text-stone-400">Member since {formatDate(worker.created_at)}</div>
+            <div className="text-sm text-stone-500">Member since {formatDate(worker.created_at)}</div>
             {completedJobCount > 0 && (
-              <div className="text-xs text-stone-400">{completedJobCount} job{completedJobCount !== 1 ? 's' : ''} completed</div>
+              <div className="text-sm text-stone-500">{completedJobCount} job{completedJobCount !== 1 ? 's' : ''} completed</div>
             )}
           </div>
         </div>
@@ -147,14 +147,14 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
       <div>
         <h2 className="font-semibold text-stone-900 mb-4">Reviews ({reviews?.length ?? 0})</h2>
         {!reviews || reviews.length === 0 ? (
-          <p className="text-stone-400 text-sm">No reviews yet.</p>
+          <p className="text-stone-500 text-sm">No reviews yet.</p>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
               <div key={review.id} className="bg-white border border-stone-200 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <StarRating rating={review.rating} />
-                  <span className="text-xs text-stone-400">{formatDate(review.created_at)}</span>
+                  <span className="text-xs text-stone-500">{formatDate(review.created_at)}</span>
                   <span className="text-xs text-stone-500 ml-auto">by {(review.users as any)?.name}</span>
                 </div>
                 {review.comment && <p className="text-sm text-stone-600">{review.comment}</p>}

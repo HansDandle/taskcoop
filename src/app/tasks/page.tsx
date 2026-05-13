@@ -78,8 +78,8 @@ export default async function TasksPage({
             <TaskMapLoader tasks={tasks.map(t => ({ id: t.id, title: t.title, budget: t.budget ?? null, zip_code: t.zip_code ?? null, categories: t.categories as any }))} />
           )}
           {!tasks || tasks.length === 0 ? (
-            <div className="text-center py-20 text-stone-400">
-              <div className="text-4xl mb-3">📋</div>
+            <div className="text-center py-20 text-stone-600">
+              <div className="text-4xl mb-3" aria-hidden="true">📋</div>
               <div className="font-medium">No tasks found</div>
               <div className="text-sm mt-1">Try different filters{!isWorker && <> or <Link href="/tasks/new" className="text-emerald-600 hover:underline">post one yourself</Link></>}.</div>
             </div>

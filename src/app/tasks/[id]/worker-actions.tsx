@@ -78,7 +78,7 @@ export default function WorkerActions({
           >
             Mark job complete →
           </button>
-          <p className="text-xs text-stone-400">The customer will be notified and asked to release payment.</p>
+          <p className="text-sm text-stone-500">The customer will be notified and asked to release payment.</p>
         </>
       )}
     </div>

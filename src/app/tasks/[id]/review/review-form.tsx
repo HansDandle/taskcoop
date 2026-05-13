@@ -86,7 +86,7 @@ export default function ReviewForm({
         <div className="border border-stone-200 rounded-lg p-4 space-y-3">
           <div>
             <div className="text-sm font-medium text-stone-700">Leave a tip</div>
-            <div className="text-xs text-stone-400 mt-0.5">Optional, not expected. Member gets 100% of tips (minus CC fee — cash preferred).</div>
+            <div className="text-sm text-stone-500 mt-0.5">Optional, not expected. Member gets 100% of tips (minus CC fee — cash preferred).</div>
           </div>
           <div className="flex gap-2 flex-wrap">
             {jobAmount && TIP_PERCENTS.map(pct => {

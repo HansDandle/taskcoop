@@ -124,7 +124,7 @@ const held = tasks?.filter(t => t.payment_status === 'held') ?? []
           </thead>
           <tbody className="divide-y divide-stone-100">
             {!tasks?.length && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-stone-400">No payments found.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-stone-500">No payments found.</td></tr>
             )}
             {tasks?.map((t) => {
               const offer = offerMap[t.id]
@@ -135,7 +135,7 @@ const held = tasks?.filter(t => t.payment_status === 'held') ?? []
                   <td className="px-4 py-3">
                     <Link href={`/tasks/${t.id}`} target="_blank" className="font-medium text-stone-900 hover:underline">{t.title}</Link>
                     {t.payment_intent_id && (
-                      <div className="text-xs text-stone-400 font-mono">{t.payment_intent_id}</div>
+                      <div className="text-xs text-stone-500 font-mono">{t.payment_intent_id}</div>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -148,7 +148,7 @@ const held = tasks?.filter(t => t.payment_status === 'held') ?? []
                       <Link href={`/admin/users/${offer.worker_id}`} className="text-xs text-stone-600 hover:underline">
                         {offer.workerName ?? offer.worker_id}
                       </Link>
-                    ) : <span className="text-xs text-stone-400">—</span>}
+                    ) : <span className="text-xs text-stone-500">—</span>}
                   </td>
                   <td className="px-4 py-3 font-medium text-stone-900">
                     {offer ? formatCurrency(offer.amount) : '—'}
@@ -165,7 +165,7 @@ const held = tasks?.filter(t => t.payment_status === 'held') ?? []
                       <span className={overdue ? 'text-red-600 font-medium' : 'text-stone-500'}>
                         {overdue ? 'Overdue — ' : ''}{autoRelease.toLocaleDateString()}
                       </span>
-                    ) : <span className="text-stone-400">—</span>}
+                    ) : <span className="text-stone-500">—</span>}
                   </td>
                   <td className="px-4 py-3 text-stone-500 text-xs">{formatDate(t.created_at)}</td>
                 </tr>

@@ -31,14 +31,14 @@ export default function AdminLicenseReview({
     <div className="bg-white border border-stone-200 rounded-lg">
       <div className="px-5 py-4 border-b border-stone-200">
         <h2 className="font-semibold text-stone-900">Professional licenses ({licenses.length})</h2>
-        <p className="text-xs text-stone-400 mt-0.5">Approved titles appear on the member&apos;s public profile.</p>
+        <p className="text-sm text-stone-500 mt-0.5">Approved titles appear on the member&apos;s public profile.</p>
       </div>
       <ul className="divide-y divide-stone-100">
         {licenses.map((l) => (
           <li key={l.path} className="flex items-center justify-between gap-3 px-5 py-3">
             <div className="min-w-0">
               <div className="text-sm font-medium text-stone-900 truncate">{l.title}</div>
-              <div className="text-xs text-stone-400 font-mono truncate">{l.path}</div>
+              <div className="text-xs text-stone-500 font-mono truncate">{l.path}</div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               {l.approved && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">✓ Approved</span>}

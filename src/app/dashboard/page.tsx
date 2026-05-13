@@ -36,7 +36,7 @@ function TaskRow({ task }: { task: any }) {
     <Link href={`/tasks/${task.id}`} className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
       <div>
         <div className="font-medium text-stone-900 text-sm">{task.title}</div>
-        <div className="text-xs text-stone-400 mt-0.5">{task.categories?.name} · {formatRelativeDate(task.created_at)}</div>
+        <div className="text-xs text-stone-500 mt-0.5">{task.categories?.name} · {formatRelativeDate(task.created_at)}</div>
       </div>
       <div className="flex items-center gap-3">
         {task.budget && <span className="text-sm text-stone-500">{formatCurrency(task.budget)}</span>}
@@ -54,7 +54,7 @@ function Section({ title, children, empty, cta }: { title: string; children: Rea
         {cta}
       </div>
       {empty ? (
-        <div className="px-5 py-6 text-sm text-stone-400 text-center">{empty}</div>
+        <div className="px-5 py-6 text-sm text-stone-500 text-center">{empty}</div>
       ) : (
         <div className="divide-y divide-stone-100">{children}</div>
       )}
@@ -129,7 +129,7 @@ export default async function DashboardPage({
 
         {tasks?.length === 0 && (
           <div className="mb-6 bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
-            <div className="text-3xl mb-3">📋</div>
+            <div className="text-3xl mb-3" aria-hidden="true">📋</div>
             <h2 className="font-semibold text-stone-900 mb-1">Post your first task</h2>
             <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Describe what you need and local members will send you offers, usually within a few hours. Free to post.</p>
             <Link href="/tasks/new" className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
@@ -205,7 +205,7 @@ export default async function DashboardPage({
                   className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
                   <div>
                     <div className="font-medium text-stone-900 text-sm">{t.title}</div>
-                    <div className="text-xs text-stone-400 mt-0.5">{(t as any).categories?.name} · {formatRelativeDate(t.created_at)}</div>
+                    <div className="text-xs text-stone-500 mt-0.5">{(t as any).categories?.name} · {formatRelativeDate(t.created_at)}</div>
                   </div>
                   <span className="text-xs bg-emerald-600 text-white px-3 py-1 rounded-full font-medium">Rate member →</span>
                 </Link>
@@ -220,14 +220,14 @@ export default async function DashboardPage({
           )}
         </div>
 
+        <div className="mt-6 flex gap-3">
+          <Link href="/profile" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Edit profile</Link>
+          <Link href="/messages" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Messages</Link>
+        </div>
+
         <div className="mt-6 space-y-3">
           <InstallTile />
           <PushToggle />
-        </div>
-
-        <div className="mt-6 flex gap-4 text-sm">
-          <Link href="/profile" className="text-stone-500 hover:text-stone-700">Edit profile →</Link>
-          <Link href="/messages" className="text-stone-500 hover:text-stone-700">Messages →</Link>
         </div>
       </div>
     )
@@ -293,7 +293,7 @@ export default async function DashboardPage({
       <Link href={`/tasks/${task?.id}`} className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
         <div>
           <div className="font-medium text-stone-900 text-sm">{task?.title}</div>
-          <div className="text-xs text-stone-400 mt-0.5">{task?.categories?.name} · {formatRelativeDate(offer.created_at)}</div>
+          <div className="text-xs text-stone-500 mt-0.5">{task?.categories?.name} · {formatRelativeDate(offer.created_at)}</div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-stone-500">{formatCurrency(offer.amount)}</span>
@@ -318,20 +318,20 @@ export default async function DashboardPage({
       {welcome && stripeOnboarded && (
         <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4">
           <p className="font-semibold text-emerald-900 text-sm">Welcome{profile.name ? `, ${profile.name.split(' ')[0]}` : ''}! Your account is ready.</p>
-          <p className="text-emerald-700 text-xs mt-1">Browse open tasks below and send offers on ones that fit your skills.</p>
+          <p className="text-emerald-700 text-sm mt-1">Browse open tasks below and send offers on ones that fit your skills.</p>
         </div>
       )}
 
       {!stripeOnboarded && (
         <div className="mb-6 bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
-          <div className="text-3xl mb-3">💳</div>
+          <div className="text-3xl mb-3" aria-hidden="true">💳</div>
           <h2 className="font-semibold text-stone-900 mb-1">Set up payouts to start earning</h2>
           <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Connect your bank account through Stripe so you can receive payment when jobs are complete. Takes about 2 minutes.</p>
           <Link href="/api/stripe/connect"
             className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
             Set up payouts →
           </Link>
-          <p className="text-xs text-stone-400 mt-4">You can browse tasks in the meantime, but you&apos;ll need this before submitting offers.</p>
+          <p className="text-sm text-stone-500 mt-4">You can browse tasks in the meantime, but you&apos;ll need this before submitting offers.</p>
         </div>
       )}
 
@@ -349,14 +349,14 @@ export default async function DashboardPage({
         return (
           <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-5 py-4">
             <div className="flex items-start gap-3">
-              <div className="text-2xl">🪪</div>
+              <div className="text-2xl" aria-hidden="true">🪪</div>
               <div className="flex-1">
                 <p className="font-semibold text-amber-900 text-sm">
                   {rejected ? 'Your ID submission was rejected'
                     : legacy ? 'Add a selfie to keep your verified badge'
                     : 'Verify your identity to win more jobs'}
                 </p>
-                <p className="text-amber-800 text-xs mt-1">
+                <p className="text-amber-800 text-sm mt-1">
                   {rejected
                     ? 'Re-upload a clearer photo of your ID and a selfie holding it.'
                     : legacy
@@ -388,7 +388,7 @@ export default async function DashboardPage({
                   className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
                   <div>
                     <div className="font-medium text-stone-900 text-sm">{task?.title}</div>
-                    <div className="text-xs text-stone-400 mt-0.5">{task?.categories?.name} · {formatRelativeDate(o.created_at)}</div>
+                    <div className="text-xs text-stone-500 mt-0.5">{task?.categories?.name} · {formatRelativeDate(o.created_at)}</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-stone-500">{formatCurrency(o.amount)}</span>
@@ -402,7 +402,7 @@ export default async function DashboardPage({
 
         {stripeOnboarded && activeOffers.length === 0 && pendingOffers.length === 0 && pastOffers.length === 0 && (
           <div className="bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
-            <div className="text-3xl mb-3">🔍</div>
+            <div className="text-3xl mb-3" aria-hidden="true">🔍</div>
             <h2 className="font-semibold text-stone-900 mb-1">Find your first job</h2>
             <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Browse open tasks posted by customers in Austin and send an offer on anything that fits your skills.</p>
             <Link href="/tasks" className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
@@ -426,6 +426,18 @@ export default async function DashboardPage({
         )}
       </div>
 
+      {/* Quick links */}
+      <div className="mt-6 flex gap-3">
+        <Link href="/profile" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Edit profile</Link>
+        <Link href={`/workers/${user.id}`} className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Public profile</Link>
+        <Link href="/messages" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Messages</Link>
+      </div>
+
+      <div className="mt-6 space-y-3">
+        <InstallTile />
+        <PushToggle />
+      </div>
+
       {/* Badges */}
       <div className="mt-6 bg-white border border-stone-200 rounded-lg overflow-hidden">
         <div className="px-5 py-3.5 border-b border-stone-200">
@@ -440,23 +452,13 @@ export default async function DashboardPage({
       <div className="mt-6 bg-white border border-stone-200 rounded-lg overflow-hidden">
         <div className="px-5 py-3.5 border-b border-stone-200">
           <h2 className="font-semibold text-stone-900 text-sm">Grow the cooperative</h2>
-          <p className="text-xs text-stone-400 mt-0.5">You have 25 unique invite links, 5 per category. Fill a row to earn Team Builder. Fill all 25 for Full Roster.</p>
+          <p className="text-sm text-stone-500 mt-0.5">You have 25 unique invite links, 5 per category. Fill a row to earn Team Builder. Fill all 25 for Full Roster.</p>
         </div>
         <div className="px-5 py-4">
           <ReferralGrid slots={referralSlots ?? []} baseUrl={APP_URL} firstName={profile.name?.split(' ')[0] ?? 'A member'} />
         </div>
       </div>
 
-      <div className="mt-6 space-y-3">
-        <InstallTile />
-        <PushToggle />
-      </div>
-
-      <div className="mt-6 flex gap-4 text-sm">
-        <Link href="/profile" className="text-stone-500 hover:text-stone-700">Edit profile →</Link>
-        <Link href={`/workers/${user.id}`} className="text-stone-500 hover:text-stone-700">View public profile →</Link>
-        <Link href="/messages" className="text-stone-500 hover:text-stone-700">Messages →</Link>
-      </div>
     </div>
   )
 }

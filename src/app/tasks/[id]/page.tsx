@@ -153,7 +153,7 @@ export default async function TaskDetailPage({
               <dl className="space-y-3 text-sm">
                 {task.duration_estimate && (
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
-                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Duration</dt>
+                    <dt className="text-stone-600 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Duration</dt>
                     <dd className="text-stone-700">{({
                       under_1hr: 'Less than 1 hour',
                       '1_2hrs': '1–2 hours',
@@ -166,7 +166,7 @@ export default async function TaskDetailPage({
                 )}
                 {task.tools_situation && (
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
-                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Tools & materials</dt>
+                    <dt className="text-stone-600 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Tools & materials</dt>
                     <dd className="text-stone-700">{({
                       just_show_up: 'All tools and materials on-site; just show up',
                       i_have_tools: 'Tools on-site; worker brings skills',
@@ -177,7 +177,7 @@ export default async function TaskDetailPage({
                 )}
                 {task.access_situation && (
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
-                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Access</dt>
+                    <dt className="text-stone-600 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Access</dt>
                     <dd className="text-stone-700">{({
                       someone_home: 'Someone will be home',
                       provide_code: 'Door/gate code provided',
@@ -188,7 +188,7 @@ export default async function TaskDetailPage({
                 )}
                 {task.physical_requirements?.length > 0 && (
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
-                    <dt className="text-stone-400 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Physical</dt>
+                    <dt className="text-stone-600 sm:w-32 shrink-0 text-xs sm:text-sm uppercase sm:normal-case tracking-wide sm:tracking-normal">Physical</dt>
                     <dd className="flex flex-wrap gap-1">
                       {(task.physical_requirements as string[]).map(r => (
                         <span key={r} className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">{({
@@ -211,7 +211,7 @@ export default async function TaskDetailPage({
               <p className="text-stone-700 text-sm">{taskAddress.street}</p>
               <p className="text-stone-500 text-sm">{taskAddress.city}, {taskAddress.state} {task.zip_code}</p>
               {!isOwner && (
-                <p className="text-xs text-stone-400 mt-2">Shared after offer acceptance.</p>
+                <p className="text-sm text-stone-500 mt-2">Shared after offer acceptance.</p>
               )}
             </div>
           )}
@@ -256,7 +256,7 @@ export default async function TaskDetailPage({
               <div className="space-y-2">
                 {task.budget && (
                   <div>
-                    <div className="text-xs text-stone-400 mb-0.5">Your budget</div>
+                    <div className="text-xs text-stone-500 mb-0.5">Your budget</div>
                     <div className="text-lg font-semibold text-stone-400 line-through">{formatCurrency(task.budget)}</div>
                   </div>
                 )}
@@ -274,7 +274,7 @@ export default async function TaskDetailPage({
               <div className="text-sm text-stone-500">Open to offers</div>
             )}
             {!acceptedOffer && (
-              <div className="mt-4 text-xs text-stone-400">
+              <div className="mt-4 text-sm text-stone-500">
                 {(offers?.length ?? 0) === 0
                   ? (isWorker ? 'Be the first to offer' : 'Members are reviewing this task')
                   : `${offers?.length} offer${offers?.length !== 1 ? 's' : ''} submitted`}
@@ -342,7 +342,7 @@ export default async function TaskDetailPage({
             </Link>
           )}
           {task.status === 'completed' && isOwner && customerHasReviewed && (
-            <div className="text-xs text-center text-stone-400">You've left a review. Thanks.</div>
+            <div className="text-sm text-center text-stone-500">You've left a review. Thanks.</div>
           )}
           {task.status === 'completed' && isAcceptedWorker && !workerHasReviewed && (
             <Link
@@ -353,7 +353,7 @@ export default async function TaskDetailPage({
             </Link>
           )}
           {task.status === 'completed' && isAcceptedWorker && workerHasReviewed && (
-            <div className="text-xs text-center text-stone-400">You've left a review. Thanks.</div>
+            <div className="text-sm text-center text-stone-500">You've left a review. Thanks.</div>
           )}
         </div>
       </div>
