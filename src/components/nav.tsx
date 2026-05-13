@@ -26,6 +26,7 @@ export default function Nav({ user, dashboardAlert }: { user: User; dashboardAle
         <nav className="hidden md:flex items-center gap-6 text-sm text-stone-600">
           <Link href="/tasks" className={pathname === '/tasks' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Browse Tasks</Link>
           <Link href="/how-it-works" className={pathname === '/how-it-works' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>How It Works</Link>
+          <Link href="/blog" className={pathname.startsWith('/blog') ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Blog</Link>
           <Link href="/cooperative" className={pathname === '/cooperative' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>About</Link>
           <Link href="/contact" className={pathname === '/contact' ? 'text-stone-900 font-medium' : 'hover:text-stone-900'}>Contact</Link>
         </nav>
@@ -73,6 +74,7 @@ export default function Nav({ user, dashboardAlert }: { user: User; dashboardAle
         <div id="mobile-nav" className="md:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 text-sm">
           <Link href="/tasks" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Browse Tasks</Link>
           <Link href="/how-it-works" className="block text-stone-700" onClick={() => setMenuOpen(false)}>How It Works</Link>
+          <Link href="/blog" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Blog</Link>
           <Link href="/cooperative" className="block text-stone-700" onClick={() => setMenuOpen(false)}>About</Link>
           <Link href="/contact" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Contact</Link>
           {user ? (

@@ -5,6 +5,13 @@ import { CATEGORIES } from '@/lib/utils'
 export const metadata: Metadata = {
   title: 'Local Services in Austin, TX — task.coop',
   description: 'Find local handyman, cleaning, moving help, yard work, and more in Austin, TX. Worker-owned marketplace with 5% transparent fee.',
+  openGraph: {
+    title: 'Local Services in Austin, TX — task.coop',
+    description: 'Find local handyman, cleaning, moving help, yard work, and more in Austin, TX. Worker-owned, 5% fee.',
+    url: 'https://task.coop/austin',
+    type: 'website',
+  },
+  alternates: { canonical: 'https://task.coop/austin' },
 }
 
 export default function AustinPage() {

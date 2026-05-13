@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.105.3",
     "@tailwindcss/typography": "^0.5.19",
     "clsx": "^2.1.1",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^1.14.0",
     "mapbox-gl": "^3.23.1",
     "next": "16.2.6",

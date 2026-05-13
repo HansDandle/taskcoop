@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   changeUserRole,
   suspendUser,
@@ -24,12 +25,13 @@ export default function AdminUserActions({
   hasSelfie?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const run = (action: (fd: FormData) => Promise<any>, fields: Record<string, string>) => {
     const fd = new FormData()
     fd.set('user_id', userId)
     for (const [k, v] of Object.entries(fields)) fd.set(k, v)
-    startTransition(async () => { await action(fd) })
+    startTransition(async () => { await action(fd); router.refresh() })
   }
 
   const confirmDelete = () => {

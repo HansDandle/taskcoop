@@ -1,7 +1,21 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import ServiceCarousel from '@/components/service-carousel'
+
+export const metadata: Metadata = {
+  title: 'task.coop — Worker-Owned Local Services in Austin, TX',
+  description: 'Find trusted local help for home repairs, tech setup, moving, yard work, and more. task.coop is Austin\'s worker-owned cooperative marketplace. Members keep 95%.',
+  openGraph: {
+    title: 'task.coop — Worker-Owned Local Services in Austin, TX',
+    description: 'Hire skilled Austin locals for home repairs, Wi-Fi setup, moving, and more. Worker-owned, 5% fee, trusted reviews.',
+    url: 'https://task.coop',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image' },
+  alternates: { canonical: 'https://task.coop' },
+}
 
 const SERVICE_GROUPS = [
   {
@@ -54,7 +68,22 @@ export default async function HomePage() {
     : { data: null }
   const isWorker = profile?.role === 'worker'
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'task.coop',
+    description: 'Worker-owned local services cooperative in Austin, TX. Home repairs, tech setup, moving, yard work, and more.',
+    url: 'https://task.coop',
+    areaServed: { '@type': 'City', name: 'Austin', addressRegion: 'TX', addressCountry: 'US' },
+    priceRange: '$',
+    currenciesAccepted: 'USD',
+    paymentAccepted: 'Credit Card',
+    '@id': 'https://task.coop',
+  }
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <div>
       {/* Hero */}
       <section className="bg-white border-b border-stone-200">
@@ -189,5 +218,6 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

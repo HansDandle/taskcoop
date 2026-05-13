@@ -8,6 +8,13 @@ import FilterSidebar from './filter-sidebar'
 export const metadata: Metadata = {
   title: 'Browse Tasks — Austin, TX',
   description: 'Browse open tasks in Austin, TX. Find handyman, cleaning, moving, yard work, and more.',
+  openGraph: {
+    title: 'Browse Tasks — Austin, TX | task.coop',
+    description: 'Browse open tasks in Austin, TX. Find handyman, cleaning, moving, yard work, and more.',
+    url: 'https://task.coop/tasks',
+    type: 'website',
+  },
+  alternates: { canonical: 'https://task.coop/tasks' },
 }
 
 export default async function TasksPage({

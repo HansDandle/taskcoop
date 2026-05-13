@@ -13,25 +13,32 @@ async function requireAdmin() {
   return supabase
 }
 
+function serviceClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
+
 export async function changeUserRole(formData: FormData) {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'Not authorized.' }
+  if (!await requireAdmin()) return { error: 'Not authorized.' }
 
   const user_id = formData.get('user_id') as string
   const role = formData.get('role') as string
   if (!['customer', 'worker', 'admin'].includes(role)) return { error: 'Invalid role.' }
 
-  await supabase.from('users').update({ role }).eq('id', user_id)
+  const { error } = await serviceClient().from('users').update({ role }).eq('id', user_id)
+  if (error) return { error: error.message }
   revalidatePath('/admin/users')
 }
 
 export async function suspendUser(formData: FormData) {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'Not authorized.' }
+  if (!await requireAdmin()) return { error: 'Not authorized.' }
 
   const user_id = formData.get('user_id') as string
   const suspended = formData.get('suspended') === 'true'
-  await supabase.from('users').update({ suspended }).eq('id', user_id)
+  const { error } = await serviceClient().from('users').update({ suspended }).eq('id', user_id)
+  if (error) return { error: error.message }
   revalidatePath('/admin/users')
 }
 
@@ -113,9 +120,15 @@ export async function setIdVerification(formData: FormData) {
   const status = formData.get('status') as string
   if (!['approved', 'rejected'].includes(status)) return { error: 'Invalid status.' }
 
-  await supabase.from('users').update({
+  const service = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+  const { error } = await service.from('users').update({
     id_verification_status: status,
     id_verified: status === 'approved',
   }).eq('id', user_id)
+  if (error) return { error: error.message }
+
   revalidatePath('/admin/users')
 }
