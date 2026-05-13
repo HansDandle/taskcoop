@@ -52,6 +52,35 @@ export default async function TaskDetailPage({
     .eq('task_id', id)
     .order('created_at', { ascending: true })
 
+  // Customer stats for "Posted by" card
+  const [
+    { count: customerTaskCount },
+    { data: customerReviews },
+  ] = await Promise.all([
+    supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('customer_id', task.customer_id),
+    supabase.from('reviews').select('rating').eq('reviewee_id', task.customer_id),
+  ])
+  const customerAvgRating = customerReviews?.length
+    ? customerReviews.reduce((s, r) => s + r.rating, 0) / customerReviews.length
+    : null
+
+  // Worker stats (rating + completed jobs) for each offer
+  const workerIds = [...new Set((offers ?? []).map(o => (o.users as any)?.id).filter(Boolean))]
+  const workerStatsMap: Record<string, { avgRating: number | null; jobCount: number }> = {}
+  if (workerIds.length) {
+    const [{ data: workerReviews }, { data: completedOffers }] = await Promise.all([
+      supabase.from('reviews').select('reviewee_id, rating').in('reviewee_id', workerIds),
+      supabase.from('offers').select('worker_id').in('worker_id', workerIds).eq('status', 'accepted'),
+    ])
+    for (const wid of workerIds) {
+      const ratings = (workerReviews ?? []).filter(r => r.reviewee_id === wid)
+      workerStatsMap[wid] = {
+        avgRating: ratings.length ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : null,
+        jobCount: (completedOffers ?? []).filter(o => o.worker_id === wid).length,
+      }
+    }
+  }
+
   let currentUserProfile = null
   let workerStripeReady = false
   if (user) {
@@ -246,6 +275,7 @@ export default async function TaskDetailPage({
             hasOffered={hasOffered ?? false}
             currentUserId={user?.id ?? null}
             stripeReady={workerStripeReady}
+            workerStats={workerStatsMap}
           />
         </div>
 
@@ -292,13 +322,19 @@ export default async function TaskDetailPage({
                   {(task.users as any)?.name?.[0]?.toUpperCase()}
                 </div>
               )}
-              <div className="font-medium text-stone-900 text-sm">
-                {(() => {
-                  const fullName = (task.users as any)?.name ?? ''
-                  if (isOwner || isAcceptedWorker) return fullName
-                  const parts = fullName.split(' ')
-                  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : fullName
-                })()}
+              <div>
+                <Link href={`/customers/${task.customer_id}`} className="font-medium text-stone-900 hover:underline text-sm block">
+                  {(() => {
+                    const fullName = (task.users as any)?.name ?? ''
+                    if (isOwner || isAcceptedWorker) return fullName
+                    const parts = fullName.split(' ')
+                    return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : fullName
+                  })()}
+                </Link>
+                <div className="text-xs text-stone-500 mt-0.5">
+                  {customerTaskCount ?? 0} task{customerTaskCount !== 1 ? 's' : ''}
+                  {customerAvgRating !== null && ` · ${customerAvgRating.toFixed(1)}★`}
+                </div>
               </div>
             </div>
           </div>

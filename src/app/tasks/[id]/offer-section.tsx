@@ -22,6 +22,7 @@ export default function OfferSection({
   hasOffered,
   currentUserId,
   stripeReady,
+  workerStats = {},
 }: {
   task: { id: string; status: string; customer_id: string }
   offers: Offer[]
@@ -30,6 +31,7 @@ export default function OfferSection({
   hasOffered: boolean
   currentUserId: string | null
   stripeReady: boolean
+  workerStats?: Record<string, { avgRating: number | null; jobCount: number }>
 }) {
   const [amount, setAmount] = useState('')
   const [message, setMessage] = useState('')
@@ -59,17 +61,22 @@ export default function OfferSection({
     })
   }
 
+  const visibleOffers = isOwner
+    ? offers
+    : offers.filter(o => o.users?.id === currentUserId)
+
   return (
     <div className="space-y-4">
       <h2 className="font-semibold text-stone-900">Offers ({offers.length})</h2>
 
-      {offers.length === 0 && (
+      {isOwner && offers.length === 0 && (
         <div className="text-sm text-stone-500 py-4">No offers yet.</div>
       )}
 
-      {offers.map((offer) => {
+      {visibleOffers.map((offer) => {
         const worker = offer.users
         const isAccepted = offer.status === 'accepted'
+        const stats = worker?.id ? workerStats[worker.id] : undefined
         return (
           <div
             key={offer.id}
@@ -88,7 +95,16 @@ export default function OfferSection({
                   <Link href={`/workers/${worker?.id}`} className="font-medium text-stone-900 hover:underline text-sm block truncate">
                     {worker?.name}
                   </Link>
-                  <div className="text-xs text-stone-500">{formatRelativeDate(offer.created_at)}</div>
+                  <div className="text-xs text-stone-500">
+                    {stats && (
+                      <span className="mr-2">
+                        {stats.jobCount} job{stats.jobCount !== 1 ? 's' : ''}
+                        {stats.avgRating !== null && ` · ${stats.avgRating.toFixed(1)}★`}
+                        {' · '}
+                      </span>
+                    )}
+                    {formatRelativeDate(offer.created_at)}
+                  </div>
                 </div>
               </div>
               <div className="text-right shrink-0">

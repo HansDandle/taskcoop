@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { StarRating } from '@/components/star-rating'
@@ -19,6 +19,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function WorkerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect(`/login?next=/workers/${id}`)
 
   const { data: worker } = await supabase
     .from('users')
@@ -76,7 +79,6 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
 
   const earnedBadges = badges.filter(b => b.earned)
 
-  const { data: { user } } = await supabase.auth.getUser()
   const isOwnProfile = user?.id === worker.id
 
   return (
@@ -155,7 +157,7 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
                 <div className="flex items-center gap-3 mb-2">
                   <StarRating rating={review.rating} />
                   <span className="text-xs text-stone-500">{formatDate(review.created_at)}</span>
-                  <span className="text-xs text-stone-500 ml-auto">by {(review.users as any)?.name}</span>
+                  <span className="text-xs text-stone-500 ml-auto">by {(review.users as any)?.name?.split(' ')[0] ?? 'Customer'}</span>
                 </div>
                 {review.comment && <p className="text-sm text-stone-600">{review.comment}</p>}
               </div>
