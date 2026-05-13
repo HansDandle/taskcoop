@@ -38,4 +38,6 @@ export const CATEGORIES = [
   { name: 'Cleaning', slug: 'cleaning', icon: '🧹', group: 'Home' },
   { name: 'Moving Help', slug: 'moving-help', icon: '📦', group: 'Moving' },
   { name: 'Junk Removal', slug: 'junk-removal', icon: '🚛', group: 'Moving' },
+  { name: 'Pets', slug: 'pets', icon: '🐾', group: 'Pets' },
+  { name: 'Notary / Process Server', slug: 'notary-process-server', icon: '⚖️', group: 'Professional' },
 ]

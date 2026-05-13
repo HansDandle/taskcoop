@@ -11,8 +11,13 @@ export async function GET(req: NextRequest) {
   if (profile?.role !== 'admin') return new NextResponse('Forbidden', { status: 403 })
 
   const path = req.nextUrl.searchParams.get('path')
-  // Validate path format: <uuid>/<timestamp>.<ext> — no traversal allowed
-  if (!path || !/^[0-9a-f-]{36}\/\d+\.[a-z]{2,4}$/i.test(path)) {
+  // Validate path format: <uuid>/[id|selfie|license/]<filename>.<ext>
+  // Older single-folder uploads (uuid/timestamp.ext) and new typed uploads
+  // (uuid/id|selfie|license/timestamp[-suffix].ext) are both accepted.
+  // No traversal allowed.
+  const legacy = /^[0-9a-f-]{36}\/\d+\.[a-z0-9]{2,4}$/i
+  const typed = /^[0-9a-f-]{36}\/(id|selfie|license)\/\d+(?:-[a-z0-9]+)?\.[a-z0-9]{2,4}$/i
+  if (!path || (!legacy.test(path) && !typed.test(path))) {
     return new NextResponse('Invalid path', { status: 400 })
   }
 

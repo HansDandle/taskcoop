@@ -56,15 +56,21 @@ export default function Nav({ user, dashboardAlert }: { user: User; dashboardAle
           )}
         </div>
 
-        <button className="md:hidden p-3" onClick={() => setMenuOpen(!menuOpen)}>
-          <div className="w-5 h-0.5 bg-stone-700 mb-1" />
-          <div className="w-5 h-0.5 bg-stone-700 mb-1" />
-          <div className="w-5 h-0.5 bg-stone-700" />
+        <button
+          className="md:hidden p-3"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
+        >
+          <div className="w-5 h-0.5 bg-stone-700 mb-1" aria-hidden="true" />
+          <div className="w-5 h-0.5 bg-stone-700 mb-1" aria-hidden="true" />
+          <div className="w-5 h-0.5 bg-stone-700" aria-hidden="true" />
         </button>
       </div>
 
       {menuOpen && (
-        <div className="md:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 text-sm">
+        <div id="mobile-nav" className="md:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 text-sm">
           <Link href="/tasks" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Browse Tasks</Link>
           <Link href="/how-it-works" className="block text-stone-700" onClick={() => setMenuOpen(false)}>How It Works</Link>
           <Link href="/cooperative" className="block text-stone-700" onClick={() => setMenuOpen(false)}>About</Link>

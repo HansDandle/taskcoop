@@ -30,19 +30,68 @@ export async function updateProfile(_prev: { error: string; success: boolean }, 
   return { error: '', success: true }
 }
 
+type LicenseSubmission = { title: string; path: string; approved?: boolean }
+
 export async function submitIdVerification(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.', success: false }
 
-  const id_document_url = formData.get('id_document_url') as string
-  if (!id_document_url) return { error: 'No document provided.', success: false }
+  const id_document_url = (formData.get('id_document_url') as string)?.trim()
+  const id_selfie_url = (formData.get('id_selfie_url') as string)?.trim()
+  const licensesRaw = formData.get('professional_licenses') as string | null
+
+  if (!id_document_url) return { error: 'Please upload a photo of your ID.', success: false }
+  if (!id_selfie_url) return { error: 'Please upload a selfie holding your ID.', success: false }
+
+  // Preserve admin-set "approved" flags on existing licenses; strip approval on
+  // anything submitted by the worker so admins explicitly re-approve.
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id_document_url, id_selfie_url, id_verified, professional_licenses')
+    .eq('id', user.id)
+    .single()
+  const approvedByPath = new Map<string, boolean>()
+  for (const row of (existing?.professional_licenses ?? []) as LicenseSubmission[]) {
+    if (row?.path) approvedByPath.set(row.path, !!row.approved)
+  }
+
+  let parsed: LicenseSubmission[] = []
+  try { parsed = licensesRaw ? JSON.parse(licensesRaw) : [] } catch {}
+  const professional_licenses = parsed
+    .filter(l => l && typeof l.path === 'string' && l.path.length > 0)
+    .slice(0, 8)
+    .map(l => ({
+      title: (l.title ?? '').toString().slice(0, 80).trim() || 'License',
+      path: l.path,
+      approved: approvedByPath.get(l.path) ?? false,
+    }))
+
+  // Only flip verification status back to "pending" if the ID or selfie actually
+  // changed. License-only edits by an already-verified worker shouldn't revoke
+  // their verified badge — each new license is approved separately by an admin.
+  const idChanged = existing?.id_document_url !== id_document_url
+  const selfieChanged = existing?.id_selfie_url !== id_selfie_url
+  const docsChanged = idChanged || selfieChanged
+  const wasVerified = !!existing?.id_verified
+
+  const update: Record<string, unknown> = {
+    id_document_url,
+    id_selfie_url,
+    professional_licenses,
+  }
+  if (docsChanged || !wasVerified) {
+    update.id_verification_status = 'pending'
+    update.id_verified = false
+  }
 
   await supabase
     .from('users')
-    .update({ id_document_url, id_verification_status: 'pending', id_verified: false })
+    .update(update)
     .eq('id', user.id)
 
   revalidatePath('/profile')
+  revalidatePath('/dashboard')
+  revalidatePath(`/workers/${user.id}`)
   return { error: '', success: true }
 }

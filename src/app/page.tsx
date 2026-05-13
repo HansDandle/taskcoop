@@ -62,7 +62,7 @@ export default async function HomePage() {
               Browse open tasks
             </Link>
           </div>
-          <p className="mt-6 text-sm text-stone-400">
+          <p className="mt-6 text-sm text-stone-500">
             Members keep 95% of every job. No hidden fees.
             {!isSignedIn && <> · Free to sign up · <Link href="/login" className="text-emerald-600 hover:underline">Sign in</Link></>}
           </p>
@@ -72,7 +72,7 @@ export default async function HomePage() {
       {/* Service groups */}
       <section className="max-w-6xl mx-auto px-4 py-16">
         <h2 className="text-2xl font-bold text-stone-900 mb-2">What we help with</h2>
-        <p className="text-stone-500 text-sm mb-10">Skilled members available across a wide range of household and technical services.</p>
+        <p className="text-stone-600 text-base mb-10">Skilled members available across a wide range of household and technical services.</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {SERVICE_GROUPS.map((group) => (
             <div
@@ -88,8 +88,8 @@ export default async function HomePage() {
               </div>
               <ul className="space-y-1.5">
                 {group.services.map((s) => (
-                  <li key={s} className="text-xs text-stone-500 flex items-start gap-1.5">
-                    <span className="text-stone-300 mt-0.5">–</span>
+                  <li key={s} className="text-sm text-stone-600 flex items-start gap-1.5">
+                    <span className="text-stone-400 mt-0.5" aria-hidden="true">–</span>
                     {s}
                   </li>
                 ))}
@@ -102,7 +102,7 @@ export default async function HomePage() {
             <Link
               key={cat.slug}
               href={`/tasks?category=${cat.slug}`}
-              className="text-xs px-3 py-1.5 rounded-full border border-stone-200 text-stone-600 hover:border-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+              className="text-sm px-3 py-1.5 rounded-full border border-stone-200 text-stone-700 hover:border-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
             >
               {cat.icon} {cat.name}
             </Link>
@@ -140,7 +140,7 @@ export default async function HomePage() {
             <div key={item.step} className="relative">
               <div className="text-4xl font-bold text-stone-300 mb-3">{item.step}</div>
               <h3 className="font-semibold text-stone-900 mb-2">{item.title}</h3>
-              <p className="text-sm text-stone-500 leading-relaxed">{item.desc}</p>
+              <p className="text-base text-stone-600 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -181,7 +181,7 @@ export default async function HomePage() {
       {/* Worker CTA */}
       <section className="max-w-4xl mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold text-stone-900 mb-4">Build a sustainable local practice.</h2>
-        <p className="text-stone-500 mb-8 max-w-xl mx-auto leading-relaxed">
+        <p className="text-stone-600 text-base mb-8 max-w-xl mx-auto leading-relaxed">
           task.coop is built for capable people who want to do good work and keep what they earn.
           Other platforms take 20–30%. We take 5%. Member-owners set the rules.
         </p>

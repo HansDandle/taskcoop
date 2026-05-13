@@ -61,6 +61,41 @@ export async function getIdDocumentPath(user_id: string): Promise<string | null>
   return data?.id_document_url ?? null
 }
 
+export async function getIdSelfiePath(user_id: string): Promise<string | null> {
+  const supabase = await requireAdmin()
+  if (!supabase) return null
+  const { data } = await supabase
+    .from('users')
+    .select('id_selfie_url')
+    .eq('id', user_id)
+    .single()
+  return data?.id_selfie_url ?? null
+}
+
+export async function setLicenseApproval(formData: FormData) {
+  const supabase = await requireAdmin()
+  if (!supabase) return { error: 'Not authorized.' }
+
+  const user_id = formData.get('user_id') as string
+  const path = formData.get('path') as string
+  const approved = formData.get('approved') === 'true'
+
+  const { data: row } = await supabase
+    .from('users')
+    .select('professional_licenses')
+    .eq('id', user_id)
+    .single()
+
+  const licenses = Array.isArray(row?.professional_licenses) ? row.professional_licenses : []
+  const next = licenses.map((l: any) =>
+    l?.path === path ? { ...l, approved } : l
+  )
+
+  await supabase.from('users').update({ professional_licenses: next }).eq('id', user_id)
+  revalidatePath(`/admin/users/${user_id}`)
+  revalidatePath(`/workers/${user_id}`)
+}
+
 export async function saveAdminNotes(formData: FormData) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'Not authorized.' }

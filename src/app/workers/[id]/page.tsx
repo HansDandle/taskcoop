@@ -22,7 +22,7 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
 
   const { data: worker } = await supabase
     .from('users')
-    .select('id, name, bio, avatar_url, role, created_at, id_verified, stripe_onboarded, suspended')
+    .select('id, name, bio, avatar_url, role, created_at, id_verified, stripe_onboarded, suspended, professional_licenses')
     .eq('id', id)
     .single()
 
@@ -121,6 +121,26 @@ export default async function WorkerProfilePage({ params }: { params: Promise<{ 
             <BadgeList badges={earnedBadges} />
           </div>
         )}
+
+        {(() => {
+          const approvedLicenses = (Array.isArray((worker as any).professional_licenses)
+            ? (worker as any).professional_licenses
+            : []) as Array<{ title: string; approved?: boolean }>
+          const titles = approvedLicenses.filter(l => l?.approved && l.title).map(l => l.title)
+          if (!titles.length) return null
+          return (
+            <div className="mt-5 pt-5 border-t border-stone-100">
+              <div className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Verified credentials</div>
+              <div className="flex flex-wrap gap-2">
+                {titles.map((t, i) => (
+                  <span key={`${t}-${i}`} className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-medium">
+                    ✓ {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Reviews */}

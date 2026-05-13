@@ -335,6 +335,43 @@ export default async function DashboardPage({
         </div>
       )}
 
+      {(() => {
+        const status = (profile as any).id_verification_status
+        const hasSelfie = !!(profile as any).id_selfie_url
+        // Three cases worth surfacing on the dashboard:
+        //   - never submitted (no doc, no status)
+        //   - rejected (must resubmit)
+        //   - legacy approval: id_verified true but no selfie on file (pre-expansion)
+        const neverSubmitted = !(profile as any).id_document_url && !status
+        const rejected = status === 'rejected'
+        const legacy = (profile as any).id_verified && !hasSelfie
+        if (!neverSubmitted && !rejected && !legacy) return null
+        return (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">🪪</div>
+              <div className="flex-1">
+                <p className="font-semibold text-amber-900 text-sm">
+                  {rejected ? 'Your ID submission was rejected'
+                    : legacy ? 'Add a selfie to keep your verified badge'
+                    : 'Verify your identity to win more jobs'}
+                </p>
+                <p className="text-amber-800 text-xs mt-1">
+                  {rejected
+                    ? 'Re-upload a clearer photo of your ID and a selfie holding it.'
+                    : legacy
+                    ? 'We now ask every verified member for a selfie holding their ID. Upload one to stay verified.'
+                    : 'Upload a photo of your ID, a selfie holding it, and any professional licenses. Customers strongly prefer ID-verified members.'}
+                </p>
+                <Link href="/profile" className="inline-block mt-2 text-xs font-semibold text-amber-900 underline">
+                  Go to verification →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       <div className="space-y-4">
         {activeOffers.length > 0 && (
           <Section title={`Active jobs (${activeOffers.length})`}>

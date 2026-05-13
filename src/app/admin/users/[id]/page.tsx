@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatDate, formatCurrency, formatRelativeDate } from '@/lib/utils'
 import AdminUserActions from '../admin-user-actions'
 import AdminUserNotes from './admin-user-notes'
+import AdminLicenseReview from './admin-license-review'
 
 export const metadata: Metadata = { title: 'Admin — User Detail' }
 
@@ -144,6 +145,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               currentRole={profile.role}
               suspended={profile.suspended ?? false}
               idVerificationStatus={profile.id_verification_status ?? null}
+              hasSelfie={!!profile.id_selfie_url}
             />
           </div>
 
@@ -158,6 +160,10 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               <div className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Bio</div>
               <p className="text-sm text-stone-600 leading-relaxed">{profile.bio}</p>
             </div>
+          )}
+
+          {profile.role === 'worker' && Array.isArray(profile.professional_licenses) && profile.professional_licenses.length > 0 && (
+            <AdminLicenseReview userId={profile.id} licenses={profile.professional_licenses} />
           )}
 
           {/* Tasks (customers) */}

@@ -1,18 +1,27 @@
 'use client'
 
 import { useTransition } from 'react'
-import { changeUserRole, suspendUser, deleteUser, setIdVerification, getIdDocumentPath } from './actions'
+import {
+  changeUserRole,
+  suspendUser,
+  deleteUser,
+  setIdVerification,
+  getIdDocumentPath,
+  getIdSelfiePath,
+} from './actions'
 
 export default function AdminUserActions({
   userId,
   currentRole,
   suspended,
   idVerificationStatus,
+  hasSelfie,
 }: {
   userId: string
   currentRole: string
   suspended: boolean
   idVerificationStatus: string | null
+  hasSelfie?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
 
@@ -74,6 +83,16 @@ export default function AdminUserActions({
             disabled={isPending}
             className="text-xs text-stone-500 hover:underline disabled:opacity-60"
           >View ID</button>
+          {hasSelfie && (
+            <button
+              onClick={async () => {
+                const path = await getIdSelfiePath(userId)
+                if (path) window.open(`/api/admin/id-document?path=${encodeURIComponent(path)}`, '_blank')
+              }}
+              disabled={isPending}
+              className="text-xs text-stone-500 hover:underline disabled:opacity-60"
+            >View selfie</button>
+          )}
           <button onClick={() => run(setIdVerification, { status: 'approved' })} disabled={isPending}
             className="text-xs text-emerald-600 hover:underline disabled:opacity-60">Approve ID</button>
           <button onClick={() => run(setIdVerification, { status: 'rejected' })} disabled={isPending}
