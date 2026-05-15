@@ -40,6 +40,9 @@ export default async function AdminDashboardPage() {
         <h1 className="text-2xl font-bold text-stone-900">Admin Dashboard</h1>
         <div className="flex gap-3 text-sm">
           <Link href="/admin/users" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Users</Link>
+          <Link href="/admin/users?verification=pending" className={`border px-4 py-2 rounded-md transition-colors ${(pendingIdCount ?? 0) > 0 ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100' : 'border-stone-200 hover:bg-stone-50'}`}>
+            ID Review{(pendingIdCount ?? 0) > 0 ? ` (${pendingIdCount})` : ''}
+          </Link>
           <Link href="/admin/tasks" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Tasks</Link>
           <Link href="/admin/payments" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Payments</Link>
           <Link href="/admin/messages" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Messages</Link>

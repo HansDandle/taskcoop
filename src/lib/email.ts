@@ -74,12 +74,7 @@ async function sendTransactional(
   html: string,
 ) {
   if (!(await shouldNotify(userId, 'email', type))) return
-  const token = signUnsubscribeToken(userId, type)
-  const listUnsubUrl = `${APP_URL}/notifications/unsubscribe?token=${token}`
-  await send(to, subject, html, {
-    'List-Unsubscribe': `<${listUnsubUrl}>`,
-    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-  })
+  await send(to, subject, html)
 }
 
 export async function sendNewOfferEmail(userId: string, to: string, taskTitle: string, taskId: string, memberName: string, amount: number) {
