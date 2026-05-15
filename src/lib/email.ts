@@ -43,7 +43,7 @@ function p(text: string) {
   return `<p style="margin:0 0 12px;font-size:15px;color:#44403c;line-height:1.6">${text}</p>`
 }
 
-async function send(to: string, subject: string, html: string, headers?: Record<string, string>) {
+export async function send(to: string, subject: string, html: string, headers?: Record<string, string>) {
   if (!process.env.BREVO_API_KEY) return
   try {
     await fetch('https://api.brevo.com/v3/smtp/email', {

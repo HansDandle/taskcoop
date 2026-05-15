@@ -46,6 +46,7 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/tasks" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Tasks</Link>
           <Link href="/admin/payments" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Payments</Link>
           <Link href="/admin/messages" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Messages</Link>
+          <Link href="/admin/email" className="border border-stone-200 px-4 py-2 rounded-md hover:bg-stone-50 transition-colors">Email blast</Link>
         </div>
       </div>
 
