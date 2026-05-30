@@ -30,15 +30,20 @@ CREATE TABLE public.categories (
 -- TASKS
 CREATE TABLE public.tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  customer_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
-  category_id UUID NOT NULL REFERENCES public.categories(id),
+  category_id UUID REFERENCES public.categories(id),
   budget NUMERIC(10, 2),
   status task_status NOT NULL DEFAULT 'open',
   location_point JSONB,
   zip_code TEXT,
   preferred_time TEXT,
+  -- Nextdoor / external sourcing
+  source TEXT NOT NULL DEFAULT 'direct',
+  external_id TEXT,
+  external_url TEXT,
+  claim_token UUID DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -105,8 +110,22 @@ CREATE POLICY "Categories are viewable by everyone." ON public.categories FOR SE
 
 -- Tasks
 CREATE POLICY "Tasks are viewable by everyone." ON public.tasks FOR SELECT USING (true);
-CREATE POLICY "Customers can create tasks." ON public.tasks FOR INSERT WITH CHECK (auth.uid() = customer_id AND EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'customer'));
+CREATE POLICY "Customers can create tasks." ON public.tasks FOR INSERT WITH CHECK (
+  (
+    auth.uid() = customer_id
+    AND EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'customer')
+  )
+  OR
+  (
+    customer_id IS NULL
+    AND source = 'nextdoor'
+    AND EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'worker')
+  )
+);
 CREATE POLICY "Customers can update own tasks." ON public.tasks FOR UPDATE USING (auth.uid() = customer_id);
+CREATE POLICY "Users can claim unclaimed sourced tasks." ON public.tasks FOR UPDATE
+  USING (customer_id IS NULL AND source = 'nextdoor')
+  WITH CHECK (auth.uid() = customer_id);
 
 -- Task Images
 CREATE POLICY "Task images are viewable by everyone." ON public.task_images FOR SELECT USING (true);
@@ -114,6 +133,9 @@ CREATE POLICY "Customers can insert images for their tasks." ON public.task_imag
 
 -- Offers
 CREATE POLICY "Offers are viewable by task owner and offer creator." ON public.offers FOR SELECT USING (auth.uid() = worker_id OR EXISTS (SELECT 1 FROM public.tasks WHERE id = task_id AND customer_id = auth.uid()));
+CREATE POLICY "Offers on unclaimed sourced tasks are publicly readable." ON public.offers FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.tasks WHERE id = task_id AND customer_id IS NULL AND source = 'nextdoor')
+);
 CREATE POLICY "Workers can create offers." ON public.offers FOR INSERT WITH CHECK (auth.uid() = worker_id AND EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'worker'));
 CREATE POLICY "Workers can update own pending offers." ON public.offers FOR UPDATE USING (auth.uid() = worker_id AND status = 'pending');
 CREATE POLICY "Customers can update offer status." ON public.offers FOR UPDATE USING (EXISTS (SELECT 1 FROM public.tasks WHERE id = task_id AND customer_id = auth.uid()));

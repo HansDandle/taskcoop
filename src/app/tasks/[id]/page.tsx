@@ -22,10 +22,10 @@ export default async function TaskDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ posted?: string }>
+  searchParams: Promise<{ posted?: string; claim?: string }>
 }) {
   const { id } = await params
-  const { posted } = await searchParams
+  const { posted, claim: claimToken } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -56,10 +56,12 @@ export default async function TaskDetailPage({
   const [
     { count: customerTaskCount },
     { data: customerReviews },
-  ] = await Promise.all([
-    supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('customer_id', task.customer_id),
-    supabase.from('reviews').select('rating').eq('reviewee_id', task.customer_id),
-  ])
+  ] = task.customer_id
+    ? await Promise.all([
+        supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('customer_id', task.customer_id),
+        supabase.from('reviews').select('rating').eq('reviewee_id', task.customer_id),
+      ])
+    : [{ count: null }, { data: null }]
   const customerAvgRating = customerReviews?.length
     ? customerReviews.reduce((s, r) => s + r.rating, 0) / customerReviews.length
     : null
@@ -79,6 +81,21 @@ export default async function TaskDetailPage({
         jobCount: (completedOffers ?? []).filter(o => o.worker_id === wid).length,
       }
     }
+  }
+
+  // Validate claim token for sourced tasks (token never exposed to client)
+  let claimTokenValid = false
+  if (claimToken && task.source === 'nextdoor' && task.customer_id === null) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: tokenRow } = await admin
+      .from('tasks')
+      .select('id')
+      .eq('id', id)
+      .eq('claim_token', claimToken)
+      .is('customer_id', null)
+      .maybeSingle()
+    claimTokenValid = !!tokenRow
   }
 
   let currentUserProfile = null
@@ -134,6 +151,67 @@ export default async function TaskDetailPage({
           <p className="text-emerald-700 text-xs mt-1">
             Members in Austin can now see it and send you offers. You&apos;ll get an email as soon as the first offer comes in.
           </p>
+        </div>
+      )}
+
+      {/* Claim flow for Nextdoor-sourced tasks */}
+      {task.source === 'nextdoor' && task.customer_id === null && claimTokenValid && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg px-5 py-5">
+          <p className="font-semibold text-blue-900 text-sm mb-1">
+            A TaskCoop member saw your Nextdoor post and made you an offer
+          </p>
+          <p className="text-blue-800 text-sm mb-4">
+            Below you&apos;ll see their offer, price, and profile. Payment is held in escrow — you pay nothing until you mark the job complete. To accept, create a free account.
+          </p>
+          {user ? (
+            <form
+              action={async (formData: FormData) => {
+                'use server'
+                const { claimTask } = await import('./actions')
+                await claimTask(formData)
+              }}
+            >
+              <input type="hidden" name="task_id" value={task.id} />
+              <input type="hidden" name="claim_token" value={claimToken!} />
+              <button
+                type="submit"
+                className="bg-blue-600 text-white text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Claim this task
+              </button>
+            </form>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={`/signup?next=/tasks/${task.id}?claim=${claimToken}`}
+                className="bg-blue-600 text-white text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Create free account to accept
+              </Link>
+              <Link
+                href={`/login?next=/tasks/${task.id}?claim=${claimToken}`}
+                className="border border-blue-300 text-blue-700 text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-100 transition-colors"
+              >
+                Sign in
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {task.source === 'nextdoor' && task.external_url && (
+        <div className="mb-4 flex items-center gap-2 text-xs text-stone-500">
+          <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
+            Nextdoor
+          </span>
+          <a
+            href={task.external_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            View original post →
+          </a>
         </div>
       )}
 
@@ -314,29 +392,41 @@ export default async function TaskDetailPage({
 
           <div className="bg-white border border-stone-200 rounded-lg p-5">
             <div className="text-xs text-stone-500 mb-2">Posted by</div>
-            <div className="flex items-center gap-3">
-              {(task.users as any)?.avatar_url ? (
-                <img src={(task.users as any).avatar_url} className="w-9 h-9 rounded-full object-cover" alt="" />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-stone-200 flex items-center justify-center text-sm font-bold text-stone-600">
-                  {(task.users as any)?.name?.[0]?.toUpperCase()}
+            {task.customer_id === null ? (
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-sm">
+                  ND
                 </div>
-              )}
-              <div>
-                <Link href={`/customers/${task.customer_id}`} className="font-medium text-stone-900 hover:underline text-sm block">
-                  {(() => {
-                    const fullName = (task.users as any)?.name ?? ''
-                    if (isOwner || isAcceptedWorker) return fullName
-                    const parts = fullName.split(' ')
-                    return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : fullName
-                  })()}
-                </Link>
-                <div className="text-xs text-stone-500 mt-0.5">
-                  {customerTaskCount ?? 0} task{customerTaskCount !== 1 ? 's' : ''}
-                  {customerAvgRating !== null && ` · ${customerAvgRating.toFixed(1)}★`}
+                <div>
+                  <span className="font-medium text-stone-700 text-sm block">Nextdoor neighbor</span>
+                  <div className="text-xs text-stone-500 mt-0.5">Unclaimed task</div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                {(task.users as any)?.avatar_url ? (
+                  <img src={(task.users as any).avatar_url} className="w-9 h-9 rounded-full object-cover" alt="" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-stone-200 flex items-center justify-center text-sm font-bold text-stone-600">
+                    {(task.users as any)?.name?.[0]?.toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <Link href={`/customers/${task.customer_id}`} className="font-medium text-stone-900 hover:underline text-sm block">
+                    {(() => {
+                      const fullName = (task.users as any)?.name ?? ''
+                      if (isOwner || isAcceptedWorker) return fullName
+                      const parts = fullName.split(' ')
+                      return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : fullName
+                    })()}
+                  </Link>
+                  <div className="text-xs text-stone-500 mt-0.5">
+                    {customerTaskCount ?? 0} task{customerTaskCount !== 1 ? 's' : ''}
+                    {customerAvgRating !== null && ` · ${customerAvgRating.toFixed(1)}★`}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {isOwner && task.status === 'open' && (

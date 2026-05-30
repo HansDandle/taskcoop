@@ -1,0 +1,85 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+
+type SourcedTaskInput = {
+  title: string
+  body: string
+  externalId: string
+  externalUrl: string
+  neighborhood: string
+  amount: number
+  message?: string
+}
+
+export async function createSourcedTask(
+  input: SourcedTaskInput,
+): Promise<{ taskId: string } | { error: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'You must be signed in.' }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role, stripe_onboarded')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'worker') return { error: 'Only members can offer on Nextdoor posts.' }
+  if (!profile?.stripe_onboarded) return { error: 'Set up payouts before submitting offers.' }
+
+  if (!input.amount || input.amount < 5) return { error: 'Offer must be at least $5.' }
+
+  // If this Nextdoor post was already imported, reuse the task
+  const { data: existing } = await supabase
+    .from('tasks')
+    .select('id')
+    .eq('external_id', input.externalId)
+    .eq('source', 'nextdoor')
+    .maybeSingle()
+
+  let taskId: string
+
+  if (existing) {
+    taskId = existing.id
+
+    const { data: existingOffer } = await supabase
+      .from('offers')
+      .select('id')
+      .eq('task_id', taskId)
+      .eq('worker_id', user.id)
+      .maybeSingle()
+
+    if (existingOffer) return { taskId }
+  } else {
+    const { data: task, error: taskError } = await supabase
+      .from('tasks')
+      .insert({
+        customer_id: null,
+        title: input.title,
+        description: input.body,
+        source: 'nextdoor',
+        external_id: input.externalId,
+        external_url: input.externalUrl,
+        status: 'open',
+      })
+      .select('id')
+      .single()
+
+    if (taskError || !task) return { error: 'Failed to create task.' }
+    taskId = task.id
+  }
+
+  const { error: offerError } = await supabase
+    .from('offers')
+    .insert({
+      task_id: taskId,
+      worker_id: user.id,
+      amount: input.amount,
+      message: input.message ?? null,
+    })
+
+  if (offerError) return { error: 'Failed to submit offer.' }
+
+  return { taskId }
+}
