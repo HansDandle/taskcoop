@@ -1,7 +1,12 @@
 'use client'
 
-import { useState, useTransition, useCallback } from 'react'
+import { useState, useTransition, useCallback, useRef } from 'react'
 import { previewRecipients, sendBlast, type BlastFilters } from './actions'
+
+const TOKENS = [
+  { label: '{{name}}', description: "Recipient's name" },
+  { label: '{{email}}', description: "Recipient's email" },
+]
 
 const DEFAULT_FILTERS: BlastFilters = {
   role: 'all',
@@ -20,6 +25,27 @@ export default function EmailBlastComposer() {
   const [error, setError] = useState<string | null>(null)
   const [isPreviewing, startPreview] = useTransition()
   const [isSending, startSend] = useTransition()
+  const bodyRef = useRef<HTMLTextAreaElement>(null)
+
+  function insertToken(token: string, field: 'subject' | 'body') {
+    if (field === 'subject') {
+      const el = document.querySelector<HTMLInputElement>('input[name="subject"]')
+      if (!el) return
+      const start = el.selectionStart ?? subject.length
+      const end = el.selectionEnd ?? subject.length
+      const next = subject.slice(0, start) + token + subject.slice(end)
+      setSubject(next)
+      requestAnimationFrame(() => { el.focus(); el.setSelectionRange(start + token.length, start + token.length) })
+    } else {
+      const el = bodyRef.current
+      if (!el) return
+      const start = el.selectionStart ?? body.length
+      const end = el.selectionEnd ?? body.length
+      const next = body.slice(0, start) + token + body.slice(end)
+      setBody(next)
+      requestAnimationFrame(() => { el.focus(); el.setSelectionRange(start + token.length, start + token.length) })
+    }
+  }
 
   const handlePreview = useCallback(() => {
     setError(null)
@@ -127,17 +153,36 @@ export default function EmailBlastComposer() {
 
       {/* Composer */}
       <section className="bg-white border border-stone-200 rounded-lg p-6">
-        <h2 className="text-sm font-semibold text-stone-700 mb-4">Compose</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-stone-700">Compose</h2>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-stone-400 mr-1">Insert:</span>
+            {TOKENS.map(t => (
+              <div key={t.label} className="flex gap-px">
+                <button type="button" title={`Insert into subject: ${t.description}`}
+                  onClick={() => insertToken(t.label, 'subject')}
+                  className="text-xs bg-stone-100 hover:bg-stone-200 text-stone-600 px-2 py-1 rounded-l font-mono border border-stone-200 border-r-0">
+                  {t.label}
+                </button>
+                <button type="button" title={`Insert into body: ${t.description}`}
+                  onClick={() => insertToken(t.label, 'body')}
+                  className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-1.5 py-1 rounded-r border border-emerald-200 font-medium">
+                  body
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="space-y-4">
           <div>
             <label className="block text-xs text-stone-500 mb-1">Subject</label>
-            <input value={subject} onChange={e => setSubject(e.target.value)}
+            <input name="subject" value={subject} onChange={e => setSubject(e.target.value)}
               placeholder="Subject line…"
               className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
           <div>
             <label className="block text-xs text-stone-500 mb-1">Body</label>
-            <textarea value={body} onChange={e => setBody(e.target.value)}
+            <textarea ref={bodyRef} value={body} onChange={e => setBody(e.target.value)}
               rows={10} placeholder="Write your message here. Plain text only — line breaks are preserved."
               className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono resize-y" />
           </div>

@@ -21,7 +21,7 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
   const isProtected = PROTECTED.some(p => pathname.startsWith(p))
@@ -30,7 +30,15 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('next', pathname)
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    if (error) {
+      for (const cookie of request.cookies.getAll()) {
+        if (cookie.name.startsWith('sb-')) {
+          redirect.cookies.delete(cookie.name)
+        }
+      }
+    }
+    return redirect
   }
 
   return supabaseResponse

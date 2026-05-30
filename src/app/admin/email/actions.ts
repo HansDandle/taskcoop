@@ -58,7 +58,12 @@ export async function sendBlast(filters: BlastFilters, subject: string, body: st
   const { data } = await buildQuery(filters).limit(500)
   if (!data?.length) return { sent: 0, error: 'No recipients match these filters.' }
 
-  const html = `<!DOCTYPE html>
+  function interpolate(template: string, name: string, email: string) {
+    return template.replaceAll('{{name}}', name).replaceAll('{{email}}', email)
+  }
+
+  function buildHtml(bodyText: string) {
+    return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#fafaf9;font-family:system-ui,sans-serif">
@@ -66,16 +71,20 @@ export async function sendBlast(filters: BlastFilters, subject: string, body: st
     <div style="padding:20px 24px;border-bottom:1px solid #e7e5e4">
       <span style="font-size:18px;font-weight:600;color:#1c1917">task<span style="color:#16a34a">.coop</span></span>
     </div>
-    <div style="padding:24px;font-size:15px;color:#44403c;line-height:1.6;white-space:pre-wrap">${body}</div>
+    <div style="padding:24px;font-size:15px;color:#44403c;line-height:1.6;white-space:pre-wrap">${bodyText}</div>
     <div style="padding:16px 24px;border-top:1px solid #e7e5e4;font-size:12px;color:#a8a29e">Member-owned local services marketplace · Austin, TX</div>
   </div>
 </body>
 </html>`
+  }
 
   let sent = 0
   for (const user of data) {
     if (!user.email) continue
-    await send(user.email, subject, html)
+    const name = user.name ?? ''
+    const personalizedSubject = interpolate(subject, name, user.email)
+    const personalizedBody = interpolate(body, name, user.email)
+    await send(user.email, personalizedSubject, buildHtml(personalizedBody))
     sent++
   }
 
