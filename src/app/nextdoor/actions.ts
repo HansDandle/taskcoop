@@ -29,7 +29,9 @@ export async function createSourcedTask(
   if (!profile?.stripe_onboarded) return { error: 'Set up payouts before submitting offers.' }
   if (!input.amount || input.amount < 5) return { error: 'Offer must be at least $5.' }
 
-  // Each worker gets their own stub — no deduplication across workers
+  // Each worker gets their own stub. No deduplication: if two workers offer on
+  // the same Nextdoor post, they each get an independent task with their own
+  // claim URL. The OP picks one; the other stays pending in the other worker's leads.
   const { data: task, error: taskError } = await supabase
     .from('tasks')
     .insert({

@@ -269,7 +269,8 @@ export async function openTaskToAll(formData: FormData) {
 
   if (!tokenRow) return { error: 'Invalid claim.' }
 
-  // Guard: sourcing worker must not be a paying member (they get exclusivity)
+  // Paying members get exclusivity on their sourced leads as a subscription perk.
+  // Re-check here even though the UI hides the button — the action is the source of truth.
   if (tokenRow.sourced_by_worker_id) {
     const { data: sourcingWorker } = await admin
       .from('users')

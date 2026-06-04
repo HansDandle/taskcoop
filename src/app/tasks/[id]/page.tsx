@@ -83,7 +83,10 @@ export default async function TaskDetailPage({
     }
   }
 
-  // Validate claim token for sourced tasks (token never exposed to client)
+  // Validate claim token server-side using the service role client.
+  // The anon client can't be used here because claim_token is a public column
+  // (tasks are readable by everyone) — we use the admin client purely to avoid
+  // surfacing the token in client-rendered HTML or as a serialized prop.
   let claimTokenValid = false
   let sourcingWorkerIsSubscribed = false
   if (claimToken && task.source === 'nextdoor' && task.customer_id === null) {
