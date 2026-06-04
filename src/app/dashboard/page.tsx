@@ -10,6 +10,7 @@ import BadgeList from '@/components/badge-list'
 import { computeBadges } from '@/lib/badges'
 import InstallTile from '@/components/install-tile'
 import PushToggle from '@/components/push-toggle'
+import CopyButton from '@/components/copy-button'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -243,6 +244,15 @@ export default async function DashboardPage({
     .order('created_at', { ascending: false })
     .limit(50)
 
+  // Nextdoor leads — task stubs this worker sourced that haven't been claimed yet
+  const { data: nextdoorLeads } = await supabase
+    .from('tasks')
+    .select('id, title, created_at, claim_token, external_url, customer_id, offers(amount)')
+    .eq('source', 'nextdoor')
+    .eq('sourced_by_worker_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
   // Referral slots — generate lazily if none exist
   let { data: referralSlots } = await supabase
     .from('referral_slots')
@@ -409,6 +419,53 @@ export default async function DashboardPage({
               Browse open tasks
             </Link>
           </div>
+        )}
+
+        {(nextdoorLeads?.length ?? 0) > 0 && (
+          <Section
+            title="Nextdoor leads"
+            cta={<Link href="/nextdoor" className="text-xs text-emerald-600 hover:underline">Browse feed</Link>}
+          >
+            {(nextdoorLeads ?? []).map(lead => {
+              const pending = lead.customer_id === null
+              const offerAmount = (lead.offers as any)?.[0]?.amount
+              const claimUrl = pending && lead.claim_token
+                ? `${APP_URL}/tasks/${lead.id}?claim=${lead.claim_token}`
+                : null
+              return (
+                <div key={lead.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/tasks/${lead.id}`} className="font-medium text-stone-900 text-sm hover:underline truncate block">
+                      {lead.title}
+                    </Link>
+                    <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-500">
+                      <span>{formatRelativeDate(lead.created_at)}</span>
+                      {offerAmount && <span>· ${offerAmount}</span>}
+                      {lead.external_url && (
+                        <a href={lead.external_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          · Nextdoor post
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {pending ? (
+                      <>
+                        <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                          awaiting response
+                        </span>
+                        {claimUrl && <CopyButton text={claimUrl} label="Copy link" />}
+                      </>
+                    ) : (
+                      <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        converted
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </Section>
         )}
 
         <Section

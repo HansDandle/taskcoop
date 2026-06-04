@@ -14,7 +14,7 @@ type SourcedTaskInput = {
 
 export async function createSourcedTask(
   input: SourcedTaskInput,
-): Promise<{ taskId: string } | { error: string }> {
+): Promise<{ taskId: string; claimToken: string } | { error: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'You must be signed in.' }
@@ -27,53 +27,30 @@ export async function createSourcedTask(
 
   if (profile?.role !== 'worker') return { error: 'Only members can offer on Nextdoor posts.' }
   if (!profile?.stripe_onboarded) return { error: 'Set up payouts before submitting offers.' }
-
   if (!input.amount || input.amount < 5) return { error: 'Offer must be at least $5.' }
 
-  // If this Nextdoor post was already imported, reuse the task
-  const { data: existing } = await supabase
+  // Each worker gets their own stub — no deduplication across workers
+  const { data: task, error: taskError } = await supabase
     .from('tasks')
-    .select('id')
-    .eq('external_id', input.externalId)
-    .eq('source', 'nextdoor')
-    .maybeSingle()
+    .insert({
+      customer_id: null,
+      title: input.title,
+      description: input.body,
+      source: 'nextdoor',
+      external_id: input.externalId,
+      external_url: input.externalUrl,
+      sourced_by_worker_id: user.id,
+      status: 'open',
+    })
+    .select('id, claim_token')
+    .single()
 
-  let taskId: string
-
-  if (existing) {
-    taskId = existing.id
-
-    const { data: existingOffer } = await supabase
-      .from('offers')
-      .select('id')
-      .eq('task_id', taskId)
-      .eq('worker_id', user.id)
-      .maybeSingle()
-
-    if (existingOffer) return { taskId }
-  } else {
-    const { data: task, error: taskError } = await supabase
-      .from('tasks')
-      .insert({
-        customer_id: null,
-        title: input.title,
-        description: input.body,
-        source: 'nextdoor',
-        external_id: input.externalId,
-        external_url: input.externalUrl,
-        status: 'open',
-      })
-      .select('id')
-      .single()
-
-    if (taskError || !task) return { error: 'Failed to create task.' }
-    taskId = task.id
-  }
+  if (taskError || !task) return { error: 'Failed to create task.' }
 
   const { error: offerError } = await supabase
     .from('offers')
     .insert({
-      task_id: taskId,
+      task_id: task.id,
       worker_id: user.id,
       amount: input.amount,
       message: input.message ?? null,
@@ -81,5 +58,5 @@ export async function createSourcedTask(
 
   if (offerError) return { error: 'Failed to submit offer.' }
 
-  return { taskId }
+  return { taskId: task.id, claimToken: task.claim_token }
 }

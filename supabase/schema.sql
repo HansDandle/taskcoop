@@ -13,7 +13,8 @@ CREATE TABLE public.users (
   bio TEXT,
   avatar_url TEXT,
   stripe_account_id TEXT,
-  location_point JSONB, -- Storing as JSONB for simplicity if PostGIS is not enabled, or you can use PostGIS extension later
+  location_point JSONB,
+  subscription_active BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -44,6 +45,7 @@ CREATE TABLE public.tasks (
   external_id TEXT,
   external_url TEXT,
   claim_token UUID DEFAULT gen_random_uuid(),
+  sourced_by_worker_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

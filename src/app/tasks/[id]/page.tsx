@@ -85,17 +85,26 @@ export default async function TaskDetailPage({
 
   // Validate claim token for sourced tasks (token never exposed to client)
   let claimTokenValid = false
+  let sourcingWorkerIsSubscribed = false
   if (claimToken && task.source === 'nextdoor' && task.customer_id === null) {
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const admin = createAdminClient()
     const { data: tokenRow } = await admin
       .from('tasks')
-      .select('id')
+      .select('id, sourced_by_worker_id')
       .eq('id', id)
       .eq('claim_token', claimToken)
       .is('customer_id', null)
       .maybeSingle()
     claimTokenValid = !!tokenRow
+    if (tokenRow?.sourced_by_worker_id) {
+      const { data: sourcingWorker } = await admin
+        .from('users')
+        .select('subscription_active')
+        .eq('id', tokenRow.sourced_by_worker_id)
+        .single()
+      sourcingWorkerIsSubscribed = !!sourcingWorker?.subscription_active
+    }
   }
 
   let currentUserProfile = null
@@ -164,36 +173,63 @@ export default async function TaskDetailPage({
             Below you&apos;ll see their offer, price, and profile. Payment is held in escrow — you pay nothing until you mark the job complete. To accept, create a free account.
           </p>
           {user ? (
-            <form
-              action={async (formData: FormData) => {
-                'use server'
-                const { claimTask } = await import('./actions')
-                await claimTask(formData)
-              }}
-            >
-              <input type="hidden" name="task_id" value={task.id} />
-              <input type="hidden" name="claim_token" value={claimToken!} />
-              <button
-                type="submit"
-                className="bg-blue-600 text-white text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Claim this task
-              </button>
-            </form>
-          ) : (
             <div className="flex flex-wrap gap-3">
-              <Link
-                href={`/signup?next=/tasks/${task.id}?claim=${claimToken}`}
-                className="bg-blue-600 text-white text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+              <form
+                action={async (formData: FormData) => {
+                  'use server'
+                  const { claimTask } = await import('./actions')
+                  await claimTask(formData)
+                }}
               >
-                Create free account to accept
-              </Link>
-              <Link
-                href={`/login?next=/tasks/${task.id}?claim=${claimToken}`}
-                className="border border-blue-300 text-blue-700 text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-100 transition-colors"
-              >
-                Sign in
-              </Link>
+                <input type="hidden" name="task_id" value={task.id} />
+                <input type="hidden" name="claim_token" value={claimToken!} />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Accept this offer
+                </button>
+              </form>
+              {!sourcingWorkerIsSubscribed && (
+                <form
+                  action={async (formData: FormData) => {
+                    'use server'
+                    const { openTaskToAll } = await import('./actions')
+                    await openTaskToAll(formData)
+                  }}
+                >
+                  <input type="hidden" name="task_id" value={task.id} />
+                  <input type="hidden" name="claim_token" value={claimToken!} />
+                  <button
+                    type="submit"
+                    className="border border-blue-300 text-blue-700 text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-100 transition-colors"
+                  >
+                    Open to all TaskCoop members
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href={`/signup?next=/tasks/${task.id}%3Fclaim%3D${claimToken}`}
+                  className="bg-blue-600 text-white text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Create free account to accept
+                </Link>
+                <Link
+                  href={`/login?next=/tasks/${task.id}%3Fclaim%3D${claimToken}`}
+                  className="border border-blue-300 text-blue-700 text-sm px-5 py-2.5 rounded-md font-semibold hover:bg-blue-100 transition-colors"
+                >
+                  Sign in
+                </Link>
+              </div>
+              {!sourcingWorkerIsSubscribed && (
+                <p className="text-xs text-blue-700">
+                  Or <Link href={`/signup?next=/tasks/${task.id}%3Fclaim%3D${claimToken}%26opentoall%3D1`} className="underline">create an account and open it to all TaskCoop members</Link> to receive competing offers.
+                </p>
+              )}
             </div>
           )}
         </div>

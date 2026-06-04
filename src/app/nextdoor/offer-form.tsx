@@ -32,13 +32,14 @@ export default function NextdoorOfferForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [taskId, setTaskId] = useState<string | null>(null)
+  const [claimToken, setClaimToken] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   const bioExcerpt = profile.bio
     ? profile.bio.slice(0, 120) + (profile.bio.length > 120 ? '…' : '')
     : 'a verified TaskCoop member'
 
-  const taskUrl = taskId ? `${APP_URL}/tasks/${taskId}` : ''
+  const taskUrl = taskId && claimToken ? `${APP_URL}/tasks/${taskId}?claim=${claimToken}` : ''
 
   const replyText = taskId
     ? `Book me: ${taskUrl}\n\nI'm ${bioExcerpt} and I'll do it for $${amount}. Payment is escrowed — you pay nothing until you mark the job complete.${profile.id_verified ? ' My ID is also verified by TaskCoop.' : ''}`
@@ -65,6 +66,7 @@ export default function NextdoorOfferForm({
       setError(result.error)
     } else {
       setTaskId(result.taskId)
+      setClaimToken(result.claimToken)
     }
   }
 

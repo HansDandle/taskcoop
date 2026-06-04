@@ -246,6 +246,53 @@ export async function cancelTask(formData: FormData) {
   return updateTaskStatus('cancelled', formData)
 }
 
+export async function openTaskToAll(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'You must be signed in.' }
+
+  const task_id = formData.get('task_id') as string
+  const claim_token = formData.get('claim_token') as string
+
+  if (!task_id || !claim_token) return { error: 'Invalid request.' }
+
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const admin = createAdminClient()
+
+  const { data: tokenRow } = await admin
+    .from('tasks')
+    .select('id, sourced_by_worker_id')
+    .eq('id', task_id)
+    .eq('claim_token', claim_token)
+    .is('customer_id', null)
+    .maybeSingle()
+
+  if (!tokenRow) return { error: 'Invalid claim.' }
+
+  // Guard: sourcing worker must not be a paying member (they get exclusivity)
+  if (tokenRow.sourced_by_worker_id) {
+    const { data: sourcingWorker } = await admin
+      .from('users')
+      .select('subscription_active')
+      .eq('id', tokenRow.sourced_by_worker_id)
+      .single()
+
+    if (sourcingWorker?.subscription_active) {
+      return { error: 'This offer is exclusive to the member who found it.' }
+    }
+  }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({ customer_id: user.id, claim_token: null })
+    .eq('id', task_id)
+    .is('customer_id', null)
+
+  if (error) return { error: 'Failed to open task.' }
+
+  revalidatePath(`/tasks/${task_id}`)
+}
+
 export async function claimTask(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
