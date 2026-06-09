@@ -1,5 +1,4 @@
-// Change to 'https://taskcoop.org' for production
-const TASKCOOP_URL = 'http://localhost:3000'
+const TASKCOOP_URL = 'https://taskcoop.org'
 
 let allLeads = []
 let activePlatform = 'all'
