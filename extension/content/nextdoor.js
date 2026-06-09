@@ -34,7 +34,7 @@ function extractPosts() {
     const postPath = postLinkEl?.getAttribute('href')
     const url = postPath
       ? new URL(postPath, 'https://nextdoor.com').href
-      : `https://nextdoor.com/search/?query=${encodeURIComponent(text.slice(0, 80).trim())}`
+      : `https://nextdoor.com/search/posts/?query=${encodeURIComponent(text.slice(0, 80).trim())}`
 
     found.push({
       id,
