@@ -42,7 +42,7 @@ export default function NextdoorOfferForm({
   const taskUrl = taskId && claimToken ? `${APP_URL}/tasks/${taskId}?claim=${claimToken}` : ''
 
   const replyText = taskId
-    ? `Book me: ${taskUrl}\n\nI'm ${bioExcerpt} and I'll do it for $${amount}. Payment is escrowed — you pay nothing until you mark the job complete.${profile.id_verified ? ' My ID is also verified by TaskCoop.' : ''}`
+    ? `Book me: ${taskUrl}\n\nI'm ${bioExcerpt} and I'll do it for $${amount}. Payment is escrowed — you pay nothing until you mark the job complete.${profile.id_verified ? ' My ID is also verified by TaskCoop.' : ''}${message.trim() ? `\n\n${message.trim()}` : ''}`
     : ''
 
   async function handleSubmit(e: React.FormEvent) {

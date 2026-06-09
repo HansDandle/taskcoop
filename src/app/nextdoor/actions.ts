@@ -47,7 +47,10 @@ export async function createSourcedTask(
     .select('id, claim_token')
     .single()
 
-  if (taskError || !task) return { error: 'Failed to create task.' }
+  if (taskError || !task) {
+    console.error('[createSourcedTask] insert error:', taskError)
+    return { error: 'Failed to create task.' }
+  }
 
   const { error: offerError } = await supabase
     .from('offers')
