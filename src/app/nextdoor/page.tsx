@@ -190,7 +190,11 @@ function PostCard({
   )
 }
 
-export default async function NextdoorFeedPage() {
+export default async function NextdoorFeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; platform?: string; title?: string; body?: string; url?: string; location?: string; id?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -204,12 +208,33 @@ export default async function NextdoorFeedPage() {
 
   if (!profile || profile.role !== 'worker') redirect('/dashboard')
 
+  const params = await searchParams
+  const fromExtension = params.from === 'extension' && params.title
+
+  // When deep-linked from the extension, show a single pre-populated post
+  // instead of the full feed so the worker can go straight to making an offer.
+  const extensionPost = fromExtension ? {
+    id: params.id ?? params.url ?? params.title!,
+    title: params.title!,
+    body: params.body ?? '',
+    category: params.platform ?? 'From extension',
+    neighborhood: params.location ?? '',
+    postedAt: 'just now',
+    reactions: 0,
+    comments: 0,
+    externalUrl: params.url ?? '',
+  } : null
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-stone-900">Nextdoor Feed</h1>
+        <h1 className="text-2xl font-bold text-stone-900">
+          {extensionPost ? 'Make an offer' : 'Nextdoor Feed'}
+        </h1>
         <p className="text-stone-500 text-sm mt-1">
-          Local task requests from your neighbors — offer to help and route the job through TaskCoop.
+          {extensionPost
+            ? 'Post found by the Lead Finder extension.'
+            : 'Local task requests from your neighbors — offer to help and route the job through TaskCoop.'}
         </p>
       </div>
 
@@ -223,20 +248,26 @@ export default async function NextdoorFeedPage() {
         </div>
       )}
 
-      <HowItWorks profile={profile} />
+      {extensionPost ? (
+        <PostCard post={extensionPost} profile={profile} />
+      ) : (
+        <>
+          <HowItWorks profile={profile} />
 
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900">Nearby posts</h2>
-        <span className="text-xs bg-stone-100 text-stone-500 px-2 py-1 rounded-full">
-          Sample posts — live feed coming soon
-        </span>
-      </div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-stone-900">Nearby posts</h2>
+            <span className="text-xs bg-stone-100 text-stone-500 px-2 py-1 rounded-full">
+              Sample posts — live feed coming soon
+            </span>
+          </div>
 
-      <div className="space-y-4">
-        {MOCK_POSTS.map(post => (
-          <PostCard key={post.id} post={post} profile={profile} />
-        ))}
-      </div>
+          <div className="space-y-4">
+            {MOCK_POSTS.map(post => (
+              <PostCard key={post.id} post={post} profile={profile} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

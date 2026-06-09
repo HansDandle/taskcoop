@@ -488,6 +488,7 @@ export default async function DashboardPage({
         <Link href="/profile" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Edit profile</Link>
         <Link href={`/workers/${user.id}`} className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Public profile</Link>
         <Link href="/messages" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Messages</Link>
+        <Link href="/extension" className="border border-emerald-300 text-emerald-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-50 transition-colors">Get Lead Finder extension</Link>
       </div>
 
       <div className="mt-6 space-y-3">
