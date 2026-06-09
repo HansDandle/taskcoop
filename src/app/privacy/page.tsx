@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-14 prose prose-stone">
       <h1>Privacy Policy</h1>
-      <p className="text-stone-500 text-sm">Last updated: May 2026</p>
+      <p className="text-stone-500 text-sm">Last updated: June 2026</p>
 
       <p>
         This Privacy Policy describes how task.coop ("we," "us," or "our") collects, uses, and shares information
@@ -129,14 +129,27 @@ export default function PrivacyPage() {
         <a href="mailto:privacy@taskcoop.org">privacy@taskcoop.org</a>. We will respond within 30 days.
       </p>
 
-      <h2>8. Children's Privacy</h2>
+      <h2>8. Lead Finder Browser Extension</h2>
+      <p>
+        The TaskCoop Lead Finder is a browser extension available for Chrome and Firefox. Its data practices differ
+        from the Platform and are described here separately.
+      </p>
+      <ul>
+        <li><strong>What it reads:</strong> The extension reads the visible text of posts on Nextdoor, Facebook Groups, Craigslist, and Reddit as you browse those sites normally. It scores each post against a list of task-related keywords to determine relevance.</li>
+        <li><strong>What it stores:</strong> Matching posts are stored in your browser's local extension storage (<code>chrome.storage.local</code>). This data never leaves your device.</li>
+        <li><strong>What it transmits:</strong> The extension transmits nothing to task.coop servers. If you click "Offer to help," your browser navigates to task.coop with the post title, body, and source URL as URL parameters. No data is sent silently or in the background.</li>
+        <li><strong>Credentials:</strong> The extension does not access, read, or transmit your Nextdoor, Facebook, Craigslist, or Reddit credentials or session data.</li>
+        <li><strong>Browsing history:</strong> The extension does not collect or transmit your browsing history.</li>
+      </ul>
+
+      <h2>9. Children's Privacy</h2>
       <p>
         task.coop is intended for users who are 18 years of age or older. We do not knowingly collect personal
         information from anyone under 18. If we learn that we have collected information from a minor, we will
         delete it promptly.
       </p>
 
-      <h2>9. Changes to This Policy</h2>
+      <h2>10. Changes to This Policy</h2>
       <p>
         We may update this Privacy Policy from time to time. We will notify you of material changes by posting the
         updated policy on this page with a new "Last updated" date. Your continued use of the Platform after changes
