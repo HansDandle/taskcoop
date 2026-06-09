@@ -11,6 +11,7 @@ import { computeBadges } from '@/lib/badges'
 import InstallTile from '@/components/install-tile'
 import PushToggle from '@/components/push-toggle'
 import CopyButton from '@/components/copy-button'
+import { saveReplyTemplate } from './actions'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -442,7 +443,7 @@ export default async function DashboardPage({
                       <span>{formatRelativeDate(lead.created_at)}</span>
                       {offerAmount && <span>· ${offerAmount}</span>}
                       {lead.external_url && (
-                        <a href={lead.external_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        <a href={lead.external_url.replace('nextdoor.com/search/?', 'nextdoor.com/search/posts/?')} target="_blank" rel="noopener noreferrer" className="hover:underline">
                           · Nextdoor post
                         </a>
                       )}
@@ -466,6 +467,36 @@ export default async function DashboardPage({
               )
             })}
           </Section>
+        )}
+
+        {profile.role === 'worker' && (
+          <details className="bg-white border border-stone-200 rounded-lg overflow-hidden">
+            <summary className="px-5 py-4 cursor-pointer list-none flex items-center justify-between">
+              <span className="font-semibold text-stone-900 text-sm">Offer reply template</span>
+              <span className="text-xs text-stone-400">Customize</span>
+            </summary>
+            <form action={saveReplyTemplate} className="px-5 pb-5 space-y-3">
+              <p className="text-xs text-stone-500">
+                Variables: <code className="bg-stone-100 px-1 rounded">{'{'+'url}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'price}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'bio}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'verified}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'message}'}</code>
+              </p>
+              <textarea
+                name="reply_template"
+                rows={6}
+                defaultValue={profile.reply_template ?? ''}
+                placeholder={`Book me: {url}\n\nI'm {bio} and I'll do it for {price}. Payment is escrowed — you pay nothing until you mark the job complete.{verified}{message}`}
+                className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y"
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  className="bg-emerald-600 text-white text-sm px-4 py-2 rounded-md font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  Save template
+                </button>
+                <span className="text-xs text-stone-400">Leave blank to use the default.</span>
+              </div>
+            </form>
+          </details>
         )}
 
         <Section

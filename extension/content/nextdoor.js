@@ -1,43 +1,42 @@
 // Nextdoor is a React SPA — posts load dynamically.
 // We observe DOM mutations and re-scan whenever new content appears.
 //
-// Selectors derived from observed DOM (June 2025). Nextdoor obfuscates
-// class names but data-testid attributes are stable across deploys.
+// Selectors verified June 2026:
+//   Feed items: [data-testid^="dwell-tracker-searchFeedItem:"] (search page)
+//               [data-testid^="dwell-tracker-feedItem:"]       (news feed)
+//   Post text:  [data-testid="styled-text"]
 
 const SEEN_IDS = new Set()
 
 function extractPosts() {
   const found = []
 
-  for (const bodyEl of document.querySelectorAll('[data-testid="post-body"]')) {
-    // Walk up to the nearest ancestor that also contains author info,
-    // so we can pull the neighborhood name from the same post.
-    const container = bodyEl.closest('.cee-media-body') ?? bodyEl.parentElement
+  const containers = document.querySelectorAll(
+    '[data-testid^="dwell-tracker-searchFeedItem:"], [data-testid^="dwell-tracker-feedItem:"]'
+  )
 
-    const textEl = bodyEl.querySelector('[data-testid="styled-text"]')
-                ?? bodyEl.querySelector('.postTextBodySpan')
-    const text = textEl?.textContent?.trim() ?? bodyEl.textContent?.trim() ?? ''
+  for (const el of containers) {
+    // The UUID after the colon is Nextdoor's internal post ID — stable and unique.
+    const postId = 'nd-' + el.dataset.testid.split(':')[1]
+    if (SEEN_IDS.has(postId)) continue
+
+    const textEl = el.querySelector('[data-testid="styled-text"]')
+    const text = textEl?.textContent?.trim() ?? ''
     if (!text || scoreText(text) === 0) continue
 
-    // Stable ID from a hash of the text — no permalink available in the feed DOM.
-    const id = 'nd-' + quickHash(text.slice(0, 120))
-    if (SEEN_IDS.has(id)) continue
-    SEEN_IDS.add(id)
+    SEEN_IDS.add(postId)
 
-    const neighborhoodLink = container?.querySelector('a[href*="/neighborhood/"]')
+    const neighborhoodLink = el.querySelector('a[href*="/neighborhood/"]')
     const location = neighborhoodLink?.textContent?.trim() ?? ''
 
-    // Try to find the post permalink (/p/{id}) anywhere in the container.
-    // Nextdoor uses JS navigation so it's often absent — fall back to a
-    // search URL built from the post text, which reliably surfaces the post.
-    const postLinkEl = container?.querySelector('a[href*="/p/"]')
+    const postLinkEl = el.querySelector('a[href*="/p/"]')
     const postPath = postLinkEl?.getAttribute('href')
     const url = postPath
       ? new URL(postPath, 'https://nextdoor.com').href
       : `https://nextdoor.com/search/posts/?query=${encodeURIComponent(text.slice(0, 80).trim())}`
 
     found.push({
-      id,
+      id: postId,
       platform: 'nextdoor',
       title: text.slice(0, 100),
       body: text.slice(0, 400),
@@ -48,12 +47,6 @@ function extractPosts() {
   }
 
   sendLeads(found)
-}
-
-function quickHash(str) {
-  let h = 0
-  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0
-  return (h >>> 0).toString(36)
 }
 
 extractPosts()

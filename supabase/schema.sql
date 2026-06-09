@@ -15,6 +15,7 @@ CREATE TABLE public.users (
   stripe_account_id TEXT,
   location_point JSONB,
   subscription_active BOOLEAN NOT NULL DEFAULT FALSE,
+  reply_template TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -63,7 +64,7 @@ CREATE TABLE public.offers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   task_id UUID NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
   worker_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  amount NUMERIC(10, 2) NOT NULL,
+  amount NUMERIC(10, 2),
   message TEXT,
   status offer_status NOT NULL DEFAULT 'pending',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

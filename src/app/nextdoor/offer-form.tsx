@@ -17,6 +17,15 @@ type Profile = {
   name: string
   bio: string | null
   id_verified: boolean
+  reply_template: string | null
+}
+
+const DEFAULT_TEMPLATE = `Book me: {url}
+
+I'm {bio} and I'll do it for {price}. Payment is escrowed — you pay nothing until you mark the job complete.{verified}{message}`
+
+function applyTemplate(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '')
 }
 
 export default function NextdoorOfferForm({
@@ -35,6 +44,8 @@ export default function NextdoorOfferForm({
   const [claimToken, setClaimToken] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  const template = profile.reply_template || DEFAULT_TEMPLATE
+
   const bioExcerpt = profile.bio
     ? profile.bio.slice(0, 120) + (profile.bio.length > 120 ? '…' : '')
     : 'a verified TaskCoop member'
@@ -42,7 +53,13 @@ export default function NextdoorOfferForm({
   const taskUrl = taskId && claimToken ? `${APP_URL}/tasks/${taskId}?claim=${claimToken}` : ''
 
   const replyText = taskId
-    ? `Book me: ${taskUrl}\n\nI'm ${bioExcerpt} and I'll do it for $${amount}. Payment is escrowed — you pay nothing until you mark the job complete.${profile.id_verified ? ' My ID is also verified by TaskCoop.' : ''}${message.trim() ? `\n\n${message.trim()}` : ''}`
+    ? applyTemplate(template, {
+        url: taskUrl,
+        bio: bioExcerpt,
+        price: amount.trim() || '[price]',
+        verified: profile.id_verified ? ' My ID is also verified by TaskCoop.' : '',
+        message: message.trim() ? `\n\n${message.trim()}` : '',
+      })
     : ''
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,7 +73,7 @@ export default function NextdoorOfferForm({
       externalId: post.id,
       externalUrl: post.externalUrl,
       neighborhood: post.neighborhood,
-      amount: Number(amount),
+      amount: amount.trim() || undefined,
       message: message.trim() || undefined,
     })
 
@@ -121,16 +138,13 @@ export default function NextdoorOfferForm({
     <form onSubmit={handleSubmit} className="mt-4 border border-stone-200 rounded-lg p-4 bg-stone-50 space-y-3">
       <div>
         <label className="block text-xs font-medium text-stone-700 mb-1">
-          Your price ($)
+          Your price <span className="text-stone-400 font-normal">(optional — e.g. $60, $50–80, starting at $40)</span>
         </label>
         <input
-          type="number"
-          min="5"
-          step="1"
-          required
+          type="text"
           value={amount}
           onChange={e => setAmount(e.target.value)}
-          placeholder="e.g. 60"
+          placeholder="e.g. $60"
           className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white"
         />
       </div>

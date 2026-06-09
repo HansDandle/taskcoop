@@ -64,6 +64,21 @@ const MOCK_POSTS = [
   },
 ]
 
+function resolveNextdoorUrl(url: string | undefined, title: string): string {
+  if (!url) return `https://nextdoor.com/search/posts/?query=${encodeURIComponent(title.slice(0, 80))}`
+  try {
+    const u = new URL(url)
+    if (u.hostname !== 'nextdoor.com' && u.hostname !== 'www.nextdoor.com') return url
+    // Generic feed/search pages — build a post search from the title instead
+    if (!u.pathname.startsWith('/p/') && !u.pathname.startsWith('/search/posts')) {
+      return `https://nextdoor.com/search/posts/?query=${encodeURIComponent(title.slice(0, 80))}`
+    }
+    return url
+  } catch {
+    return url
+  }
+}
+
 function HowItWorks({ profile }: { profile: { name: string; bio: string | null; id_verified: boolean } }) {
   const bioExcerpt = profile.bio
     ? profile.bio.slice(0, 100) + (profile.bio.length > 100 ? '…' : '')
@@ -206,7 +221,7 @@ export default async function NextdoorFeedPage({
 
   const { data: profile } = await supabase
     .from('users')
-    .select('role, name, bio, id_verified, stripe_onboarded')
+    .select('role, name, bio, id_verified, stripe_onboarded, reply_template')
     .eq('id', user.id)
     .single()
 
@@ -226,7 +241,7 @@ export default async function NextdoorFeedPage({
     postedAt: 'just now',
     reactions: 0,
     comments: 0,
-    externalUrl: params.url ?? '',
+    externalUrl: resolveNextdoorUrl(params.url, params.title!),
   } : null
 
   return (

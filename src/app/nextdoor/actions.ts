@@ -8,7 +8,7 @@ type SourcedTaskInput = {
   externalId: string
   externalUrl: string
   neighborhood: string
-  amount: number
+  amount?: string
   message?: string
 }
 
@@ -27,7 +27,10 @@ export async function createSourcedTask(
 
   if (profile?.role !== 'worker') return { error: 'Only members can offer on Nextdoor posts.' }
   if (!profile?.stripe_onboarded) return { error: 'Set up payouts before submitting offers.' }
-  if (!input.amount || input.amount < 5) return { error: 'Offer must be at least $5.' }
+
+  // Parse a numeric value from free-text amount (e.g. "$50–80" → 50, "starting at $40" → 40).
+  // Stored as null if no number is found — the raw text lives in the reply template.
+  const numericAmount = input.amount ? parseFloat(input.amount.replace(/[^0-9.]/g, '')) || null : null
 
   // Each worker gets their own stub. No deduplication: if two workers offer on
   // the same Nextdoor post, they each get an independent task with their own
@@ -57,7 +60,7 @@ export async function createSourcedTask(
     .insert({
       task_id: task.id,
       worker_id: user.id,
-      amount: input.amount,
+      amount: numericAmount,
       message: input.message ?? null,
     })
 
