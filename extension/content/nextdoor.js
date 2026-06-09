@@ -28,12 +28,13 @@ function extractPosts() {
     const location = neighborhoodLink?.textContent?.trim() ?? ''
 
     // Try to find the post permalink (/p/{id}) anywhere in the container.
-    // Nextdoor uses JS navigation so the href may not always be present.
+    // Nextdoor uses JS navigation so it's often absent — fall back to a
+    // search URL built from the post text, which reliably surfaces the post.
     const postLinkEl = container?.querySelector('a[href*="/p/"]')
     const postPath = postLinkEl?.getAttribute('href')
     const url = postPath
       ? new URL(postPath, 'https://nextdoor.com').href
-      : window.location.href
+      : `https://nextdoor.com/search/?query=${encodeURIComponent(text.slice(0, 80).trim())}`
 
     found.push({
       id,
