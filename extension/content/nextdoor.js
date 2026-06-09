@@ -1,52 +1,50 @@
 // Nextdoor is a React SPA — posts load dynamically.
 // We observe DOM mutations and re-scan whenever new content appears.
+//
+// Selectors derived from observed DOM (June 2025). Nextdoor obfuscates
+// class names but data-testid attributes are stable across deploys.
 
 const SEEN_IDS = new Set()
 
 function extractPosts() {
   const found = []
 
-  // Nextdoor changes class names frequently; we cast a wide net with
-  // multiple selectors and fall back to any <article> on the page.
-  const candidates = [
-    ...document.querySelectorAll('[data-testid="post-card"]'),
-    ...document.querySelectorAll('[data-testid="feed-post-wrapper"]'),
-    ...document.querySelectorAll('article'),
-  ]
+  for (const bodyEl of document.querySelectorAll('[data-testid="post-body"]')) {
+    // Walk up to the nearest ancestor that also contains author info,
+    // so we can pull the neighborhood name from the same post.
+    const container = bodyEl.closest('.cee-media-body') ?? bodyEl.parentElement
 
-  for (const el of candidates) {
-    if (el.textContent.trim().length < 40) continue
+    const textEl = bodyEl.querySelector('[data-testid="styled-text"]')
+                ?? bodyEl.querySelector('.postTextBodySpan')
+    const text = textEl?.textContent?.trim() ?? bodyEl.textContent?.trim() ?? ''
+    if (!text || scoreText(text) === 0) continue
 
-    const titleEl = el.querySelector('h2, h3, [class*="title" i], [class*="Title"]')
-    const bodyEl  = el.querySelector('p, [class*="body" i], [class*="content" i], [class*="text" i]')
-    const title   = titleEl?.textContent?.trim() ?? ''
-    const body    = bodyEl?.textContent?.trim()  ?? ''
-    const text    = `${title} ${body}`
+    // Stable ID from a hash of the text — no permalink available in the feed DOM.
+    const id = 'nd-' + quickHash(text.slice(0, 120))
+    if (SEEN_IDS.has(id)) continue
+    SEEN_IDS.add(id)
 
-    if (scoreText(text) === 0) continue
-
-    const linkEl = el.querySelector('a[href*="/p/"], a[href*="/posts/"]')
-    const url    = linkEl ? new URL(linkEl.getAttribute('href'), 'https://nextdoor.com').href
-                          : window.location.href
-
-    if (SEEN_IDS.has(url)) continue
-    SEEN_IDS.add(url)
-
-    const metaEl   = el.querySelector('[class*="neighborhood" i], [class*="location" i]')
-    const location = metaEl?.textContent?.trim() ?? ''
+    const neighborhoodLink = container?.querySelector('a[href*="/neighborhood/"]')
+    const location = neighborhoodLink?.textContent?.trim() ?? ''
 
     found.push({
-      id: url,
+      id,
       platform: 'nextdoor',
-      title: title || text.slice(0, 80),
-      body: body.slice(0, 300),
-      url,
+      title: text.slice(0, 100),
+      body: text.slice(0, 400),
+      url: window.location.href,
       location,
       foundAt: Date.now(),
     })
   }
 
   sendLeads(found)
+}
+
+function quickHash(str) {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0
+  return (h >>> 0).toString(36)
 }
 
 extractPosts()

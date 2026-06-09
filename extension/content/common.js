@@ -4,8 +4,10 @@ const TASK_KEYWORDS = [
   // Help-seeking phrases
   'need help with', 'need someone to', 'need a person', 'need someone who',
   'looking for someone to', 'looking for a handyman', 'looking for help',
+  'looking for quotes', 'looking for a contractor', 'looking for a cleaner',
   'can someone help', 'anyone available to', 'anyone able to',
-  'hire someone', 'hiring someone', 'will pay',
+  'hire someone', 'hiring someone', 'will pay', 'anyone recommend',
+  'recommendations for', 'need a recommendation',
 
   // Trade / service workers
   'handyman', 'plumber', 'electrician', 'carpenter', 'contractor',
@@ -15,7 +17,8 @@ const TASK_KEYWORDS = [
 
   // Lawn / outdoor
   'lawn care', 'lawn mowing', 'mow my lawn', 'yard work',
-  'landscaping', 'tree trimming', 'leaf blowing',
+  'landscaping', 'tree trimming', 'tree removal', 'remove a tree', 'cut down a tree',
+  'leaf blowing', 'stump removal',
 
   // Moving / hauling
   'help moving', 'help me move', 'move furniture', 'haul away', 'junk removal',
