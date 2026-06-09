@@ -16,7 +16,9 @@ const TASK_KEYWORDS = [
   'deep clean', 'house cleaning', 'housekeeping', 'cleaning service',
 
   // Lawn / outdoor
-  'lawn care', 'lawn mowing', 'mow my lawn', 'yard work',
+  'lawn care', 'lawn mowing', 'lawn service', 'lawn maintenance',
+  'mow my lawn', 'mow the lawn', 'grass cut', 'grass cutting',
+  'yard work', 'yard service', 'yard maintenance',
   'landscaping', 'tree trimming', 'tree removal', 'remove a tree', 'cut down a tree',
   'leaf blowing', 'stump removal',
 
