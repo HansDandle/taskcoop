@@ -42,13 +42,12 @@
     }
   ],
   "background": {
-    "service_worker": "background/service-worker.js",
-    "scripts": ["background/service-worker.js"]
+    "service_worker": "background/service-worker.js"
   },
   "browser_specific_settings": {
     "gecko": {
       "id": "lead-finder@task.coop",
-      "strict_min_version": "109.0"
+      "strict_min_version": "128.0"
     }
   }
 }
