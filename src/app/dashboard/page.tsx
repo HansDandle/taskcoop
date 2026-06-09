@@ -10,6 +10,8 @@ import BadgeList from '@/components/badge-list'
 import { computeBadges } from '@/lib/badges'
 import InstallTile from '@/components/install-tile'
 import PushToggle from '@/components/push-toggle'
+import CopyButton from '@/components/copy-button'
+import { saveReplyTemplate } from './actions'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -243,6 +245,15 @@ export default async function DashboardPage({
     .order('created_at', { ascending: false })
     .limit(50)
 
+  // Nextdoor leads — task stubs this worker sourced that haven't been claimed yet
+  const { data: nextdoorLeads } = await supabase
+    .from('tasks')
+    .select('id, title, created_at, claim_token, external_url, customer_id, offers(amount)')
+    .eq('source', 'nextdoor')
+    .eq('sourced_by_worker_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
   // Referral slots — generate lazily if none exist
   let { data: referralSlots } = await supabase
     .from('referral_slots')
@@ -411,6 +422,83 @@ export default async function DashboardPage({
           </div>
         )}
 
+        {(nextdoorLeads?.length ?? 0) > 0 && (
+          <Section
+            title="Nextdoor leads"
+            cta={<Link href="/nextdoor" className="text-xs text-emerald-600 hover:underline">Browse feed</Link>}
+          >
+            {(nextdoorLeads ?? []).map(lead => {
+              const pending = lead.customer_id === null
+              const offerAmount = (lead.offers as any)?.[0]?.amount
+              const claimUrl = pending && lead.claim_token
+                ? `${APP_URL}/tasks/${lead.id}?claim=${lead.claim_token}`
+                : null
+              return (
+                <div key={lead.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/tasks/${lead.id}`} className="font-medium text-stone-900 text-sm hover:underline truncate block">
+                      {lead.title}
+                    </Link>
+                    <div className="flex items-center gap-2 mt-0.5 text-xs text-stone-500">
+                      <span>{formatRelativeDate(lead.created_at)}</span>
+                      {offerAmount && <span>· ${offerAmount}</span>}
+                      {lead.external_url && (
+                        <a href={lead.external_url.replace('nextdoor.com/search/?', 'nextdoor.com/search/posts/?')} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          · Nextdoor post
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {pending ? (
+                      <>
+                        <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                          awaiting response
+                        </span>
+                        {claimUrl && <CopyButton text={claimUrl} label="Copy link" />}
+                      </>
+                    ) : (
+                      <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        converted
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </Section>
+        )}
+
+        {profile.role === 'worker' && (
+          <details className="bg-white border border-stone-200 rounded-lg overflow-hidden">
+            <summary className="px-5 py-4 cursor-pointer list-none flex items-center justify-between">
+              <span className="font-semibold text-stone-900 text-sm">Offer reply template</span>
+              <span className="text-xs text-stone-400">Customize</span>
+            </summary>
+            <form action={saveReplyTemplate} className="px-5 pb-5 space-y-3">
+              <p className="text-xs text-stone-500">
+                Variables: <code className="bg-stone-100 px-1 rounded">{'{'+'url}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'price}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'bio}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'verified}'}</code> <code className="bg-stone-100 px-1 rounded">{'{'+'message}'}</code>
+              </p>
+              <textarea
+                name="reply_template"
+                rows={6}
+                defaultValue={profile.reply_template ?? ''}
+                placeholder={`Book me: {url}\n\nI'm {bio} and I'll do it for {price}. Payment is escrowed — you pay nothing until you mark the job complete.{verified}{message}`}
+                className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y"
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  className="bg-emerald-600 text-white text-sm px-4 py-2 rounded-md font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  Save template
+                </button>
+                <span className="text-xs text-stone-400">Leave blank to use the default.</span>
+              </div>
+            </form>
+          </details>
+        )}
+
         <Section
           title={`Pending offers (${pendingOffers.length})`}
           empty={pendingOffers.length === 0 ? 'No pending offers.' : undefined}
@@ -431,6 +519,7 @@ export default async function DashboardPage({
         <Link href="/profile" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Edit profile</Link>
         <Link href={`/workers/${user.id}`} className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Public profile</Link>
         <Link href="/messages" className="border border-stone-300 text-stone-700 px-4 py-2 rounded-md text-sm font-medium hover:border-stone-500 hover:bg-stone-50 transition-colors">Messages</Link>
+        <Link href="/extension" className="border border-emerald-300 text-emerald-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-50 transition-colors">Get Lead Finder extension</Link>
       </div>
 
       <div className="mt-6 space-y-3">

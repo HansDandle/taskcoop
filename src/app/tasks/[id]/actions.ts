@@ -246,6 +246,85 @@ export async function cancelTask(formData: FormData) {
   return updateTaskStatus('cancelled', formData)
 }
 
+export async function openTaskToAll(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'You must be signed in.' }
+
+  const task_id = formData.get('task_id') as string
+  const claim_token = formData.get('claim_token') as string
+
+  if (!task_id || !claim_token) return { error: 'Invalid request.' }
+
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const admin = createAdminClient()
+
+  const { data: tokenRow } = await admin
+    .from('tasks')
+    .select('id, sourced_by_worker_id')
+    .eq('id', task_id)
+    .eq('claim_token', claim_token)
+    .is('customer_id', null)
+    .maybeSingle()
+
+  if (!tokenRow) return { error: 'Invalid claim.' }
+
+  // Paying members get exclusivity on their sourced leads as a subscription perk.
+  // Re-check here even though the UI hides the button — the action is the source of truth.
+  if (tokenRow.sourced_by_worker_id) {
+    const { data: sourcingWorker } = await admin
+      .from('users')
+      .select('subscription_active')
+      .eq('id', tokenRow.sourced_by_worker_id)
+      .single()
+
+    if (sourcingWorker?.subscription_active) {
+      return { error: 'This offer is exclusive to the member who found it.' }
+    }
+  }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({ customer_id: user.id, claim_token: null })
+    .eq('id', task_id)
+    .is('customer_id', null)
+
+  if (error) return { error: 'Failed to open task.' }
+
+  revalidatePath(`/tasks/${task_id}`)
+}
+
+export async function claimTask(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'You must be signed in to claim this task.' }
+
+  const task_id = formData.get('task_id') as string
+  const claim_token = formData.get('claim_token') as string
+
+  if (!task_id || !claim_token) return { error: 'Invalid claim.' }
+
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('id, customer_id, claim_token, source')
+    .eq('id', task_id)
+    .single()
+
+  if (!task || task.source !== 'nextdoor') return { error: 'Task not found.' }
+  if (task.customer_id !== null) return { error: 'This task has already been claimed.' }
+  if (task.claim_token !== claim_token) return { error: 'Invalid claim token.' }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({ customer_id: user.id, claim_token: null })
+    .eq('id', task_id)
+    .is('customer_id', null)
+
+  if (error) return { error: 'Failed to claim task.' }
+
+  revalidatePath(`/tasks/${task_id}`)
+}
+
 // Release funds to worker — called when customer marks complete or auto-release fires
 export async function releaseFunds(task_id: string) {
   const supabase = await createClient()
