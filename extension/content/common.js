@@ -60,7 +60,14 @@ function scoreText(text) {
 }
 
 // Sends detected leads to the background service worker for storage.
+// Guards against the extension context being invalidated (e.g. after a reload)
+// which leaves content scripts orphaned with no runtime connection.
 function sendLeads(leads) {
   if (leads.length === 0) return
-  chrome.runtime.sendMessage({ type: 'NEW_LEADS', leads })
+  if (!chrome.runtime?.id) return
+  try {
+    chrome.runtime.sendMessage({ type: 'NEW_LEADS', leads })
+  } catch (e) {
+    // Swallow "Extension context invalidated" — page needs a refresh
+  }
 }
