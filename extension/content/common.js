@@ -19,6 +19,7 @@ const TASK_KEYWORDS = [
 
   // Moving / hauling
   'help moving', 'help me move', 'move furniture', 'haul away', 'junk removal',
+  'need movers', 'looking for movers', 'hire movers', 'movers',
 
   // Assembly / install
   'furniture assembly', 'ikea assembly', 'assemble furniture',
