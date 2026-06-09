@@ -3,7 +3,7 @@
   "name": "TaskCoop Lead Finder",
   "version": "0.1.0",
   "description": "Find local task leads on Nextdoor, Facebook Groups, Craigslist, and Reddit — all in one place.",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
     "https://nextdoor.com/*",
     "https://www.facebook.com/*",
