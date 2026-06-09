@@ -142,7 +142,7 @@ export default function NextdoorOfferForm({
           rows={2}
           value={message}
           onChange={e => setMessage(e.target.value)}
-          placeholder="Any details about your experience or availability…"
+          placeholder="Any notes or questions for the requester?"
           className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white resize-none"
         />
       </div>
