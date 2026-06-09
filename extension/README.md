@@ -1,24 +1,29 @@
-# TaskCoop Lead Finder — Chrome Extension
+# TaskCoop Lead Finder — Browser Extension
 
-Aggregates task-related posts from Nextdoor, Facebook Groups, Craigslist, and Reddit into a single feed. Works entirely client-side — no data leaves your browser except to open taskcoop.org when you click "Offer to help."
+Aggregates task-related posts from Nextdoor, Facebook Groups, Craigslist, and Reddit into a single feed. Works entirely client-side — no data leaves your browser except to open task.coop when you click "Offer to help."
 
-## Loading unpacked (for development)
+## Installing in Chrome (or Edge / Brave)
 
-1. Open Chrome and go to `chrome://extensions`
-2. Enable **Developer mode** (top right toggle)
-3. Click **Load unpacked**
-4. Select this `extension/` directory
+1. Download this repository: on GitHub, click **Code → Download ZIP**, then unzip it somewhere permanent (your Desktop is fine, but don't delete it after installing).
+2. Open Chrome and go to `chrome://extensions`
+3. Enable **Developer mode** using the toggle in the top-right corner.
+4. Click **Load unpacked**.
+5. Navigate into the unzipped folder and select the `extension/` directory inside it.
+6. The TaskCoop icon will appear in your toolbar. You may need to click the puzzle-piece icon and pin it.
 
-The extension icon will appear in your toolbar. Browse any of the supported platforms and leads will accumulate in the popup automatically.
+> Edge: go to `edge://extensions` and follow the same steps. Enable **Developer mode** in the left sidebar.
+> Brave: go to `brave://extensions` and follow the same steps.
 
-## Icons
+## Installing in Firefox
 
-Placeholder icons are needed at:
-- `icons/icon16.png`
-- `icons/icon48.png`
-- `icons/icon128.png`
+1. Download this repository: on GitHub, click **Code → Download ZIP**, then unzip it somewhere permanent.
+2. Open Firefox and go to `about:debugging`
+3. Click **This Firefox** in the left sidebar.
+4. Click **Load Temporary Add-on**.
+5. Navigate into the unzipped folder, open the `extension/` directory, and select `manifest.json`.
+6. The TaskCoop icon will appear in your toolbar.
 
-Generate these from the TaskCoop logo before publishing to the Chrome Web Store.
+**Note:** Firefox's "temporary" add-on is removed when you quit the browser. To keep it across restarts, you need a Firefox account with developer access, or wait for the AMO (addons.mozilla.org) listing.
 
 ## Supported platforms
 
@@ -33,8 +38,23 @@ Generate these from the TaskCoop logo before publishing to the Chrome Web Store.
 
 Each post is scored by counting how many task-related keywords appear in the title and body. Posts with a score of zero are ignored. Keywords are defined in `content/common.js` and can be extended without touching any other file.
 
-## Publishing to Chrome Web Store
+## How to use it
 
-1. Zip the contents of this directory (not the directory itself)
-2. Go to the Chrome Developer Dashboard
-3. Upload the zip and complete the listing
+1. Install the extension using the steps above.
+2. Browse Nextdoor, Facebook Groups, Craigslist, or Reddit as you normally would.
+3. The extension reads your feed as it loads. The toolbar icon shows a count of new leads.
+4. Click the toolbar icon to open the lead popup.
+5. Click **Offer to help** on any lead. TaskCoop opens with the post pre-filled.
+6. Set your price, generate your reply, and paste it back on the original platform.
+
+## Publishing to the Chrome Web Store
+
+1. Zip the contents of the `extension/` directory (not the directory itself): `cd extension && zip -r ../lead-finder.zip .`
+2. Go to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+3. Upload the zip and complete the listing.
+
+## Publishing to Firefox Add-ons (AMO)
+
+1. Zip the contents of the `extension/` directory the same way as above.
+2. Go to [addons.mozilla.org/developers](https://addons.mozilla.org/developers/).
+3. Submit the zip. AMO requires source code review for extensions with remote-hosted scripts — this extension has none, so review is typically fast.
