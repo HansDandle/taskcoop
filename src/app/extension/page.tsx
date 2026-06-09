@@ -69,16 +69,24 @@ export default async function ExtensionPage() {
           <>
             <p className="font-semibold text-stone-900 mb-1">Free to install</p>
             <p className="text-stone-500 text-sm mb-4">
-              Works on Chrome, Edge, and Brave. No account required to install.
+              Works on Chrome, Edge, Brave, and Firefox. No account required to install.
             </p>
-            <a
-              href="#"
-              className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
-            >
-              Add to Chrome — it&apos;s free
-            </a>
+            <div className="flex flex-wrap justify-center gap-3">
+              <a
+                href="#"
+                className="inline-block bg-emerald-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
+              >
+                Add to Chrome — it&apos;s free
+              </a>
+              <a
+                href="#"
+                className="inline-block bg-stone-800 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-stone-900 transition-colors"
+              >
+                Add to Firefox — it&apos;s free
+              </a>
+            </div>
             <p className="text-xs text-stone-400 mt-3">
-              Chrome Web Store listing coming soon.{' '}
+              Store listings coming soon.{' '}
               <Link href="https://github.com/HansDandle/taskcoop/tree/main/extension" className="underline">
                 Install the development version instead.
               </Link>

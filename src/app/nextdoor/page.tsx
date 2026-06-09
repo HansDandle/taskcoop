@@ -72,13 +72,17 @@ function HowItWorks({ profile }: { profile: { name: string; bio: string | null; 
   const sampleUrl = `${APP_URL}/tasks/xxxxxxx`
 
   return (
-    <div className="bg-white border border-stone-200 rounded-lg overflow-hidden mb-8">
-      <div className="px-5 py-4 border-b border-stone-200">
-        <h2 className="font-semibold text-stone-900">How the Nextdoor feed works</h2>
-        <p className="text-sm text-stone-500 mt-0.5">
-          Neighbors post tasks on Nextdoor every day. Here&apos;s how to win those jobs through TaskCoop.
-        </p>
-      </div>
+    <details open className="bg-white border border-stone-200 rounded-lg overflow-hidden mb-8 group">
+      <summary className="px-5 py-4 border-b border-stone-200 cursor-pointer list-none flex items-center justify-between">
+        <div>
+          <h2 className="font-semibold text-stone-900">How the Nextdoor feed works</h2>
+          <p className="text-sm text-stone-500 mt-0.5">
+            Neighbors post tasks on Nextdoor every day. Here&apos;s how to win those jobs through TaskCoop.
+          </p>
+        </div>
+        <span className="text-stone-400 text-xs ml-4 shrink-0 group-open:hidden">Show</span>
+        <span className="text-stone-400 text-xs ml-4 shrink-0 hidden group-open:inline">Hide</span>
+      </summary>
 
       <div className="divide-y divide-stone-100">
         <div className="px-5 py-4 flex gap-4">
@@ -144,7 +148,7 @@ function HowItWorks({ profile }: { profile: { name: string; bio: string | null; 
           </div>
         </div>
       </div>
-    </div>
+    </details>
   )
 }
 
@@ -253,6 +257,21 @@ export default async function NextdoorFeedPage({
       ) : (
         <>
           <HowItWorks profile={profile} />
+
+          <div className="bg-stone-50 border border-stone-200 rounded-lg px-5 py-4 mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-stone-900">Find more leads automatically</p>
+              <p className="text-sm text-stone-500 mt-0.5">
+                The Lead Finder extension watches Nextdoor, Facebook, Craigslist, and Reddit as you browse and surfaces task posts in one click.
+              </p>
+            </div>
+            <a
+              href="/extension"
+              className="shrink-0 text-sm bg-emerald-600 text-white px-4 py-2 rounded-md font-medium hover:bg-emerald-700 transition-colors"
+            >
+              Get the extension
+            </a>
+          </div>
 
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-stone-900">Nearby posts</h2>
