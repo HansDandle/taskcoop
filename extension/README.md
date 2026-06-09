@@ -4,11 +4,11 @@ Aggregates task-related posts from Nextdoor, Facebook Groups, Craigslist, and Re
 
 ## Installing in Chrome (or Edge / Brave)
 
-1. Download this repository: on GitHub, click **Code → Download ZIP**, then unzip it somewhere permanent (your Desktop is fine, but don't delete it after installing).
+1. Go to the [Releases page](https://github.com/HansDandle/taskcoop/releases) and download the latest `lead-finder.zip`. Unzip it somewhere permanent — your Desktop is fine, but don't delete it after installing.
 2. Open Chrome and go to `chrome://extensions`
 3. Enable **Developer mode** using the toggle in the top-right corner.
 4. Click **Load unpacked**.
-5. Navigate into the unzipped folder and select the `extension/` directory inside it.
+5. Select the unzipped `lead-finder/` folder.
 6. The TaskCoop icon will appear in your toolbar. You may need to click the puzzle-piece icon and pin it.
 
 > Edge: go to `edge://extensions` and follow the same steps. Enable **Developer mode** in the left sidebar.
@@ -16,11 +16,11 @@ Aggregates task-related posts from Nextdoor, Facebook Groups, Craigslist, and Re
 
 ## Installing in Firefox
 
-1. Download this repository: on GitHub, click **Code → Download ZIP**, then unzip it somewhere permanent.
+1. Download and unzip `lead-finder.zip` from the [Releases page](https://github.com/HansDandle/taskcoop/releases).
 2. Open Firefox and go to `about:debugging`
 3. Click **This Firefox** in the left sidebar.
 4. Click **Load Temporary Add-on**.
-5. Navigate into the unzipped folder, open the `extension/` directory, and select `manifest.json`.
+5. Open the unzipped `lead-finder/` folder and select `manifest.json`.
 6. The TaskCoop icon will appear in your toolbar.
 
 **Note:** Firefox's "temporary" add-on is removed when you quit the browser. To keep it across restarts, you need a Firefox account with developer access, or wait for the AMO (addons.mozilla.org) listing.
@@ -47,14 +47,18 @@ Each post is scored by counting how many task-related keywords appear in the tit
 5. Click **Offer to help** on any lead. TaskCoop opens with the post pre-filled.
 6. Set your price, generate your reply, and paste it back on the original platform.
 
+## Creating a release (do this before publishing)
+
+1. Zip the extension folder: `cd extension && zip -r ../lead-finder.zip .`
+2. On GitHub, go to **Releases → Draft a new release**, tag it (e.g. `ext-v0.1.0`), and attach `lead-finder.zip`. This is what the install instructions above link to.
+
 ## Publishing to the Chrome Web Store
 
-1. Zip the contents of the `extension/` directory (not the directory itself): `cd extension && zip -r ../lead-finder.zip .`
+1. Use the same `lead-finder.zip` from the release step above.
 2. Go to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 3. Upload the zip and complete the listing.
 
 ## Publishing to Firefox Add-ons (AMO)
 
-1. Zip the contents of the `extension/` directory the same way as above.
-2. Go to [addons.mozilla.org/developers](https://addons.mozilla.org/developers/).
-3. Submit the zip. AMO requires source code review for extensions with remote-hosted scripts — this extension has none, so review is typically fast.
+1. Go to [addons.mozilla.org/developers](https://addons.mozilla.org/developers/).
+2. Submit `lead-finder.zip`. AMO requires source code review for extensions with remote-hosted scripts — this extension has none, so review is typically fast.
