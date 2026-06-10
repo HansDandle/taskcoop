@@ -29,7 +29,7 @@ export async function dismissLead(taskId: string): Promise<void> {
     .update({ sourced_by_worker_id: null })
     .eq('id', taskId)
     .eq('sourced_by_worker_id', user.id)
-    .eq('customer_id', null)
+    .is('customer_id', null)
 
   revalidatePath('/dashboard')
 }

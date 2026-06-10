@@ -11,7 +11,9 @@ import { computeBadges } from '@/lib/badges'
 import InstallTile from '@/components/install-tile'
 import PushToggle from '@/components/push-toggle'
 import CopyButton from '@/components/copy-button'
-import { saveReplyTemplate, dismissLead, deleteOffer } from './actions'
+import { saveReplyTemplate } from './actions'
+import DeleteOfferButton from './delete-offer-button'
+import DismissLeadButton from './dismiss-lead-button'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -310,13 +312,7 @@ export default async function DashboardPage({
         <div className="flex items-center gap-3 shrink-0">
           <span className="text-sm text-stone-500">{formatCurrency(offer.amount)}</span>
           <StatusBadge status={task?.status ?? offer.status} />
-          {isPending && (
-            <form action={deleteOffer.bind(null, offer.id)}>
-              <button type="submit" className="text-xs text-stone-400 hover:text-red-500 transition-colors" title="Delete offer">
-                ✕
-              </button>
-            </form>
-          )}
+          {isPending && <DeleteOfferButton offerId={offer.id} />}
         </div>
       </div>
     )
@@ -481,11 +477,7 @@ export default async function DashboardPage({
                           awaiting response
                         </span>
                         {claimUrl && <CopyButton text={claimUrl} label="Copy link" />}
-                        <form action={dismissLead.bind(null, lead.id)}>
-                          <button type="submit" className="text-xs text-stone-400 hover:text-red-500 transition-colors" title="Dismiss">
-                            ✕
-                          </button>
-                        </form>
+                        <DismissLeadButton taskId={lead.id} />
                       </>
                     ) : (
                       <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
