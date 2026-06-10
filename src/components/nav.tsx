@@ -38,11 +38,6 @@ export default function Nav({ user, dashboardAlert }: { user: User; dashboardAle
                 Dashboard
                 {dashboardAlert && <span className="absolute -top-1 -right-2 w-2 h-2 bg-red-500 rounded-full" aria-label="New activity" />}
               </Link>
-              {user.role === 'worker' && (
-                <Link href="/nextdoor" className={pathname === '/nextdoor' ? 'text-stone-900 font-medium text-sm' : 'text-sm text-stone-600 hover:text-stone-900'}>
-                  Nextdoor Feed
-                </Link>
-              )}
               {user.role === 'customer' && (
                 <Link href="/tasks/new" className="text-sm bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors">
                   Post a Task
@@ -88,9 +83,6 @@ export default function Nav({ user, dashboardAlert }: { user: User; dashboardAle
                 Dashboard
                 {dashboardAlert && <span className="w-2 h-2 bg-red-500 rounded-full" aria-label="New activity" />}
               </Link>
-              {user.role === 'worker' && (
-                <Link href="/nextdoor" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Nextdoor Feed</Link>
-              )}
               {user.role === 'customer' && (
                 <Link href="/tasks/new" className="block text-stone-700" onClick={() => setMenuOpen(false)}>Post a Task</Link>
               )}

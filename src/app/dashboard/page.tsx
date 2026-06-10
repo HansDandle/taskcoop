@@ -422,10 +422,27 @@ export default async function DashboardPage({
           </div>
         )}
 
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4 flex items-start gap-4">
+          <div className="text-2xl shrink-0" aria-hidden="true">🔍</div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-emerald-900 text-sm">Find more leads with the Chrome extension</p>
+            <p className="text-emerald-800 text-sm mt-1">
+              The TaskCoop Lead Finder watches Nextdoor, Facebook, Craigslist, and Reddit as you browse and flags task requests automatically. When you spot one, generate your offer reply in seconds.
+            </p>
+            <a
+              href="https://chromewebstore.google.com/detail/taskcoop-lead-finder/plgjlgbkgjkijoblifahbdohgfpnkmeh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-3 bg-emerald-600 text-white text-sm px-4 py-2 rounded-md font-semibold hover:bg-emerald-700 transition-colors"
+            >
+              Add to Chrome — it&apos;s free
+            </a>
+          </div>
+        </div>
+
         {(nextdoorLeads?.length ?? 0) > 0 && (
           <Section
             title="Nextdoor leads"
-            cta={<Link href="/nextdoor" className="text-xs text-emerald-600 hover:underline">Browse feed</Link>}
           >
             {(nextdoorLeads ?? []).map(lead => {
               const pending = lead.customer_id === null

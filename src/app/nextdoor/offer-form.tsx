@@ -17,7 +17,7 @@ type Profile = {
   name: string
   bio: string | null
   id_verified: boolean
-  reply_template: string | null
+  reply_template?: string | null
 }
 
 const DEFAULT_TEMPLATE = `Book me: {url}

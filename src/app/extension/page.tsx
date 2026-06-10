@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Lead Finder Extension — TaskCoop',
@@ -73,7 +72,9 @@ export default async function ExtensionPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <a
-                href="#"
+                href="https://chromewebstore.google.com/detail/taskcoop-lead-finder/plgjlgbkgjkijoblifahbdohgfpnkmeh"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block bg-emerald-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
               >
                 Add to Chrome — it&apos;s free
@@ -85,12 +86,6 @@ export default async function ExtensionPage() {
                 Add to Firefox — it&apos;s free
               </a>
             </div>
-            <p className="text-xs text-stone-400 mt-3">
-              Store listings coming soon.{' '}
-              <Link href="https://github.com/HansDandle/taskcoop/tree/main/extension" className="underline">
-                Install the development version instead.
-              </Link>
-            </p>
           </>
         )}
       </div>
