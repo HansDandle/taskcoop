@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TaskCoop Lead Finder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Find local task leads on Nextdoor, Facebook Groups, Craigslist, and Reddit — all in one place.",
   "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
@@ -32,8 +32,14 @@
     },
     {
       "matches": ["https://*.craigslist.org/*"],
-      "js": ["content/common.js", "content/craigslist.js"],
+      "js": ["content/craigslist-bridge.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://*.craigslist.org/*"],
+      "js": ["content/common.js", "content/craigslist.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
     },
     {
       "matches": ["https://www.reddit.com/*", "https://old.reddit.com/*"],
@@ -42,6 +48,13 @@
     }
   ],
   "background": {
-    "service_worker": "background/service-worker.js"
+    "service_worker": "background/service-worker.js",
+    "scripts": ["background/service-worker.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lead-finder@task.coop",
+      "strict_min_version": "109.0"
+    }
   }
 }

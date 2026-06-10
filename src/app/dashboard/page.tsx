@@ -11,7 +11,7 @@ import { computeBadges } from '@/lib/badges'
 import InstallTile from '@/components/install-tile'
 import PushToggle from '@/components/push-toggle'
 import CopyButton from '@/components/copy-button'
-import { saveReplyTemplate } from './actions'
+import { saveReplyTemplate, dismissLead, deleteOffer } from './actions'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -275,7 +275,7 @@ export default async function DashboardPage({
   const activeOffers = offers?.filter(o => o.status === 'accepted' && ['assigned', 'in_progress'].includes((o.tasks as any)?.status)) ?? []
   const needsReviewOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
   const pendingOffers = offers?.filter(o => o.status === 'pending') ?? []
-  const pastOffers = offers?.filter(o => o.status === 'rejected' || (o.status === 'accepted' && ['completed', 'cancelled'].includes((o.tasks as any)?.status))) ?? []
+  const pastOffers = offers?.filter(o => o.status === 'rejected' || o.status === 'withdrawn' || (o.status === 'accepted' && ['completed', 'cancelled'].includes((o.tasks as any)?.status))) ?? []
 
   // Badges
   const completedOffers = offers?.filter(o => o.status === 'accepted' && (o.tasks as any)?.status === 'completed') ?? []
@@ -300,17 +300,25 @@ export default async function DashboardPage({
 
   function OfferRow({ offer }: { offer: any }) {
     const task = offer.tasks as any
+    const isPending = offer.status === 'pending'
     return (
-      <Link href={`/tasks/${task?.id}`} className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
-        <div>
+      <div className="flex items-center justify-between px-5 py-3.5 hover:bg-stone-50 transition-colors">
+        <Link href={`/tasks/${task?.id}`} className="flex-1 min-w-0">
           <div className="font-medium text-stone-900 text-sm">{task?.title}</div>
           <div className="text-xs text-stone-500 mt-0.5">{task?.categories?.name} · {formatRelativeDate(offer.created_at)}</div>
-        </div>
-        <div className="flex items-center gap-3">
+        </Link>
+        <div className="flex items-center gap-3 shrink-0">
           <span className="text-sm text-stone-500">{formatCurrency(offer.amount)}</span>
           <StatusBadge status={task?.status ?? offer.status} />
+          {isPending && (
+            <form action={deleteOffer.bind(null, offer.id)}>
+              <button type="submit" className="text-xs text-stone-400 hover:text-red-500 transition-colors" title="Delete offer">
+                ✕
+              </button>
+            </form>
+          )}
         </div>
-      </Link>
+      </div>
     )
   }
 
@@ -473,6 +481,11 @@ export default async function DashboardPage({
                           awaiting response
                         </span>
                         {claimUrl && <CopyButton text={claimUrl} label="Copy link" />}
+                        <form action={dismissLead.bind(null, lead.id)}>
+                          <button type="submit" className="text-xs text-stone-400 hover:text-red-500 transition-colors" title="Dismiss">
+                            ✕
+                          </button>
+                        </form>
                       </>
                     ) : (
                       <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
