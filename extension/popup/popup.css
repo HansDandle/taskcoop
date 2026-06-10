@@ -57,11 +57,31 @@ header {
 .lead {
   padding: 10px 14px;
   border-bottom: 1px solid #f5f5f4;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  gap: 4px 8px;
+  align-items: start;
 }
 .lead:hover { background: #fafaf9; }
+.lead .lead-meta    { grid-column: 1; }
+.lead .lead-title   { grid-column: 1; }
+.lead .lead-actions { grid-column: 1; }
+
+.dismiss-btn {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-self: center;
+  background: none;
+  border: none;
+  color: #d6d3d1;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+}
+.dismiss-btn:hover { color: #78716c; background: #f5f5f4; }
 
 .lead-meta { display: flex; align-items: center; gap: 6px; }
 

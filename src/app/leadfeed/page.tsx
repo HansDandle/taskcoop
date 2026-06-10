@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { APP_URL } from '@/lib/urls'
 import NextdoorOfferForm from './offer-form'
 
-export const metadata: Metadata = { title: 'Nextdoor Feed — TaskCoop' }
+export const metadata: Metadata = { title: 'Lead Feed — TaskCoop' }
 
 const MOCK_POSTS = [
   {
@@ -90,9 +90,9 @@ function HowItWorks({ profile }: { profile: { name: string; bio: string | null; 
     <details open className="bg-white border border-stone-200 rounded-lg overflow-hidden mb-8 group">
       <summary className="px-5 py-4 border-b border-stone-200 cursor-pointer list-none flex items-center justify-between">
         <div>
-          <h2 className="font-semibold text-stone-900">How the Nextdoor feed works</h2>
+          <h2 className="font-semibold text-stone-900">How the Lead Feed works</h2>
           <p className="text-sm text-stone-500 mt-0.5">
-            Neighbors post tasks on Nextdoor every day. Here&apos;s how to win those jobs through TaskCoop.
+            People post tasks on Nextdoor, Facebook, Reddit, and Craigslist every day. Here&apos;s how to win those jobs through TaskCoop.
           </p>
         </div>
         <span className="text-stone-400 text-xs ml-4 shrink-0 group-open:hidden">Show</span>
@@ -105,7 +105,7 @@ function HowItWorks({ profile }: { profile: { name: string; bio: string | null; 
           <div>
             <p className="font-medium text-stone-900 text-sm">Browse posts near you</p>
             <p className="text-sm text-stone-500 mt-0.5">
-              The feed below shows Nextdoor posts in your area where people are looking for help — the same kinds of jobs you already do.
+              The feed below shows posts from Nextdoor, Facebook, Reddit, and Craigslist where people are looking for help — the same kinds of jobs you already do.
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ function HowItWorks({ profile }: { profile: { name: string; bio: string | null; 
           <div>
             <p className="font-medium text-stone-900 text-sm">Set your price — we write your reply</p>
             <p className="text-sm text-stone-500 mt-0.5">
-              Click &ldquo;Offer to help&rdquo; on any post, enter what you&apos;d charge, and TaskCoop generates a ready-to-paste Nextdoor reply:
+              Click &ldquo;Offer to help&rdquo; on any post, enter what you&apos;d charge, and TaskCoop generates a ready-to-paste reply:
             </p>
             <div className="mt-3 bg-stone-50 border border-stone-200 rounded-md p-3 text-sm text-stone-700 font-mono leading-relaxed">
               <span className="text-emerald-700 font-semibold">Book me:</span> {sampleUrl}
@@ -128,7 +128,7 @@ function HowItWorks({ profile }: { profile: { name: string; bio: string | null; 
         <div className="px-5 py-4 flex gap-4">
           <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">3</div>
           <div>
-            <p className="font-medium text-stone-900 text-sm">Paste it on Nextdoor — they click your link</p>
+            <p className="font-medium text-stone-900 text-sm">Paste your reply — they click your link</p>
             <p className="text-sm text-stone-500 mt-0.5">
               Your reply stands out. You&apos;re not just saying &ldquo;I can help!&rdquo; — you&apos;re giving them a direct booking link, a clear price, and proof that payment is protected.
             </p>
@@ -171,7 +171,7 @@ function PostCard({
   post,
   profile,
 }: {
-  post: typeof MOCK_POSTS[number]
+  post: typeof MOCK_POSTS[number] & { platform?: string | null }
   profile: { name: string; bio: string | null; id_verified: boolean }
 }) {
   return (
@@ -190,18 +190,20 @@ function PostCard({
           <div className="flex items-center gap-3 mt-2 text-xs text-stone-400">
             <span>{post.reactions} reactions</span>
             <span>{post.comments} comments</span>
-            <a
-              href={post.externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-stone-400 hover:text-stone-600 hover:underline"
-            >
-              View on Nextdoor →
-            </a>
+            {post.externalUrl && (
+              <a
+                href={post.externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-stone-400 hover:text-stone-600 hover:underline"
+              >
+                {post.platform === 'nextdoor' || !post.platform ? 'View on Nextdoor →' : 'View original post →'}
+              </a>
+            )}
           </div>
         </div>
-        <span className="shrink-0 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
-          Nextdoor
+        <span className="shrink-0 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
+          {post.platform ?? 'Nextdoor'}
         </span>
       </div>
       <NextdoorOfferForm post={post} profile={profile} />
@@ -217,7 +219,7 @@ export default async function NextdoorFeedPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login?next=/nextdoor')
+  if (!user) redirect('/login?next=/leadfeed')
 
   const { data: profile } = await supabase
     .from('users')
@@ -237,18 +239,19 @@ export default async function NextdoorFeedPage({
     title: params.title!,
     body: params.body ?? '',
     category: params.platform ?? 'From extension',
+    platform: params.platform ?? null,
     neighborhood: params.location ?? '',
     postedAt: 'just now',
     reactions: 0,
     comments: 0,
-    externalUrl: resolveNextdoorUrl(params.url, params.title!),
+    externalUrl: params.url ?? null,
   } : null
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-stone-900">
-          {extensionPost ? 'Make an offer' : 'Nextdoor Feed'}
+          {extensionPost ? 'Make an offer' : 'Lead Feed'}
         </h1>
         <p className="text-stone-500 text-sm mt-1">
           {extensionPost

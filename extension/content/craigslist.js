@@ -6,10 +6,7 @@ const SEEN_IDS = new Set()
 function extractPosts() {
   const found = []
 
-  const items = [
-    ...document.querySelectorAll('li.cl-search-result'),
-    ...document.querySelectorAll('li.result-row'),
-  ]
+  const items = document.querySelectorAll('.cl-search-result, li.result-row')
 
   for (const item of items) {
     const titleEl = item.querySelector(
@@ -51,7 +48,17 @@ function extractPosts() {
     }
   }
 
-  sendLeads(found)
+  if (found.length > 0) {
+    window.postMessage({ type: 'TASKCOOP_NEW_LEADS', leads: found }, '*')
+  }
 }
 
-extractPosts()
+// Poll until results appear (CL defers rendering even on SSR pages)
+let pollCount = 0
+const pollTimer = setInterval(() => {
+  const ready = document.querySelector('.cl-search-result, li.result-row, #postingbody')
+  if (ready || ++pollCount >= 20) {
+    clearInterval(pollTimer)
+    if (ready) extractPosts()
+  }
+}, 500)

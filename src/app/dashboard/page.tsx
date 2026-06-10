@@ -427,7 +427,7 @@ export default async function DashboardPage({
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-emerald-900 text-sm">Find more leads with the Chrome extension</p>
             <p className="text-emerald-800 text-sm mt-1">
-              The TaskCoop Lead Finder watches Nextdoor, Facebook, Craigslist, and Reddit as you browse and flags task requests automatically. When you spot one, generate your offer reply in seconds.
+              The TaskCoop Lead Finder watches Nextdoor, Facebook, Craigslist, and Reddit as you browse and flags task requests automatically. When you spot one, send them to the Lead Feed and generate your offer reply in seconds.
             </p>
             <a
               href="https://chromewebstore.google.com/detail/taskcoop-lead-finder/plgjlgbkgjkijoblifahbdohgfpnkmeh"
@@ -442,7 +442,7 @@ export default async function DashboardPage({
 
         {(nextdoorLeads?.length ?? 0) > 0 && (
           <Section
-            title="Nextdoor leads"
+            title="Sourced leads"
           >
             {(nextdoorLeads ?? []).map(lead => {
               const pending = lead.customer_id === null
@@ -461,7 +461,7 @@ export default async function DashboardPage({
                       {offerAmount && <span>· ${offerAmount}</span>}
                       {lead.external_url && (
                         <a href={lead.external_url.replace('nextdoor.com/search/?', 'nextdoor.com/search/posts/?')} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                          · Nextdoor post
+                          · Original post
                         </a>
                       )}
                     </div>

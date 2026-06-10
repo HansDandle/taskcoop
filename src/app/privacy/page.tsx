@@ -136,7 +136,7 @@ export default function PrivacyPage() {
       </p>
       <ul>
         <li><strong>What it reads:</strong> The extension reads the visible text of posts on Nextdoor, Facebook Groups, Craigslist, and Reddit as you browse those sites normally. It scores each post against a list of task-related keywords to determine relevance.</li>
-        <li><strong>What it stores:</strong> Matching posts are stored in your browser's local extension storage (<code>chrome.storage.local</code>). This data never leaves your device.</li>
+        <li><strong>What it stores:</strong> Matching posts are stored in your browser's local extension storage. This data never leaves your device.</li>
         <li><strong>What it transmits:</strong> The extension transmits nothing to task.coop servers. If you click "Offer to help," your browser navigates to task.coop with the post title, body, and source URL as URL parameters. No data is sent silently or in the background.</li>
         <li><strong>Credentials:</strong> The extension does not access, read, or transmit your Nextdoor, Facebook, Craigslist, or Reddit credentials or session data.</li>
         <li><strong>Browsing history:</strong> The extension does not collect or transmit your browsing history.</li>

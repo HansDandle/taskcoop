@@ -51,5 +51,9 @@ function extractPosts() {
 
 extractPosts()
 
-const observer = new MutationObserver(() => extractPosts())
+let debounceTimer = null
+const observer = new MutationObserver(() => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(extractPosts, 300)
+})
 observer.observe(document.body, { childList: true, subtree: true })

@@ -32,14 +32,8 @@
     },
     {
       "matches": ["https://*.craigslist.org/*"],
-      "js": ["content/craigslist-bridge.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://*.craigslist.org/*"],
       "js": ["content/common.js", "content/craigslist.js"],
-      "run_at": "document_idle",
-      "world": "MAIN"
+      "run_at": "document_idle"
     },
     {
       "matches": ["https://www.reddit.com/*", "https://old.reddit.com/*"],

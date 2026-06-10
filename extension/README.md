@@ -47,18 +47,42 @@ Each post is scored by counting how many task-related keywords appear in the tit
 5. Click **Offer to help** on any lead. TaskCoop opens with the post pre-filled.
 6. Set your price, generate your reply, and paste it back on the original platform.
 
-## Creating a release (do this before publishing)
+## Manifest files
 
-1. Zip the extension folder: `cd extension && zip -r ../lead-finder.zip .`
-2. On GitHub, go to **Releases → Draft a new release**, tag it (e.g. `ext-v0.1.0`), and attach `lead-finder.zip`. This is what the install instructions above link to.
+The extension uses two manifest files because Chrome and Firefox have incompatible MV3 background script requirements:
+
+- `manifest.json` — **Firefox**. Uses `background.scripts` (no `service_worker`). Includes `browser_specific_settings` with the AMO extension ID.
+- `manifest.chrome.json` — **Chrome**. Uses `background.service_worker` only. No gecko settings.
+
+When packaging, copy the right one to `manifest.json` before zipping (see steps below).
+
+## Creating a release
+
+**Firefox package:**
+```
+cd extension
+zip -r ../lead-finder-firefox.zip . --exclude "*.chrome.json"
+```
+`manifest.json` is already the Firefox version — no substitution needed.
+
+**Chrome package:**
+```
+cd extension
+cp manifest.chrome.json manifest.json
+zip -r ../lead-finder-chrome.zip . --exclude "*.chrome.json"
+git checkout manifest.json
+```
+
+On GitHub, go to **Releases → Draft a new release**, tag it (e.g. `ext-v0.1.0`), and attach both zips.
 
 ## Publishing to the Chrome Web Store
 
-1. Use the same `lead-finder.zip` from the release step above.
+1. Use `lead-finder-chrome.zip`.
 2. Go to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 3. Upload the zip and complete the listing.
 
 ## Publishing to Firefox Add-ons (AMO)
 
-1. Go to [addons.mozilla.org/developers](https://addons.mozilla.org/developers/).
-2. Submit `lead-finder.zip`. AMO requires source code review for extensions with remote-hosted scripts — this extension has none, so review is typically fast.
+1. Use `lead-finder-firefox.zip`.
+2. Go to [addons.mozilla.org/developers](https://addons.mozilla.org/developers/).
+3. Submit the zip. AMO requires source code review for extensions with remote-hosted scripts — this extension has none, so review is typically fast.

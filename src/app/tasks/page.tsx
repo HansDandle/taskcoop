@@ -40,9 +40,10 @@ export default async function TasksPage({
     .select(`
       id, title, description, budget, status, zip_code, created_at,
       categories(name, slug),
-      users(name, avatar_url)
+      users!customer_id(name, avatar_url)
     `)
     .eq('status', 'open')
+    .eq('source', 'direct')
     .order('created_at', { ascending: false })
 
   if (cat) query = query.eq('category_id', (cat as any).id)
