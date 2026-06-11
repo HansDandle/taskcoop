@@ -9,39 +9,6 @@ export const metadata: Metadata = { title: 'Lead Feed — TaskCoop' }
 const MOCK_POSTS = [
   {
     id: 'nd-mock-001',
-    title: 'Need help moving a sectional this Saturday',
-    body: "Hey neighbors — I have a large sectional couch that needs to go from my living room to the garage to make space for a renovation. It's heavy and I can't do it alone. Looking for someone available this Saturday or Sunday morning. Happy to pay fair.",
-    category: 'Moving Help',
-    neighborhood: 'South Congress',
-    postedAt: '2h ago',
-    reactions: 4,
-    comments: 3,
-    externalUrl: 'https://nextdoor.com',
-  },
-  {
-    id: 'nd-mock-002',
-    title: 'Anyone good at furniture assembly? Have 3 IKEA pieces',
-    body: "Picked up a KALLAX shelf, a HEMNES dresser, and a BILLY bookcase. Not exactly handy myself. Would love someone who knows their way around an Allen wrench. Flexible on timing this week.",
-    category: 'Furniture Assembly',
-    neighborhood: 'Travis Heights',
-    postedAt: '5h ago',
-    reactions: 2,
-    comments: 1,
-    externalUrl: 'https://nextdoor.com',
-  },
-  {
-    id: 'nd-mock-003',
-    title: 'Yard overgrown — need cleanup before HOA inspection',
-    body: "My backyard got away from me this spring. Needs mowing, edging, and a bunch of overgrown bushes trimmed back. HOA inspection is in 10 days. Looking for someone reliable who can get it done this week.",
-    category: 'Yard Work',
-    neighborhood: 'Bouldin Creek',
-    postedAt: '1d ago',
-    reactions: 6,
-    comments: 4,
-    externalUrl: 'https://nextdoor.com',
-  },
-  {
-    id: 'nd-mock-004',
     title: 'Need a handyman for a few small fixes around the house',
     body: "A few things piled up — a door that won't latch, a leaky faucet, and a ceiling fan that needs to come down. Nothing major but I'm useless with tools. Happy to pay by the hour.",
     category: 'Handyman',
@@ -50,17 +17,7 @@ const MOCK_POSTS = [
     reactions: 1,
     comments: 2,
     externalUrl: 'https://nextdoor.com',
-  },
-  {
-    id: 'nd-mock-005',
-    title: 'Deep clean needed before I list my house',
-    body: "Getting ready to list and want a thorough cleaning — kitchen appliances, bathrooms, baseboards, the works. House is about 1,400 sq ft. Looking for someone experienced and can work this weekend.",
-    category: 'Cleaning',
-    neighborhood: 'Barton Hills',
-    postedAt: '2d ago',
-    reactions: 3,
-    comments: 5,
-    externalUrl: 'https://nextdoor.com',
+    mock: true,
   },
 ]
 
@@ -171,7 +128,7 @@ function PostCard({
   post,
   profile,
 }: {
-  post: typeof MOCK_POSTS[number] & { platform?: string | null }
+  post: typeof MOCK_POSTS[number] & { platform?: string | null; externalUrl?: string | null; mock?: boolean }
   profile: { name: string; bio: string | null; id_verified: boolean }
 }) {
   return (
@@ -202,9 +159,16 @@ function PostCard({
             )}
           </div>
         </div>
-        <span className="shrink-0 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
-          {post.platform ?? 'Nextdoor'}
-        </span>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {post.mock && (
+            <span className="text-xs bg-stone-100 text-stone-500 border border-stone-200 px-2 py-0.5 rounded-full">
+              Example lead
+            </span>
+          )}
+          <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
+            {post.platform ?? 'Nextdoor'}
+          </span>
+        </div>
       </div>
       <NextdoorOfferForm post={post} profile={profile} />
     </div>
