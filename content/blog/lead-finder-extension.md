@@ -22,7 +22,9 @@ When you spot a lead worth pursuing, click "Offer to help." The Lead Feed page o
 
 A reply like "I can help, DM me" gets lost. Dozens of people say the same thing.
 
-A reply with a direct booking link, a stated price, and escrow-backed payment stands out. The person posting knows exactly what they're getting, what it costs, and that they won't need to chase you down or pay before the job is done. That's the difference between getting ignored and getting hired.
+A reply with a direct booking link, a stated price, and escrow-backed payment stands out. The person posting knows exactly what they're getting and what it costs. You know you're not showing up for free, because payment is held before the job starts. And if your ID is verified through TaskCoop, they can see you're a real person with a real profile, not just a random reply in the comments. That's the difference between getting ignored and getting hired.
+
+If you haven't verified your ID yet, do it. It takes a few minutes and it's one of the highest-leverage things you can do to improve your chances of being picked.
 
 Every job you complete through TaskCoop also builds your profile. Reviews compound. The tenth job is easier to land than the first.
 
@@ -49,6 +51,6 @@ The extension is not magic. A few things worth knowing:
 
 ## Getting started
 
-Install the extension from the [Chrome Web Store](https://task.coop/extension) or [Firefox Add-ons](https://task.coop/extension). Sign in with your TaskCoop account, and it starts working immediately on any supported page you visit.
+Install the extension from the [Chrome Web Store](https://task.coop/extension) or [Firefox Add-ons](https://task.coop/extension). Sign into taskcoop.org first, and it starts working immediately on any supported page you visit.
 
 If you're not a member yet, [sign up free](https://task.coop/signup?role=worker). It takes about two minutes, and there's no cost to join.
