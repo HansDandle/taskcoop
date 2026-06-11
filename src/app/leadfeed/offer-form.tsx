@@ -9,7 +9,7 @@ type Post = {
   title: string
   body: string
   neighborhood: string
-  externalUrl: string
+  externalUrl: string | null
   category: string
 }
 
@@ -71,7 +71,7 @@ export default function NextdoorOfferForm({
       title: post.title,
       body: post.body,
       externalId: post.id,
-      externalUrl: post.externalUrl,
+      externalUrl: post.externalUrl ?? undefined,
       neighborhood: post.neighborhood,
       amount: amount.trim() || undefined,
       message: message.trim() || undefined,
@@ -107,14 +107,16 @@ export default function NextdoorOfferForm({
           >
             {copied ? 'Copied!' : 'Copy reply'}
           </button>
-          <a
-            href={post.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-emerald-700 hover:underline"
-          >
-            Open post on Nextdoor →
-          </a>
+          {post.externalUrl && (
+            <a
+              href={post.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-emerald-700 hover:underline"
+            >
+              Open original post →
+            </a>
+          )}
         </div>
         <p className="text-xs text-stone-500 mt-3">
           When they click your link, they&apos;ll see your offer and can book you directly through TaskCoop.

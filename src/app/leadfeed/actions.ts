@@ -6,7 +6,7 @@ type SourcedTaskInput = {
   title: string
   body: string
   externalId: string
-  externalUrl: string
+  externalUrl?: string
   neighborhood: string
   amount?: string
   message?: string

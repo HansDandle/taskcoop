@@ -128,7 +128,19 @@ function PostCard({
   post,
   profile,
 }: {
-  post: typeof MOCK_POSTS[number] & { platform?: string | null; externalUrl?: string | null; mock?: boolean }
+  post: {
+    id: string
+    title: string
+    body: string
+    category: string
+    neighborhood: string
+    postedAt: string
+    reactions: number
+    comments: number
+    externalUrl: string | null
+    platform?: string | null
+    mock?: boolean
+  }
   profile: { name: string; bio: string | null; id_verified: boolean }
 }) {
   return (
