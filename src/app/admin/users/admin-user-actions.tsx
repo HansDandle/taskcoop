@@ -16,12 +16,14 @@ export default function AdminUserActions({
   currentRole,
   suspended,
   idVerificationStatus,
+  hasDocument,
   hasSelfie,
 }: {
   userId: string
   currentRole: string
   suspended: boolean
   idVerificationStatus: string | null
+  hasDocument?: boolean
   hasSelfie?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
@@ -32,6 +34,11 @@ export default function AdminUserActions({
     fd.set('user_id', userId)
     for (const [k, v] of Object.entries(fields)) fd.set(k, v)
     startTransition(async () => { await action(fd); router.refresh() })
+  }
+
+  const viewDoc = async (getPath: (id: string) => Promise<string | null>) => {
+    const path = await getPath(userId)
+    if (path) window.open(`/api/admin/id-document?path=${encodeURIComponent(path)}`, '_blank')
   }
 
   const confirmDelete = () => {
@@ -75,26 +82,22 @@ export default function AdminUserActions({
         {suspended ? 'Unsuspend' : 'Suspend'}
       </button>
 
+      {hasDocument && (
+        <button
+          onClick={() => viewDoc(getIdDocumentPath)}
+          disabled={isPending}
+          className="text-xs text-stone-500 hover:underline disabled:opacity-60"
+        >View ID</button>
+      )}
+      {hasSelfie && (
+        <button
+          onClick={() => viewDoc(getIdSelfiePath)}
+          disabled={isPending}
+          className="text-xs text-stone-500 hover:underline disabled:opacity-60"
+        >View selfie</button>
+      )}
       {idVerificationStatus === 'pending' && (
         <>
-          <button
-            onClick={async () => {
-              const path = await getIdDocumentPath(userId)
-              if (path) window.open(`/api/admin/id-document?path=${encodeURIComponent(path)}`, '_blank')
-            }}
-            disabled={isPending}
-            className="text-xs text-stone-500 hover:underline disabled:opacity-60"
-          >View ID</button>
-          {hasSelfie && (
-            <button
-              onClick={async () => {
-                const path = await getIdSelfiePath(userId)
-                if (path) window.open(`/api/admin/id-document?path=${encodeURIComponent(path)}`, '_blank')
-              }}
-              disabled={isPending}
-              className="text-xs text-stone-500 hover:underline disabled:opacity-60"
-            >View selfie</button>
-          )}
           <button onClick={() => run(setIdVerification, { status: 'approved' })} disabled={isPending}
             className="text-xs text-emerald-600 hover:underline disabled:opacity-60">Approve ID</button>
           <button onClick={() => run(setIdVerification, { status: 'rejected' })} disabled={isPending}

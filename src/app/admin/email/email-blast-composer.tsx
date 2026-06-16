@@ -10,10 +10,74 @@ const TOKENS = [
 
 const DEFAULT_FILTERS: BlastFilters = {
   role: 'all',
-  idVerified: 'all',
+  idStatus: 'all',
   stripeOnboarded: 'all',
   inactiveDays: '',
 }
+
+// Drop-in starting points: each sets the recipient filters plus a draft subject/body.
+// Everything stays editable after applying. Keep copy free of em dashes.
+const TEMPLATES: {
+  key: string
+  label: string
+  description: string
+  filters: Partial<BlastFilters>
+  subject: string
+  body: string
+}[] = [
+  {
+    key: 'verified-no-stripe',
+    label: 'ID verified, no payouts',
+    description: 'Verified members who have not connected Stripe',
+    filters: { role: 'worker', idStatus: 'verified', stripeOnboarded: 'no' },
+    subject: "You're verified, one step left to get paid",
+    body: `Hi {{name}},
+
+Good news: your ID is verified on task.coop, so you're almost ready to start earning.
+
+The last step is connecting your payout account through Stripe so we can send your money securely. It takes about two minutes.
+
+Open your dashboard and choose "Set up payouts" to finish.
+
+Thanks for being part of the cooperative,
+The task.coop team`,
+  },
+  {
+    key: 'id-incomplete',
+    label: 'ID verification incomplete',
+    description: 'Uploaded an ID and/or selfie but not yet verified',
+    filters: { role: 'worker', idStatus: 'incomplete' },
+    subject: 'Finish your ID verification on task.coop',
+    body: `Hi {{name}},
+
+Thanks for starting your ID verification. It isn't quite complete yet, so your account isn't verified.
+
+To finish, please make sure you've uploaded both a clear photo of your ID and a selfie from your profile page. Once both are in, our team will review and approve you, usually within a day.
+
+Open your profile to wrap it up.
+
+Thanks,
+The task.coop team`,
+  },
+  {
+    key: 'no-id-no-stripe',
+    label: 'No ID, no payouts',
+    description: 'Members who have not started ID verification or Stripe',
+    filters: { role: 'worker', idStatus: 'none', stripeOnboarded: 'no' },
+    subject: 'Two quick steps to start earning on task.coop',
+    body: `Hi {{name}},
+
+Welcome to task.coop. To start accepting tasks and getting paid, there are two quick things to set up:
+
+1. Verify your identity by uploading your ID and a selfie. This keeps the community safe.
+2. Connect your payout account through Stripe so we can pay you securely.
+
+Both take just a few minutes from your profile and dashboard.
+
+We're glad you're here,
+The task.coop team`,
+  },
+]
 
 export default function EmailBlastComposer() {
   const [filters, setFilters] = useState<BlastFilters>(DEFAULT_FILTERS)
@@ -62,6 +126,16 @@ export default function EmailBlastComposer() {
     setConfirming(false)
   }
 
+  function applyTemplate(t: (typeof TEMPLATES)[number]) {
+    setFilters({ ...DEFAULT_FILTERS, ...t.filters })
+    setSubject(t.subject)
+    setBody(t.body)
+    setRecipients(null)
+    setConfirming(false)
+    setResult(null)
+    setError(null)
+  }
+
   function handleSend() {
     setError(null)
     startSend(async () => {
@@ -82,6 +156,25 @@ export default function EmailBlastComposer() {
   return (
     <div className="space-y-8">
 
+      {/* Templates */}
+      <section className="bg-white border border-stone-200 rounded-lg p-6">
+        <h2 className="text-sm font-semibold text-stone-700 mb-1">Templates</h2>
+        <p className="text-xs text-stone-500 mb-4">Drop in a starting point. Filters and copy stay editable.</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {TEMPLATES.map(t => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => applyTemplate(t)}
+              className="text-left border border-stone-200 rounded-md p-3 hover:border-emerald-400 hover:bg-emerald-50/40 transition-colors"
+            >
+              <div className="text-sm font-medium text-stone-800">{t.label}</div>
+              <div className="text-xs text-stone-500 mt-0.5">{t.description}</div>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* Filters */}
       <section className="bg-white border border-stone-200 rounded-lg p-6">
         <h2 className="text-sm font-semibold text-stone-700 mb-4">Recipient filters</h2>
@@ -96,12 +189,14 @@ export default function EmailBlastComposer() {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-stone-500 mb-1">ID verified</label>
-            <select value={filters.idVerified} onChange={e => setFilter('idVerified', e.target.value as BlastFilters['idVerified'])}
+            <label className="block text-xs text-stone-500 mb-1">ID status</label>
+            <select value={filters.idStatus} onChange={e => setFilter('idStatus', e.target.value as BlastFilters['idStatus'])}
               className="w-full border border-stone-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="all">Either</option>
-              <option value="yes">Verified</option>
-              <option value="no">Not verified</option>
+              <option value="all">Any</option>
+              <option value="verified">Verified</option>
+              <option value="incomplete">Incomplete (uploaded, not verified)</option>
+              <option value="none">None uploaded</option>
+              <option value="unverified">Any not verified</option>
             </select>
           </div>
           <div>

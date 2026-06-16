@@ -30,7 +30,7 @@ export default async function AdminUsersPage({
 
   let query = supabase
     .from('users')
-    .select('id, name, role, bio, created_at, suspended, id_verified, id_verification_status, admin_notes, id_selfie_url')
+    .select('id, name, role, bio, created_at, suspended, id_verified, id_verification_status, admin_notes, id_document_url, id_selfie_url')
     .order('created_at', { ascending: false })
 
   if (role) query = query.eq('role', role)
@@ -141,6 +141,7 @@ export default async function AdminUsersPage({
                     currentRole={u.role}
                     suspended={u.suspended ?? false}
                     idVerificationStatus={u.id_verification_status ?? null}
+                    hasDocument={!!(u as any).id_document_url}
                     hasSelfie={!!(u as any).id_selfie_url}
                   />
                 </td>

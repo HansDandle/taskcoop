@@ -1,15 +1,20 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { adminCancelTask, adminDeleteTask } from './actions'
 
 export default function AdminTaskActions({ taskId, status }: { taskId: string; status: string }) {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
-  const run = (action: (fd: FormData) => Promise<any>) => {
+  const run = (action: (fd: FormData) => Promise<{ error: string | null }>) => {
     const fd = new FormData()
     fd.set('task_id', taskId)
-    startTransition(async () => { await action(fd) })
+    setError(null)
+    startTransition(async () => {
+      const res = await action(fd)
+      if (res?.error) setError(res.error)
+    })
   }
 
   const confirmDelete = () => {
@@ -29,6 +34,7 @@ export default function AdminTaskActions({ taskId, status }: { taskId: string; s
         className="text-xs text-red-500 hover:underline disabled:opacity-60">
         Delete
       </button>
+      {error && <span className="text-xs text-red-600" title={error}>Failed</span>}
     </div>
   )
 }

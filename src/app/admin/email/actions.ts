@@ -21,7 +21,12 @@ async function requireAdmin() {
 
 export interface BlastFilters {
   role: 'all' | 'customer' | 'worker'
-  idVerified: 'all' | 'yes' | 'no'
+  // ID verification stage:
+  //   verified   = id_verified
+  //   incomplete = not verified, but an ID doc and/or selfie has been uploaded
+  //   none       = not verified, nothing uploaded
+  //   unverified = any not-verified (incomplete OR none)
+  idStatus: 'all' | 'verified' | 'incomplete' | 'none' | 'unverified'
   stripeOnboarded: 'all' | 'yes' | 'no'
   inactiveDays: '' | '30' | '60' | '90' | '180'
 }
@@ -31,12 +36,31 @@ function buildQuery(filters: BlastFilters) {
     .from('admin_users_view')
     .select('id, name, email, last_sign_in_at')
     .neq('role', 'admin')
+    // Never email suspended members. `is not true` also keeps NULLs in scope.
+    .not('suspended', 'is', true)
 
   if (filters.role !== 'all') q = q.eq('role', filters.role)
-  if (filters.idVerified === 'yes') q = q.eq('id_verified', true)
-  if (filters.idVerified === 'no') q = q.eq('id_verified', false)
+
+  switch (filters.idStatus) {
+    case 'verified':
+      q = q.eq('id_verified', true)
+      break
+    case 'unverified':
+      q = q.not('id_verified', 'is', true)
+      break
+    case 'incomplete':
+      q = q.not('id_verified', 'is', true)
+           .or('id_document_url.not.is.null,id_selfie_url.not.is.null')
+      break
+    case 'none':
+      q = q.not('id_verified', 'is', true)
+           .is('id_document_url', null)
+           .is('id_selfie_url', null)
+      break
+  }
+
   if (filters.stripeOnboarded === 'yes') q = q.eq('stripe_onboarded', true)
-  if (filters.stripeOnboarded === 'no') q = q.eq('stripe_onboarded', false)
+  if (filters.stripeOnboarded === 'no') q = q.not('stripe_onboarded', 'is', true)
   if (filters.inactiveDays) {
     const cutoff = new Date(Date.now() - parseInt(filters.inactiveDays) * 24 * 60 * 60 * 1000).toISOString()
     q = q.or(`last_sign_in_at.lt.${cutoff},last_sign_in_at.is.null`)

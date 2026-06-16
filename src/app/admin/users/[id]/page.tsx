@@ -145,6 +145,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               currentRole={profile.role}
               suspended={profile.suspended ?? false}
               idVerificationStatus={profile.id_verification_status ?? null}
+              hasDocument={!!profile.id_document_url}
               hasSelfie={!!profile.id_selfie_url}
             />
           </div>
