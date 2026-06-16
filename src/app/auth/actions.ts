@@ -59,7 +59,16 @@ export async function signup(formData: FormData) {
     redirect(role === 'customer' ? '/tasks/new?welcome=1' : '/dashboard?welcome=1')
   }
 
-  redirect('/signup/confirmed')
+  redirect(`/signup/confirmed?email=${encodeURIComponent(data.email)}`)
+}
+
+// Re-send the signup confirmation email from the "check your email" screen.
+export async function resendConfirmation(email: string): Promise<{ error: string | null }> {
+  if (!email) return { error: 'No email on file. Please sign up again.' }
+  const supabase = await createClient()
+  const { error } = await supabase.auth.resend({ type: 'signup', email })
+  if (error) return { error: error.message }
+  return { error: null }
 }
 
 export async function signInWithGoogle() {

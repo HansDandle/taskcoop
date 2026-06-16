@@ -337,52 +337,71 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {!stripeOnboarded && (
-        <div className="mb-6 bg-white border border-stone-200 rounded-lg px-6 py-8 text-center">
-          <div className="text-3xl mb-3" aria-hidden="true">💳</div>
-          <h2 className="font-semibold text-stone-900 mb-1">Set up payouts to start earning</h2>
-          <p className="text-stone-500 text-sm mb-5 max-w-sm mx-auto">Connect your bank account through Stripe so you can receive payment when jobs are complete. Takes about 2 minutes.</p>
-          <Link href="/api/stripe/connect"
-            className="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors">
-            Set up payouts →
-          </Link>
-          <p className="text-sm text-stone-500 mt-4">You can browse tasks in the meantime, but you&apos;ll need this before submitting offers.</p>
-        </div>
-      )}
-
       {(() => {
-        const status = (profile as any).id_verification_status
-        const hasSelfie = !!(profile as any).id_selfie_url
-        // Three cases worth surfacing on the dashboard:
-        //   - never submitted (no doc, no status)
-        //   - rejected (must resubmit)
-        //   - legacy approval: id_verified true but no selfie on file (pre-expansion)
-        const neverSubmitted = !(profile as any).id_document_url && !status
-        const rejected = status === 'rejected'
-        const legacy = (profile as any).id_verified && !hasSelfie
-        if (!neverSubmitted && !rejected && !legacy) return null
+        // Single "steps to start earning" checklist, replacing the separate
+        // payout/ID banners. Hidden once both steps are done.
+        const idStatus = (profile as any).id_verification_status as string | null
+        const idDone = !!profile.id_verified
+        const idPending = idStatus === 'pending' && !idDone
+        const idRejected = idStatus === 'rejected'
+
+        const steps = [
+          {
+            key: 'verify',
+            title: 'Verify your identity',
+            done: idDone,
+            pending: idPending,
+            desc: idDone ? 'Your verified badge is active.'
+              : idPending ? "Under review. We'll email you when you're approved."
+              : idRejected ? 'Your last submission needs another try.'
+              : 'Upload your ID and a selfie. Verified members win more jobs.',
+            href: '/verify',
+            cta: idRejected ? 'Resubmit →' : 'Verify →',
+          },
+          {
+            key: 'payouts',
+            title: 'Connect payouts',
+            done: stripeOnboarded,
+            pending: false,
+            desc: stripeOnboarded ? 'You can receive payments.'
+              : 'Connect your bank through Stripe so you can get paid. Takes about 2 minutes.',
+            href: '/api/stripe/connect',
+            cta: 'Set up →',
+          },
+        ]
+        const doneCount = steps.filter(s => s.done).length
+        if (doneCount === steps.length) return null
+
         return (
-          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-5 py-4">
-            <div className="flex items-start gap-3">
-              <div className="text-2xl" aria-hidden="true">🪪</div>
-              <div className="flex-1">
-                <p className="font-semibold text-amber-900 text-sm">
-                  {rejected ? 'Your ID submission was rejected'
-                    : legacy ? 'Add a selfie to keep your verified badge'
-                    : 'Verify your identity to win more jobs'}
-                </p>
-                <p className="text-amber-800 text-sm mt-1">
-                  {rejected
-                    ? 'Re-upload a clearer photo of your ID and a selfie holding it.'
-                    : legacy
-                    ? 'We now ask every verified member for a selfie holding their ID. Upload one to stay verified.'
-                    : 'Upload a photo of your ID, a selfie holding it, and any professional licenses. Customers strongly prefer ID-verified members.'}
-                </p>
-                <Link href="/profile" className="inline-block mt-2 text-xs font-semibold text-amber-900 underline">
-                  Go to verification →
-                </Link>
-              </div>
+          <div className="mb-6 bg-white border border-stone-200 rounded-lg overflow-hidden">
+            <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between">
+              <h2 className="font-semibold text-stone-900 text-sm">Get set up to start earning</h2>
+              <span className="text-xs text-stone-500">{doneCount} of {steps.length} done</span>
             </div>
+            <ol className="divide-y divide-stone-100">
+              {steps.map((s, i) => (
+                <li key={s.key} className="flex items-center gap-3 px-5 py-4">
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                    s.done ? 'bg-emerald-600 text-white'
+                    : s.pending ? 'bg-amber-100 text-amber-700'
+                    : 'bg-stone-200 text-stone-600'
+                  }`}>
+                    {s.done ? '✓' : i + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${s.done ? 'text-stone-400 line-through' : 'text-stone-900'}`}>{s.title}</p>
+                    <p className="text-xs text-stone-500 mt-0.5">{s.desc}</p>
+                  </div>
+                  {!s.done && !s.pending && (
+                    <Link href={s.href}
+                      className="shrink-0 bg-emerald-600 text-white px-4 py-2 rounded-md text-xs font-semibold hover:bg-emerald-700 transition-colors">
+                      {s.cta}
+                    </Link>
+                  )}
+                  {s.pending && <span className="shrink-0 text-xs text-amber-600 font-medium">Pending</span>}
+                </li>
+              ))}
+            </ol>
           </div>
         )
       })()}

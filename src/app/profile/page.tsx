@@ -26,6 +26,32 @@ export default async function ProfilePage() {
         <ProfileForm profile={profile} email={user.email ?? ''} />
       </div>
 
+      {profile?.role === 'worker' && (
+        <div className="border-t border-stone-200 pt-10">
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-lg font-semibold text-stone-900">Identity verification</h2>
+            {profile.id_verified
+              ? <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">✓ Verified</span>
+              : profile.id_verification_status === 'pending'
+              ? <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Under review</span>
+              : profile.id_verification_status === 'rejected'
+              ? <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rejected</span>
+              : <span className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-medium">Not started</span>}
+          </div>
+          <p className="text-stone-500 text-sm mb-4">
+            {profile.id_verified
+              ? 'Your identity is verified. You can manage professional licenses on the verification page.'
+              : 'Verified members win more jobs. Upload your ID and a selfie to get your badge.'}
+          </p>
+          <Link
+            href="/verify"
+            className="inline-block text-sm border border-stone-300 text-stone-700 px-4 py-2 rounded-md font-medium hover:border-stone-500 transition-colors"
+          >
+            {profile.id_verified ? 'Manage verification →' : 'Verify my identity →'}
+          </Link>
+        </div>
+      )}
+
       {profile?.role === 'customer' && (
         <div className="border-t border-stone-200 pt-10">
           <AddressManager addresses={addresses ?? []} />

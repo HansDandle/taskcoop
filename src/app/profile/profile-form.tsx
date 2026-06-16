@@ -1,12 +1,10 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
-import { updateProfile, submitIdVerification } from './actions'
+import { useActionState, useState } from 'react'
+import { updateProfile } from './actions'
 import ImageUpload from '@/components/image-upload'
 import MultiImageUpload from '@/components/multi-image-upload'
 import MarkdownBio from '@/components/markdown-bio'
-import FileUpload from '@/components/file-upload'
-import MultiFileUpload, { type LicenseEntry } from '@/components/multi-file-upload'
 
 const initial = { error: '', success: false }
 
@@ -14,20 +12,10 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
   const [state, action, pending] = useActionState(updateProfile, initial)
   const [avatarUrl, setAvatarUrl] = useState<string>(profile?.avatar_url ?? '')
   const [portfolioUrls, setPortfolioUrls] = useState<string[]>(profile?.portfolio_urls ?? [])
-  const [idDocPath, setIdDocPath] = useState<string>(profile?.id_document_url ?? '')
-  const [idSelfiePath, setIdSelfiePath] = useState<string>(profile?.id_selfie_url ?? '')
-  const [licenses, setLicenses] = useState<LicenseEntry[]>(
-    Array.isArray(profile?.professional_licenses) ? profile.professional_licenses : []
-  )
-  const [idSubmitted, setIdSubmitted] = useState(false)
-  const [licensesSaved, setLicensesSaved] = useState(false)
-  const [idError, setIdError] = useState('')
-  const [idPending, startIdTransition] = useTransition()
   const [bioPreview, setBioPreview] = useState(false)
   const [bioValue, setBioValue] = useState<string>(profile?.bio ?? '')
 
   return (
-    <>
     <form action={action} className="space-y-6">
       <input type="hidden" name="avatar_url" value={avatarUrl} />
       <input type="hidden" name="portfolio_urls" value={JSON.stringify(portfolioUrls)} />
@@ -111,156 +99,5 @@ export default function ProfileForm({ profile, email }: { profile: any; email: s
         {pending ? 'Saving…' : 'Save changes'}
       </button>
     </form>
-
-    {/* ID Verification — members only */}
-    {profile?.role === 'worker' && (
-      <div className="mt-8 border border-stone-200 rounded-lg p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold text-stone-900">ID Verification</h3>
-          {profile.id_verified && (
-            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">✓ Verified</span>
-          )}
-          {profile.id_verification_status === 'pending' && (
-            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Under review</span>
-          )}
-          {profile.id_verification_status === 'rejected' && (
-            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rejected; please resubmit</span>
-          )}
-        </div>
-        <p className="text-sm text-stone-600 mb-5">
-          Verified members get a badge on their profile. ID and selfie are private — only admins can view them and they&apos;re never shown publicly. Approved license titles (e.g. &ldquo;Notary Commission&rdquo;) appear on your public profile to help customers trust your offer.
-        </p>
-
-        {/* Fully-verified-with-selfie members: show a quiet panel for managing licenses only. */}
-        {profile.id_verified && profile.id_selfie_url && !idSubmitted && profile.id_verification_status !== 'pending' ? (
-          <div className="space-y-4">
-            <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
-              Your ID and selfie are verified. Add or update professional licenses below — we&apos;ll review each one separately.
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Professional licenses & certifications</label>
-              <p className="text-sm text-stone-600 mb-2">Approved titles appear on your public profile.</p>
-              <MultiFileUpload
-                bucket="id-documents"
-                folder={`${profile.id}/license`}
-                existing={licenses}
-                onChange={setLicenses}
-                max={8}
-                accept="image/*,.pdf"
-              />
-            </div>
-            {idError && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{idError}</div>
-            )}
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                disabled={idPending}
-                onClick={() => {
-                  setIdError('')
-                  setLicensesSaved(false)
-                  startIdTransition(async () => {
-                    const fd = new FormData()
-                    fd.set('id_document_url', idDocPath)
-                    fd.set('id_selfie_url', idSelfiePath)
-                    fd.set('professional_licenses', JSON.stringify(licenses))
-                    const result = await submitIdVerification(fd)
-                    if (result?.error) setIdError(result.error)
-                    else setLicensesSaved(true)
-                  })
-                }}
-                className="text-sm text-emerald-700 hover:text-emerald-800 font-medium disabled:opacity-60"
-              >
-                {idPending ? 'Saving…' : 'Save license changes'}
-              </button>
-              {licensesSaved && !idPending && (
-                <span className="text-xs text-emerald-700">Saved — new licenses pending admin review.</span>
-              )}
-            </div>
-          </div>
-        ) : profile.id_verification_status === 'pending' && !idSubmitted ? (
-          <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-            Your documents are under review. We&apos;ll email you once they&apos;re approved.
-          </div>
-        ) : idSubmitted ? (
-          <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
-            Documents submitted. We&apos;ll review them shortly.
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
-                Photo of your government ID <span className="text-red-500" aria-hidden="true">*</span><span className="sr-only">(required)</span>
-              </label>
-              <p className="text-sm text-stone-600 mb-2">Driver&apos;s license, passport, or state ID. Make sure all four corners are visible and text is readable.</p>
-              <FileUpload
-                bucket="id-documents"
-                folder={`${profile.id}/id`}
-                existingUrl={idDocPath}
-                onUpload={setIdDocPath}
-                accept="image/*,.pdf"
-                label="Upload ID"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
-                Selfie holding your ID <span className="text-red-500" aria-hidden="true">*</span><span className="sr-only">(required)</span>
-              </label>
-              <p className="text-sm text-stone-600 mb-2">A photo of you holding the same ID next to your face. Both your face and the ID must be clearly visible.</p>
-              <FileUpload
-                bucket="id-documents"
-                folder={`${profile.id}/selfie`}
-                existingUrl={idSelfiePath}
-                onUpload={setIdSelfiePath}
-                accept="image/*"
-                label="Upload selfie with ID"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Professional licenses & certifications</label>
-              <p className="text-sm text-stone-600 mb-2">Optional. Notary commission, contractor license, pet care certifications, etc. Title each one — approved titles show on your public profile.</p>
-              <MultiFileUpload
-                bucket="id-documents"
-                folder={`${profile.id}/license`}
-                existing={licenses}
-                onChange={setLicenses}
-                max={8}
-                accept="image/*,.pdf"
-              />
-            </div>
-
-            {idError && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{idError}</div>
-            )}
-
-            <button
-              type="button"
-              disabled={idPending || !idDocPath || !idSelfiePath}
-              onClick={() => {
-                setIdError('')
-                startIdTransition(async () => {
-                  const fd = new FormData()
-                  fd.set('id_document_url', idDocPath)
-                  fd.set('id_selfie_url', idSelfiePath)
-                  fd.set('professional_licenses', JSON.stringify(licenses))
-                  const result = await submitIdVerification(fd)
-                  if (result?.error) setIdError(result.error)
-                  else setIdSubmitted(true)
-                })
-              }}
-              className="w-full bg-emerald-600 text-white py-2.5 rounded-md font-semibold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-60"
-            >
-              {idPending ? 'Submitting…' : 'Submit for review'}
-            </button>
-            {(!idDocPath || !idSelfiePath) && (
-              <p className="text-sm text-stone-500 text-center -mt-3">Upload both your ID and a selfie to submit.</p>
-            )}
-          </div>
-        )}
-      </div>
-    )}
-    </>
   )
 }

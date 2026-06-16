@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { validateFile } from '@/lib/upload-validation'
 
 export type LicenseEntry = { title: string; path: string; approved?: boolean }
 
@@ -39,8 +40,9 @@ export default function MultiFileUpload({
     const added: LicenseEntry[] = []
 
     for (const file of toUpload) {
-      if (file.size > 8 * 1024 * 1024) {
-        setError('Files must be 8 MB or smaller.')
+      const invalid = validateFile(file, accept, 8)
+      if (invalid) {
+        setError(invalid)
         continue
       }
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
