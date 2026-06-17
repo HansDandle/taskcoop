@@ -22,7 +22,13 @@
 
 # misc
 .DS_Store
+Thumbs.db
+
+# secrets / keys
 *.pem
+*.key
+*.pfx
+*.p12
 
 # debug
 npm-debug.log*
@@ -40,6 +46,11 @@ debug.log
 
 # supabase
 /supabase/migrations
+/supabase/.temp
+/supabase/.branches
+
+# claude code (machine-local settings & state)
+.claude/settings.local.json
 
 # typescript
 *.tsbuildinfo
