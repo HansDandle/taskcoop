@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { formatDate, formatCurrency } from '@/lib/utils'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { formatDate, formatCurrency, formatRelativeDate } from '@/lib/utils'
 import AdminTaskActions from './admin-task-actions'
 
 export const metadata: Metadata = { title: 'Admin — Tasks' }
@@ -32,6 +33,32 @@ export default async function AdminTasksPage({
   if (q) query = query.ilike('title', `%${q}%`)
 
   const { data: tasks } = await query.limit(200)
+
+  // Offers are RLS-gated to the task owner and offer creator, so admins can't
+  // see them through the normal client. Read them with the service role here.
+  type OfferRow = { id: string; task_id: string; amount: number; status: string; message: string | null; worker_id: string; created_at: string }
+  const taskIds = (tasks ?? []).map(t => t.id)
+  const admin = createAdminClient()
+  const allOffers: OfferRow[] = taskIds.length
+    ? (((await admin
+        .from('offers')
+        .select('id, task_id, amount, status, message, worker_id, created_at')
+        .in('task_id', taskIds)
+        .order('created_at', { ascending: true })).data ?? []) as OfferRow[])
+    : []
+
+  const workerIds = [...new Set(allOffers.map(o => o.worker_id))]
+  const { data: workers } = workerIds.length
+    ? await admin.from('users').select('id, name').in('id', workerIds)
+    : { data: [] }
+  const workerName = new Map((workers ?? []).map(w => [w.id, w.name as string]))
+
+  const offersByTask = new Map<string, OfferRow[]>()
+  for (const o of allOffers) {
+    const arr = offersByTask.get(o.task_id) ?? []
+    arr.push(o)
+    offersByTask.set(o.task_id, arr)
+  }
 
   const counts = STATUS_TABS.reduce((acc, s) => {
     acc[s || 'all'] = s ? tasks?.filter(t => t.status === s).length ?? 0 : tasks?.length ?? 0
@@ -81,13 +108,14 @@ export default async function AdminTasksPage({
               <th className="text-left px-4 py-3 font-medium text-stone-600">Budget</th>
               <th className="text-left px-4 py-3 font-medium text-stone-600">Payment</th>
               <th className="text-left px-4 py-3 font-medium text-stone-600">Status</th>
+              <th className="text-left px-4 py-3 font-medium text-stone-600">Offers</th>
               <th className="text-left px-4 py-3 font-medium text-stone-600">Date</th>
               <th className="text-left px-4 py-3 font-medium text-stone-600">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-100">
             {!tasks?.length && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-stone-500">No tasks found.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-stone-500">No tasks found.</td></tr>
             )}
             {tasks?.map((t) => (
               <tr key={t.id} className="hover:bg-stone-50">
@@ -115,6 +143,30 @@ export default async function AdminTasksPage({
                     t.status === 'cancelled' ? 'bg-red-50 text-red-600' :
                     'bg-amber-50 text-amber-700'
                   }`}>{t.status}</span>
+                </td>
+                <td className="px-4 py-3 align-top">
+                  {(offersByTask.get(t.id)?.length ?? 0) === 0 ? (
+                    <span className="text-xs text-stone-400">—</span>
+                  ) : (
+                    <details className="text-xs">
+                      <summary className="cursor-pointer text-stone-700 font-medium select-none">
+                        {offersByTask.get(t.id)!.length} offer{offersByTask.get(t.id)!.length !== 1 ? 's' : ''}
+                      </summary>
+                      <ul className="mt-2 space-y-2 min-w-[180px]">
+                        {offersByTask.get(t.id)!.map((o) => (
+                          <li key={o.id} className="border-l-2 border-stone-200 pl-2">
+                            <div className="text-stone-700">
+                              <span className="font-medium text-stone-900">{workerName.get(o.worker_id) ?? 'Unknown'}</span>
+                              {' · '}{formatCurrency(o.amount)}
+                              {' · '}<span className="text-stone-500">{o.status}</span>
+                            </div>
+                            <div className="text-stone-400 mt-0.5">offered {formatRelativeDate(o.created_at)}</div>
+                            {o.message && <div className="text-stone-500 italic mt-0.5">&ldquo;{o.message}&rdquo;</div>}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-stone-500 text-xs">{formatDate(t.created_at)}</td>
                 <td className="px-4 py-3">

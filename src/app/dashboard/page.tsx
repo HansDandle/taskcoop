@@ -106,15 +106,19 @@ export default async function DashboardPage({
     const needsReview = tasks?.filter(t => t.status === 'completed') ?? []
     const done = tasks?.filter(t => ['completed', 'cancelled'].includes(t.status)) ?? []
 
-    // Fetch pending offer counts for open tasks
+    // Fetch pending offer counts (and timing) for open tasks
     const openIds = open.map(t => t.id)
     const { data: pendingOffers } = openIds.length > 0
-      ? await supabase.from('offers').select('task_id').in('task_id', openIds).eq('status', 'pending')
+      ? await supabase.from('offers').select('task_id, created_at').in('task_id', openIds).eq('status', 'pending')
       : { data: [] }
 
     const offerCountByTask: Record<string, number> = {}
+    const latestOfferByTask: Record<string, string> = {}
     for (const o of pendingOffers ?? []) {
       offerCountByTask[o.task_id] = (offerCountByTask[o.task_id] ?? 0) + 1
+      if (!latestOfferByTask[o.task_id] || o.created_at > latestOfferByTask[o.task_id]) {
+        latestOfferByTask[o.task_id] = o.created_at
+      }
     }
     const tasksWithOffers = open.filter(t => offerCountByTask[t.id] > 0)
     const totalNewOffers = Object.values(offerCountByTask).reduce((s, n) => s + n, 0)
@@ -150,7 +154,12 @@ export default async function DashboardPage({
             <div className="space-y-1">
               {tasksWithOffers.map(t => (
                 <Link key={t.id} href={`/tasks/${t.id}`} className="flex items-center justify-between text-sm hover:opacity-80">
-                  <span className="text-emerald-800 truncate">{t.title}</span>
+                  <span className="min-w-0">
+                    <span className="text-emerald-800 truncate block">{t.title}</span>
+                    {latestOfferByTask[t.id] && (
+                      <span className="text-xs text-emerald-700/70">latest offer {formatRelativeDate(latestOfferByTask[t.id])}</span>
+                    )}
+                  </span>
                   <span className="shrink-0 ml-3 bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                     {offerCountByTask[t.id]} offer{offerCountByTask[t.id] !== 1 ? 's' : ''} →
                   </span>
@@ -448,18 +457,28 @@ export default async function DashboardPage({
         <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-5 py-4 flex items-start gap-4">
           <div className="text-2xl shrink-0" aria-hidden="true">🔍</div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-emerald-900 text-sm">Find more leads with the Chrome extension</p>
+            <p className="font-semibold text-emerald-900 text-sm">Find more leads with the browser extension</p>
             <p className="text-emerald-800 text-sm mt-1">
               The TaskCoop Lead Finder watches Nextdoor, Facebook, Craigslist, and Reddit as you browse and flags task requests automatically. When you spot one, send them to the Lead Feed and generate your offer reply in seconds.
             </p>
-            <a
-              href="https://chromewebstore.google.com/detail/taskcoop-lead-finder/plgjlgbkgjkijoblifahbdohgfpnkmeh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-3 bg-emerald-600 text-white text-sm px-4 py-2 rounded-md font-semibold hover:bg-emerald-700 transition-colors"
-            >
-              Add to Chrome — it&apos;s free
-            </a>
+            <div className="flex flex-wrap gap-3 mt-3">
+              <a
+                href="https://chromewebstore.google.com/detail/taskcoop-lead-finder/plgjlgbkgjkijoblifahbdohgfpnkmeh"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-emerald-600 text-white text-sm px-4 py-2 rounded-md font-semibold hover:bg-emerald-700 transition-colors"
+              >
+                Add to Chrome, it&apos;s free
+              </a>
+              <a
+                href="https://addons.mozilla.org/en-US/firefox/addon/taskcoop-lead-finder/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-stone-800 text-white text-sm px-4 py-2 rounded-md font-semibold hover:bg-stone-900 transition-colors"
+              >
+                Add to Firefox, it&apos;s free
+              </a>
+            </div>
           </div>
         </div>
 

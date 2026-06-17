@@ -24,7 +24,7 @@ export default async function NotificationPrefsPage() {
     const emailKey = `email_${t.value}`
     const pushKey = `push_${t.value}`
     effective[emailKey] = prefs?.[emailKey] ?? true
-    const pushDefaultOff = ['offer_rejected', 'payment_released', 'review_received'].includes(t.value)
+    const pushDefaultOff = ['offer_rejected', 'payment_released', 'review_received', 'task_hint'].includes(t.value)
     effective[pushKey] = prefs?.[pushKey] ?? !pushDefaultOff
   }
 

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/release-funds",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/stale-task-hints",
+      "schedule": "0 9 * * *"
     }
   ]
 }

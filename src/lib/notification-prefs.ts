@@ -9,6 +9,7 @@ export type NotificationType =
   | 'job_marked_done'
   | 'payment_released'
   | 'review_received'
+  | 'task_hint'
 
 export type Channel = 'email' | 'push'
 
@@ -20,6 +21,7 @@ export const NOTIFICATION_TYPES: { value: NotificationType; label: string; descr
   { value: 'job_marked_done', label: 'Job marked complete', description: 'When your member says a job is done.' },
   { value: 'payment_released', label: 'Payment released', description: 'When funds are sent to your account.' },
   { value: 'review_received', label: 'Review received', description: 'When someone leaves you a review.' },
+  { value: 'task_hint', label: 'Task tips', description: 'Suggestions to help an open task attract offers.' },
 ]
 
 function adminClient() {
@@ -33,6 +35,7 @@ const DEFAULT_PUSH_OFF: Set<NotificationType> = new Set([
   'offer_rejected',
   'payment_released',
   'review_received',
+  'task_hint',
 ])
 
 export async function shouldNotify(userId: string, channel: Channel, type: NotificationType): Promise<boolean> {

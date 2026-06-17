@@ -2,6 +2,7 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { stripe, PLATFORM_FEE_PERCENT, WORKER_PAYOUT_RATIO } from './stripe'
 import { sendPaymentReleasedEmail } from './email'
 import { sendPushToUser } from './push'
+import { getUserEmail } from './supabase/admin'
 
 // Uses service role — safe for cron, not for user-facing actions
 const supabase = createServiceClient(
@@ -25,7 +26,7 @@ export async function releasePayment(task: {
 
   if (!offer) return
 
-  const { data: worker } = await supabase.from('users').select('stripe_account_id, email').eq('id', offer.worker_id).single()
+  const { data: worker } = await supabase.from('users').select('stripe_account_id').eq('id', offer.worker_id).single()
   if (!worker?.stripe_account_id) return
 
   const pi = await stripe.paymentIntents.retrieve(task.payment_intent_id)
@@ -42,8 +43,9 @@ export async function releasePayment(task: {
 
   await supabase.from('tasks').update({ payment_status: 'released' }).eq('id', task.id)
 
-  if (worker.email) {
-    await sendPaymentReleasedEmail(offer.worker_id, worker.email, task.title, offer.amount)
+  const workerEmail = await getUserEmail(offer.worker_id)
+  if (workerEmail) {
+    await sendPaymentReleasedEmail(offer.worker_id, workerEmail, task.title, offer.amount)
   }
   await sendPushToUser(offer.worker_id, {
     title: 'Payment released 💰',

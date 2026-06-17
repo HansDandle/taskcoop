@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getUserEmail } from '@/lib/supabase/admin'
 import { sendNewMessageEmail } from '@/lib/email'
 import { sendPushToUser } from '@/lib/push'
 
@@ -24,13 +25,13 @@ export async function sendMessage(formData: FormData) {
   if (error) return { error: 'Failed to send message.' }
 
   // Notify recipient (fire-and-forget — don't block message delivery)
-  const [{ data: sender }, { data: receiver }, { data: task }] = await Promise.all([
+  const [{ data: sender }, receiverEmail, { data: task }] = await Promise.all([
     supabase.from('users').select('name').eq('id', user.id).single(),
-    supabase.from('users').select('email').eq('id', receiver_id).single(),
+    getUserEmail(receiver_id),
     supabase.from('tasks').select('title').eq('id', task_id).single(),
   ])
-  if (receiver?.email && sender && task) {
-    sendNewMessageEmail(receiver_id, receiver.email, sender.name, task.title, task_id, content)
+  if (receiverEmail && sender && task) {
+    sendNewMessageEmail(receiver_id, receiverEmail, sender.name, task.title, task_id, content)
   }
   if (sender && task) {
     await sendPushToUser(receiver_id, {

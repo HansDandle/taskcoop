@@ -137,6 +137,18 @@ export async function sendPaymentReleasedEmail(userId: string, to: string, taskT
   `, userId, 'payment_released'))
 }
 
+export async function sendStaleTaskHintEmail(userId: string, to: string, taskTitle: string, taskId: string, hints: string[]) {
+  const list = hints.length
+    ? `<ul style="margin:0 0 12px;padding-left:20px;font-size:15px;color:#44403c;line-height:1.8">${hints.map(h => `<li>${h}</li>`).join('')}</ul>`
+    : p('Try sharing a bit more detail about the work so members can size up the job.')
+  await sendTransactional(userId, to, 'task_hint', `Get more offers on "${taskTitle}"`, baseTemplate(`
+    ${p(`Your task <em>${taskTitle}</em> has been open for a few days without any offers yet.`)}
+    ${p('A few quick tweaks tend to bring in more members:')}
+    ${list}
+    ${btn('Update your task', `${APP_URL}/tasks/${taskId}/edit`)}
+  `, userId, 'task_hint'))
+}
+
 export async function sendReviewReceivedEmail(userId: string, to: string, reviewerName: string, rating: number, taskTitle: string, taskId: string) {
   const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating)
   await sendTransactional(userId, to, 'review_received', `You received a ${rating}-star review`, baseTemplate(`

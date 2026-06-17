@@ -10,11 +10,8 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  let email: string | undefined
-  if (user) {
-    const { data } = await supabase.from('users').select('email').eq('id', user.id).single()
-    email = data?.email ?? user.email ?? undefined
-  }
+  // The authenticated user's email comes straight from the auth session
+  const email: string | undefined = user?.email ?? undefined
 
   return (
     <div className="max-w-xl mx-auto px-4 py-16">

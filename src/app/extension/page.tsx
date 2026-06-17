@@ -77,13 +77,15 @@ export default async function ExtensionPage() {
                 rel="noopener noreferrer"
                 className="inline-block bg-emerald-600 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-emerald-700 transition-colors"
               >
-                Add to Chrome — it&apos;s free
+                Add to Chrome, it&apos;s free
               </a>
               <a
-                href="#"
+                href="https://addons.mozilla.org/en-US/firefox/addon/taskcoop-lead-finder/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block bg-stone-800 text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-stone-900 transition-colors"
               >
-                Add to Firefox — it&apos;s free
+                Add to Firefox, it&apos;s free
               </a>
             </div>
           </>
